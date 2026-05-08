@@ -1,0 +1,492 @@
+{
+    "index_page": {
+        "slogan": "오픈 소스 퀴즈 플랫폼!",
+        "meta": {
+            "description": "ClassQuiz는 학생들이 상호작용하며 학습할 수 있는 오픈 소스 무료 퀴즈 앱입니다",
+            "title": "홈"
+        },
+        "stats": "ClassQuiz에는 이미 {{user_count}}명의 사용자와 {{quiz_count}}개의 퀴즈가 있습니다.",
+        "see_what_true_and_false": "무엇이 맞고 틀렸는지 확인하세요",
+        "see_how_many_true_and_false": "몇 개가 맞고 틀렸는지 확인하세요",
+        "create_or_import": "만들기 또는 가져오기",
+        "see_all_quizzes": "내 모든 퀴즈 보기",
+        "teachers_site": "교사용 사이트",
+        "students_site": "학생용 사이트",
+        "no_tracking": "추적 없음",
+        "self_hostable": "자가 호스팅 가능",
+        "german_server": "독일 서버",
+        "user_friendly": "사용자 친화적",
+        "completely_free": "완전 무료",
+        "quiz_results_downloadable": "퀴즈 결과를 다운로드할 수 있습니다",
+        "multilingual": "다국어 지원",
+        "dark_mode": "다크 모드",
+        "get_a_quiz": "1. 퀴즈 준비하기",
+        "create_a_quiz_from_scratch": "에디터로 처음부터 퀴즈를 만들고 사진 등을 포함하세요",
+        "find_or_explore": "다른 사람이 만들거나 가져온 퀴즈를 찾거나 탐색하세요",
+        "play_quiz": "2. 퀴즈 플레이하기",
+        "select_answer": "답 선택하기",
+        "choose_answer_wisely": "신중하게 답을 고르세요",
+        "view_results": "결과 보기",
+        "check_if_chosen_wisely": "현명하게 선택했는지 확인하세요",
+        "list_winners": "우승자 목록",
+        "get_ranking_and_winners": "순위를 확인하고 누가 이겼는지 보세요",
+        "why_classquiz": "왜 ClassQuiz인가요?",
+        "no_tracking_content": "다른 서비스는 사용자를 추적하고 그 정보를 제3자에게 보내지만, ClassQuiz는 그렇지 않습니다.",
+        "self_hostable_content": "ClassQuiz는 쉽게 자가 호스팅할 수 있으므로 데이터는 오직 사용자의 통제 안에 있습니다!",
+        "user_friendly_content": "ClassQuiz는 단순함을 목표로 하므로 누구나 사용할 수 있습니다.",
+        "completely_free_content": "ClassQuiz는 사용자에게 완전히 무료이며, 유료 요금제나 성가신 업그레이드 페이지 이동이 없습니다. 기부는 언제나 환영합니다.",
+        "quiz_results_downloadable_content": "퀴즈 결과를 Excel 스프레드시트로 쉽게 내보낼 수 있습니다. (다른 곳에서는 안 된다는 걸 몰랐나요)",
+        "multilingual_content": "ClassQuiz는 영어, 프랑스어, 독일어, 이탈리아어, 노르웨이어 보크몰, 터키어를 지원하며 인도네시아어와 카탈루냐어도 일부 지원합니다.",
+        "dark_mode_content": "웹사이트가 가질 수 있는 가장 중요한 기능 중 하나입니다!",
+        "german_server_content": "ClassQuiz 서버는 독일에 있으며 netcup에서 호스팅됩니다.",
+        "download_quizzes": "퀴즈 다운로드",
+        "download_quizzes_content": "퀴즈를 하나의 파일로 다운로드하고 언제든지 가져올 수 있습니다. 이를 통해 퀴즈를 다른 ClassQuiz 인스턴스로 옮길 수도 있습니다.",
+        "community_driven": "커뮤니티 주도",
+        "community_driven_content": "ClassQuiz는 자금 지원, 아이디어 테스트, 기능 요청, 번역 등에서 커뮤니티에 의존합니다! 여러분도 ClassQuiz 커뮤니티의 일부가 될 수 있습니다!",
+        "how_does_classquiz_work": "ClassQuiz는 어떻게 작동하나요?",
+        "no_player_limit": "플레이어 제한 없음",
+        "no_player_limit_content": "ClassQuiz에는 인위적인 플레이어 제한이 없습니다. 이론적으로 1000명 이상의 플레이어가 같은 퀴즈를 플레이할 수 있지만, 퀴즈당 최대 300명까지 테스트되었습니다.",
+        "import_quiz_from_kahoot_and_edit": "Kahoot!에서 퀴즈를 가져와 ClassQuiz에서 편집하세요"
+    },
+    "overview_page": {
+        "created_at": "생성일",
+        "question_count": "문제 수",
+        "no_quizzes": "시작하려면 \"만들기\" 버튼을 클릭하거나 퀴즈를 가져오세요."
+    },
+    "edit_page": {
+        "success_update_title": "퀴즈가 업데이트되었습니다.",
+        "success_update_body": "아무도 인퀴지션을 예상하지 못할 것입니다."
+    },
+    "create_page": {
+        "success": {
+            "title": "퀴즈가 생성되었습니다.",
+            "body": "게임을 시작합시다."
+        }
+    },
+    "register_page": {
+        "greeting": "만나서 반가워요!",
+        "create_account": "계정 만들기",
+        "forgot_password?": "비밀번호를 잊으셨나요?",
+        "already_have_account?": "이미 계정이 있나요?"
+    },
+    "login_page": {
+        "welcome_back": "다시 오신 것을 환영합니다.",
+        "login_or_create_account": "로그인하거나 계정 만들기",
+        "already_have_account": "계정이 없나요?",
+        "email_or_username": "이메일 또는 사용자 이름",
+        "modal": {
+            "success": {
+                "success_check_mail": "로그인되었습니다. 이메일 받은편지함을 확인하세요.",
+                "success": "로그인되었습니다.",
+                "description": {
+                    "success_check_mail": "로그인할 수 있는 링크가 포함된 이메일을 받은편지함에서 확인하세요.",
+                    "success": "로그인되었습니다."
+                }
+            },
+            "error": {
+                "wrong_creds": "이메일 주소 또는 비밀번호가 잘못되었습니다.",
+                "unexpected": "예상치 못한 오류입니다!",
+                "description": {
+                    "wrong_creds": "비밀번호와 이메일 주소가 올바른지 확인하세요.",
+                    "unexpected": "늘 그렇듯 예상치 못한 오류가 발생했습니다!"
+                }
+            }
+        },
+        "use_backup_code": "백업 코드 사용"
+    },
+    "words": {
+        "question": "문제",
+        "answer": "답변",
+        "stats": "통계",
+        "features": "기능",
+        "login": "로그인",
+        "email": "이메일 주소",
+        "username": "사용자 이름",
+        "password": "비밀번호",
+        "play": "플레이",
+        "edit": "편집",
+        "delete": "삭제",
+        "public": "공개",
+        "start": "시작",
+        "create": "만들기",
+        "import": "가져오기",
+        "logout": "로그아웃",
+        "title": "제목",
+        "url": "URL",
+        "submit": "제출",
+        "connect": "연결",
+        "pin": "PIN",
+        "kick": "내보내기",
+        "register": "가입",
+        "docs": "문서",
+        "close": "닫기",
+        "save": "저장",
+        "description": "설명",
+        "image": "이미지",
+        "settings": "설정",
+        "repeat_password": "비밀번호 반복 입력",
+        "overview": "개요",
+        "report": "신고",
+        "explore": "탐색",
+        "search": "검색",
+        "screenshot": "스크린샷",
+        "screenshot_plural": "스크린샷",
+        "browser": "브라우저",
+        "view": "보기",
+        "view_plural": "조회수",
+        "correct": "정답",
+        "result": "결과",
+        "result_plural": "결과",
+        "count": "개수",
+        "range": "범위",
+        "multiple_choice": "객관식",
+        "private": "비공개",
+        "dashboard": "대시보드",
+        "question_plural": "문제",
+        "game_pin": "게임 PIN",
+        "other": "기타",
+        "other_plural": "기타",
+        "donating": "기부",
+        "find": "찾기",
+        "practice": "연습",
+        "error": "오류",
+        "voting": "투표",
+        "download": "다운로드",
+        "continue": "계속",
+        "backup_code": "백업 코드",
+        "totp": "TOTP",
+        "text": "텍스트",
+        "order": "순서",
+        "results": "결과",
+        "note": "메모",
+        "player_plural": "플레이어",
+        "version": "버전",
+        "never": "없음",
+        "unknown": "알 수 없음",
+        "update": "업데이트",
+        "score": "점수",
+        "slide": "슬라이드",
+        "name": "이름",
+        "point": "점",
+        "point_plural": "점",
+        "back": "뒤로",
+        "finish": "완료",
+        "normal": "일반",
+        "selected": "선택됨",
+        "select": "선택",
+        "quiz": "퀴즈",
+        "quiztivity": "퀴즈티비티",
+        "next": "다음",
+        "check_choice": "선택 확인",
+        "video": "동영상",
+        "library": "라이브러리",
+        "progress": "진행률",
+        "speed": "속도",
+        "upload": "업로드",
+        "files_library": "파일 라이브러리",
+        "answer_plural": "답변",
+        "yes": "예",
+        "no": "아니요",
+        "analytics": "분석",
+        "rating": "평점",
+        "like": "좋아요",
+        "like_plural": "좋아요",
+        "dislike": "싫어요",
+        "dislike_plural": "싫어요",
+        "play_plural": "플레이",
+        "info": "정보",
+        "player": "플레이어"
+    },
+    "editor": {
+        "time_in_seconds": "시간(초)",
+        "right_or_true?": "정답인가요?",
+        "add_new_answer": "새 답변 추가",
+        "add_new_question": "새 문제 추가",
+        "delete_question": "문제 삭제",
+        "delete_answer": "답변 삭제",
+        "not_all_links_imgur_links": "모든 링크가 Imgur 링크는 아닙니다!",
+        "no_title": "제목 없음...",
+        "empty": "비어 있음...",
+        "bg_image": "배경 이미지",
+        "slide": {
+            "headline": "헤드라인",
+            "headline_description": "헤드라인용 굵은 텍스트",
+            "text": "텍스트",
+            "text_description": "더 작은 긴 텍스트",
+            "rectangle": "사각형",
+            "rectangle_description": "그냥 사각형"
+        },
+        "abcd_description": "하나의 답변만 선택할 수 있습니다",
+        "voting_description": "답변은 점수를 추가하지 않습니다",
+        "check_choice_description": "점수를 얻으려면 모든 정답을 선택해야 합니다",
+        "order_description": "답변을 올바른 순서로 배치할 수 있습니다",
+        "text_description": "플레이어가 텍스트를 입력할 수 있습니다",
+        "range_description": "슬라이더로 숫자 범위를 선택할 수 있습니다",
+        "need_more_help": "도움이 더 필요하신가요?",
+        "visit_docs": "문서를 방문하세요.",
+        "enter_answer": "답변을 입력하세요",
+        "enable_reorder": "순서 변경 모드 활성화",
+        "disable_reorder": "순서 변경 모드 비활성화",
+        "advanced_settings": "고급 설정",
+        "hide_question_results": "문제 결과를 숨길까요?",
+        "time_based_scoring": "시간 기반 점수",
+        "time_based_scoring_description": "정답을 더 빨리 맞힐수록 더 많은 점수를 받습니다. 끄면 모든 정답이 해당 문제의 전체 점수를 받습니다."
+    },
+    "import_page": {
+        "need_help": "도움이 필요하신가요?",
+        "visit_docs": "문서 방문",
+        "a_kahoot_quiz": "Kahoot! 퀴즈",
+        "url_should_look_like_this": "URL은 다음과 같아야 합니다: https://create.kahoot.it/details/...",
+        "side_import_kahoot": "이쪽에서는 Kahoot!에 있는 퀴즈를 가져올 수 있습니다.",
+        "classquiz_quiz": "ClassQuiz 퀴즈",
+        "upload_file_ending": ".cqa 또는 .xlsx로 끝나는 파일을 업로드하세요",
+        "this_side_classquiz": "이쪽에서는 ClassQuiz에서 내보낸 퀴즈를 가져올 수 있습니다.",
+        "this_side_classquiz_excel": "다음 템플릿을 채웠다면 Excel 파일도 업로드할 수 있습니다. 같은 제목의 퀴즈가 이미 있으면 기존 퀴즈에 문제가 추가됩니다.",
+        "download_template_here": "템플릿 다운로드"
+    },
+    "admin_page": {
+        "already_registered_as_admin": "이 게임에는 이미 관리자가 등록되어 있습니다.",
+        "start_game": "게임 시작",
+        "time_left": "남은 시간",
+        "get_results": "결과 가져오기",
+        "get_results_and_stop_time": "결과를 가져오고 시간 멈추기",
+        "get_final_results": "최종 결과 가져오기",
+        "show_next_question": "다음 문제 표시",
+        "start_by_showing_first_question": "첫 번째 문제를 표시하며 시작합니다.",
+        "no_answers": "답변이 없습니다!",
+        "stop_time": "시간 멈추기",
+        "save_results": "결과 저장",
+        "next_question": "다음 문제 ({{question}})",
+        "show_results": "결과 표시",
+        "stop_time_and_solutions": "시간을 멈추고 해답 표시",
+        "enter_answer_into_field": "입력 필드에 답을 입력하세요!",
+        "answers_submitted": "{{answer_count}}개의 답변 제출됨",
+        "request_export_results": "결과 다운로드 요청",
+        "download_export_results": "결과 다운로드",
+        "export_results": "결과 내보내기"
+    },
+    "password_reset_page": {
+        "reset_password": "비밀번호 재설정"
+    },
+    "settings_page": {
+        "old_password": "이전 비밀번호",
+        "new_password": "새 비밀번호",
+        "repeat_password": "비밀번호 반복 입력",
+        "change_password_submit": "비밀번호 변경!",
+        "last_seen": "마지막 접속",
+        "check_location": "위치 확인",
+        "delete_this_session": "이 세션 삭제",
+        "this_session?": "이 세션인가요?",
+        "change_avatar": "아바타 변경",
+        "security_settings": "보안 설정",
+        "add_api_key": "API 키 추가"
+    },
+    "explore_page": {
+        "made_by": "제작자",
+        "imported_by": "가져온 사람"
+    },
+    "search_page": {
+        "at_least_3_characters": "최소 3자를 입력하세요...",
+        "nothing_here": "여기에는 아무것도 없습니다..."
+    },
+    "play_page": {
+        "end_sentence": "끝입니다! 이것이 퀴즈였습니다.",
+        "1st_place": "1위",
+        "2nd_place": "2위",
+        "3rd place": "3위",
+        "with_out_of": "{{total_question_count}}개 중 {{correct_questions}}개 정답",
+        "final_result_rank": "{{place}}: {{username}} - {{points}}점",
+        "your_score": "내 점수: {{score}}",
+        "join_description": "{{url}}에서 참가하고 {{pin}}을 입력하세요.",
+        "join_by_entering_code": "다음 코드를 입력하여 참가하세요",
+        "points_added": "점수가 추가되었습니다",
+        "your_place": "현재 {{place}}위입니다!",
+        "players_waiting": "{{count}}명의 플레이어가 기다리고 있습니다",
+        "players_waiting_plural": "{{count}}명의 플레이어가 기다리고 있습니다"
+    },
+    "editor_page": {
+        "add_an_answer": "답변 추가",
+        "right_click_to_delete": "답변을 삭제하려면 답변을 마우스 오른쪽 버튼으로 클릭하세요!"
+    },
+    "dashboard": {
+        "search_for_own_quizzes": "내 퀴즈 검색",
+        "views_n_plays": "조회수 및 플레이",
+        "info_analytics": "\"플레이\"는 퀴즈가 시작된 횟수(본인 포함)만 표시하는 반면, \"조회수\"는 \"보기\" 페이지가 방문된 횟수를 세므로 봇도 포함됩니다(미안합니다).",
+        "commandpalette_notice": "명령 팔레트를 열려면 <kbd>Ctr</kbd>+<kbd>k</kbd> 또는 <kbd>Meta</kbd>+<kbd>k</kbd>를 누르세요",
+        "create_quiz": "새 퀴즈 만들기"
+    },
+    "footer": {
+        "self_ads": "{{mawoka_link}}가 {{others_link}}의 도움을 받아 ❤️로 만들었습니다.",
+        "more_details_here": "자세한 내용은 여기",
+        "donate": "유용하다고 생각하신다면 {{donate_link}}을 고려해 주세요."
+    },
+    "error_page": {
+        "404_text": "찾고 있던 페이지가 사라졌거나 애초에 존재하지 않았습니다. 누가 알겠어요?",
+        "unknown_error_text": "이런 일이 일어나면 안 됩니다. 아마 당신 잘못이 아니라 제 잘못일 겁니다. 하지만 어쩌면 당신에게 무언가를 망가뜨리는 마법 같은 힘이 있을지도요..."
+    },
+    "uploader": {
+        "add_image": "미디어 추가",
+        "select_upload_type": "업로드 유형 선택",
+        "upload_a_video": "동영상 업로드",
+        "upload_video_popup_notice": "팝업이 열려 있습니다. 자세한 정보를 확인하세요",
+        "upload_video": "동영상 업로드",
+        "visit_pixabay": "Pixabay 방문",
+        "images_by_pixabay": "Pixabay에서 제공한 이미지",
+        "search_english_only": "검색은 영어로만 작동합니다",
+        "next_page": "다음 페이지",
+        "previous_page": "이전 페이지"
+    },
+    "avatar_settings": {
+        "skin_color": "피부색",
+        "top_type": "상의",
+        "hair_color": "머리색",
+        "facial_hair_type": "수염",
+        "facial_hair_color": "수염 색상",
+        "mouth_type": "입",
+        "eyebrow_type": "눈썹",
+        "accessories_type": "안경",
+        "hat_color": "모자 색상",
+        "clothe_type": "의상",
+        "clothe_color": "의상 색상",
+        "clothe_graphic_type": "그래픽",
+        "thats_you": "바로 당신입니다!",
+        "start_over": "처음부터 다시",
+        "go_back": "돌아가기"
+    },
+    "results_page": {
+        "no_results_so_far": "아직 저장된 결과가 없습니다...",
+        "quiz_title": "퀴즈 제목",
+        "date_played": "플레이한 날짜",
+        "player_count": "플레이어 수",
+        "general_overview": {
+            "sentence": "{{date}}에 플레이된 퀴즈 \"{{title}}\"에는 {{player_count}}명의 플레이어가 있었고 평균 점수는 {{average_score}}였습니다."
+        }
+    },
+    "result_page": {
+        "player_name": "플레이어 이름",
+        "custom_field": "사용자 지정 필드",
+        "average_score": "평균 점수: {{average_score}}",
+        "correct_answer": "정답 {{count}}개",
+        "correct_answer_plural": "정답 {{count}}개",
+        "time_taken": "소요 시간",
+        "player_score": "플레이어 점수",
+        "player_correct_questions": "정답"
+    },
+    "controllers": {
+        "add_new_controller": "새 컨트롤러 추가",
+        "player_name": "플레이어 이름",
+        "first_seen": "처음 확인됨",
+        "last_seen": "마지막 확인됨",
+        "controller_name": "컨트롤러 이름",
+        "version_overview": "사용 가능한 최신 버전은 {{newest_version}}이고 설치된 버전은 {{current_version}}입니다.",
+        "already_latest_version": "이미 최신 버전입니다",
+        "cancel_update": "업데이트 취소!",
+        "update_from_to": "{{current_version}}에서 {{newest_version}}로 업데이트"
+    },
+    "navbar": {
+        "donate": "기부"
+    },
+    "security_settings": {
+        "backup_code": "백업 코드",
+        "get_backup_code": "백업 코드 받기",
+        "activate_2fa": "2단계 인증 활성화",
+        "2fa_activated": "2단계 인증이 활성화되었습니다",
+        "2fa_deactivated": "2단계 인증이 비활성화되었습니다",
+        "webauthn": "WebAuthn",
+        "webauthn_available": "WebAuthn을 사용할 수 있습니다",
+        "webauthn_unavailable": "WebAuthn을 사용할 수 없습니다",
+        "add_security_key": "보안 키 추가",
+        "totp": "TOTP",
+        "totp_available": "TOTP를 사용할 수 있습니다",
+        "totp_unavailable": "TOTP를 사용할 수 없습니다",
+        "disable_totp": "TOTP 끄기",
+        "enable_totp": "TOTP 켜기",
+        "backup_codes": {
+            "your_backup_code": "내 백업 코드",
+            "save_somewhere_save": "안전한 곳에 저장하세요!",
+            "download_code": "코드 다운로드"
+        },
+        "totp_setup": {
+            "scan_to_set_up": "코드를 설정하려면 이 QR 코드를 스캔하세요",
+            "enter_as_secret_if_no_see_code": "QR 코드를 스캔할 수 없다면 이것을 비밀 키로 입력하세요",
+            "totp_setup": "TOTP 설정",
+            "do_not_forget_backup_code": "복구 코드를 저장하는 것을 잊지 마세요!"
+        }
+    },
+    "view_quiz_page": {
+        "made_by": "제작자",
+        "view_on_kahoot": "원본에서 보기"
+    },
+    "start_game": {
+        "captcha_message": "활성화하면 Google ReCaptcha가 플레이어의 브라우저에서 로드됩니다. 캡차를 로드하려면 모든 플레이어의 동의가 필요하므로 정말 필요한 경우에만 활성화하세요.",
+        "normal_mode_description": "문제와 답변은 관리자 화면에만 표시됩니다. 플레이어는 관리자 화면의 기호와 일치하는 색상 버튼만 보게 됩니다.",
+        "old_school_mode": "올드 스쿨",
+        "old_school_mode_description": "문제와 이미지는 관리자 화면과 플레이어 화면 모두에 표시됩니다",
+        "start_game": "게임 시작"
+    },
+    "quiztivity": {
+        "editor": {
+            "select_page_type": "페이지 유형 선택",
+            "move_left": "왼쪽으로 이동",
+            "move_right": "오른쪽으로 이동",
+            "title_placeholder": "여기에 제목 입력",
+            "add_new": "새로 추가",
+            "delete": "삭제",
+            "open_shares_menu": "공유 메뉴 열기",
+            "shares": {
+                "add_new_share": "새 공유 추가",
+                "expires_on": "{{date}}에 만료",
+                "never_expires": "만료되지 않음"
+            }
+        },
+        "memory": {
+            "editor": {
+                "add_card": "카드 추가",
+                "upload_image": "이미지 업로드",
+                "add_pair": "쌍 추가"
+            }
+        },
+        "play": {
+            "memory": {
+                "try_count": "시도 횟수: {{try_count}}"
+            }
+        },
+        "share_expired": "공유가 만료되었습니다"
+    },
+    "components": {
+        "popover": {
+            "copied_to_clipboard": "클립보드에 복사되었습니다!"
+        }
+    },
+    "public_user_page": {
+        "joined_on": "가입일: {{date}}",
+        "no_original_quizzes": "이 사용자는 원본 퀴즈가 없습니다",
+        "user_not_found": "사용자를 찾을 수 없습니다"
+    },
+    "file_dashboard": {
+        "not_available": "사용할 수 없음",
+        "missing": "누락됨!",
+        "unset": "설정되지 않음",
+        "size": "크기: {{size}} MiB",
+        "caption": "캡션: {{caption}}",
+        "filename": "파일 이름: {{filename}}",
+        "uploaded": "업로드됨: {{date}}",
+        "imported": "가져옴: {{yes_or_no}}",
+        "edit_details": "세부 정보 편집",
+        "delete_image": "이미지 삭제",
+        "edit_the_image": "이미지 편집",
+        "filename_word": "파일 이름",
+        "alt_text": "대체 텍스트 / 캡션",
+        "storage_usage": "{{total}} MiB 저장 공간 중 {{used}} MiB를 사용했습니다. 이는 저장 공간의 {{percent}}%에 해당합니다."
+    },
+    "video_uploader": {
+        "time_elapsed": "경과 시간",
+        "time_remaining": "남은 시간"
+    },
+    "downloader": {
+        "select_download_type": "다운로드 유형 선택",
+        "own_format": "자체 형식",
+        "excel_format": "Excel 형식",
+        "help": "자체 형식(.cqa)은 사진도 포함하며 모든 문제 유형을 지원하지만, Excel 형식은 투표와 객관식 문제만 지원합니다."
+    }
+}
