@@ -355,7 +355,9 @@
         "add_new_question": "Thêm câu hỏi mới",
         "bg_image": "Hình nền",
         "no_title": "Không có tiêu đề...",
-        "enable_reorder": "Bật chế độ sắp xếp lại"
+        "enable_reorder": "Bật chế độ sắp xếp lại",
+        "time_based_scoring": "Tính điểm theo thời gian",
+        "time_based_scoring_description": "Câu trả lời đúng nhanh hơn sẽ được nhiều điểm hơn. Tắt tùy chọn này để mỗi câu trả lời đúng nhận toàn bộ điểm của câu hỏi."
     },
     "controllers": {
         "last_seen": "thấy lần cuối",

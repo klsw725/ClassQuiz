@@ -11,7 +11,8 @@ from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, st
 from pydantic import BaseModel, ValidationError
 from classquiz.config import redis
 from classquiz.db.models import PlayGame, QuizQuestionType, AnswerData, GamePlayer
-from classquiz.socket_server import sio, calculate_score, set_answer
+from classquiz.scoring import calculate_answer_score
+from classquiz.socket_server import sio, set_answer
 
 router = APIRouter()
 
@@ -48,9 +49,13 @@ async def submit_answer_fn(data_answer: int, game_pin: str, player_id: str, now:
     else:
         return
     diff = (question_time - now).total_seconds() * 1000
-    score = 0
-    if answer_right:
-        score = calculate_score(abs(diff), int(float(question.time)))
+    score = calculate_answer_score(
+        answer_right,
+        game.time_based_scoring,
+        abs(diff),
+        int(float(question.time)),
+        question.points,
+    )
     await redis.set(f"answer_given:{player_id}:{game.current_question}", "True", ex=600)
     await redis.hincrby(f"game_session:{game_pin}:player_scores", username, score)
     answer_data = AnswerData(

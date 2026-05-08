@@ -88,6 +88,7 @@ SPDX-License-Identifier: MPL-2.0
 		const empty_question: Question = {
 			type: question_types[index].type,
 			time: '20',
+			points: 1000,
 			question: '',
 			image: undefined,
 			answers: question_types[index].answers

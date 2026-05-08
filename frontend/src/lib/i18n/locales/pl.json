@@ -269,7 +269,9 @@
         "enable_reorder": "Włącz tryb zmiany kolejności",
         "need_more_help": "Potrzebujesz pomocy?",
         "visit_docs": "Odwiedź dokumentację.",
-        "disable_reorder": "Wyłącz tryb zmiany kolejności"
+        "disable_reorder": "Wyłącz tryb zmiany kolejności",
+        "time_based_scoring": "Punktacja zależna od czasu",
+        "time_based_scoring_description": "Szybsze poprawne odpowiedzi dają więcej punktów. Wyłącz tę opcję, aby każda poprawna odpowiedź dawała pełną wartość punktową."
     },
     "import_page": {
         "need_help": "Potrzebujesz pomocy?",

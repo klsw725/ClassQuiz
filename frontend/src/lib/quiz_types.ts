@@ -21,6 +21,7 @@ export interface QuizData {
 	cover_image?: string;
 	background_color?: string;
 	background_image?: string;
+	time_based_scoring: boolean;
 	likes: number;
 	dislikes: number;
 	plays: number;
@@ -57,6 +58,7 @@ export interface OrderQuizAnswer {
 
 export interface Question {
 	time: string;
+	points: number;
 	question: string;
 	type?: QuizQuestionType;
 	image?: string;
@@ -92,6 +94,7 @@ export interface EditorData {
 	cover_image?: string;
 	background_color?: string;
 	background_image?: string;
+	time_based_scoring: boolean;
 }
 
 export interface PrivateImageData {

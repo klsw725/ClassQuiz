@@ -124,6 +124,7 @@ async def import_quiz(file: UploadFile = File(), user: User = Depends(get_curren
     quiz_dict["created_at"] = datetime.fromisoformat(quiz_dict["created_at"])
     quiz_dict["updated_at"] = datetime.fromisoformat(quiz_dict["updated_at"])
     quiz_dict["id"] = quiz_id
+    quiz_dict.setdefault("time_based_scoring", True)
     for question in quiz_dict["questions"]:
         if question["image"] is not None:
             question["image"] = image_urls[question["image"]]

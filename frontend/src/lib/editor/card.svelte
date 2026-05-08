@@ -68,6 +68,12 @@ SPDX-License-Identifier: MPL-2.0
 		selected_question;
 		set_unique();
 	});
+	run(() => {
+		const question = data.questions[selected_question];
+		if (question) {
+			question.points ??= 1000;
+		}
+	});
 	let image_url = $state('');
 
 	const update_image_url = () => {
@@ -206,7 +212,7 @@ SPDX-License-Identifier: MPL-2.0
 					{/await}
 				{/if}
 				<div class="flex justify-center pt-10 w-full">
-					<div>
+					<div class="flex items-center gap-2">
 						<svg
 							class="w-8 h-8 inline-block"
 							fill="none"
@@ -229,6 +235,13 @@ SPDX-License-Identifier: MPL-2.0
 							bind:value={data.questions[selected_question].time}
 						/>
 						<p class="inline-block">s</p>
+						<input
+							type="number"
+							min="0"
+							class="w-24 bg-transparent rounded-lg text-lg border-2 border-gray-500 p-1 outline-hidden focus:shadow-2xl"
+							bind:value={data.questions[selected_question].points}
+						/>
+						<p class="inline-block">pts</p>
 					</div>
 				</div>
 				<div class="flex justify-center py-5">

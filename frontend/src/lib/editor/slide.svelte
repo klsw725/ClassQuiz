@@ -24,6 +24,7 @@ SPDX-License-Identifier: MPL-2.0
 	let { data = $bindable({
 		type: QuizQuestionType.SLIDE,
 		time: '120',
+		points: 1000,
 		question: '',
 		image: undefined,
 		answers: ''

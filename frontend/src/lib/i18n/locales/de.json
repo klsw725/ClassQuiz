@@ -233,7 +233,9 @@
         "enable_reorder": "Fragen Umsortieren",
         "disable_reorder": "Umsortieren beenden",
         "advanced_settings": "Erweiterte Einstellungen",
-        "hide_question_results": "Frageergebnisse ausblenden?"
+        "hide_question_results": "Frageergebnisse ausblenden?",
+        "time_based_scoring": "Zeitbasierte Punktewertung",
+        "time_based_scoring_description": "Schnellere richtige Antworten erhalten mehr Punkte. Deaktiviere dies, damit jede richtige Antwort den vollen Punktwert erhält."
     },
     "import": {
         "need_help": "",

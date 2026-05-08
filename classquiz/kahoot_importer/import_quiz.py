@@ -106,6 +106,7 @@ async def import_quiz(quiz_id: str, user: User) -> Quiz | int:
         user_id=user.id,
         questions=json.dumps(quiz_questions),
         imported_from_kahoot=True,
+        time_based_scoring=True,
         cover_image=cover,
         kahoot_id=uuid.UUID(kahoot_quiz_id),
     )

@@ -13,6 +13,7 @@ import socketio
 from cryptography.fernet import Fernet
 
 from classquiz.config import redis, settings
+from classquiz.scoring import calculate_answer_score
 from classquiz.db.models import (
     PlayGame,
     QuizQuestionType,
@@ -65,12 +66,6 @@ async def generate_final_results(game_data: PlayGame, game_pin: str) -> dict:
         else:
             results[str(i)] = json.loads(redis_res)
     return results
-
-
-def calculate_score(z: float, t: int) -> int:
-    t = t * 1000
-    res = (t - z) / t
-    return int(res * 1000)
 
 
 async def set_answer(answers, game_pin: str, q_index: int, data: AnswerData) -> AnswerDataList:
@@ -306,14 +301,13 @@ async def submit_answer(sid: str, data: dict):
     latency = int(float(session["ping"]))
     time_q_started = datetime.fromisoformat(await redis.get(f"game:{session['game_pin']}:current_time"))
     diff = (time_q_started - now).total_seconds() * 1000  # - timedelta(milliseconds=latency)
-    score = 0
-    if answer_right:
-        score = calculate_score(
-            abs(diff) - latency,
-            int(float(game_data.questions[question_index].time)),
-        )
-        if score > 1000:
-            score = 1000
+    score = calculate_answer_score(
+        answer_right,
+        game_data.time_based_scoring,
+        abs(diff) - latency,
+        int(float(game_data.questions[question_index].time)),
+        game_data.questions[question_index].points,
+    )
     await redis.hincrby(f"game_session:{session['game_pin']}:player_scores", session["username"], score)
     answer_data = AnswerData(
         username=session["username"],

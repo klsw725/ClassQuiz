@@ -187,6 +187,7 @@ async def handle_import_from_excel(data: BinaryIO, user: User) -> Quiz:
             user_id=user,
             questions=questions,
             imported_from_kahoot=False,
+            time_based_scoring=True,
         )
         _ = await quiz.save()
     else:

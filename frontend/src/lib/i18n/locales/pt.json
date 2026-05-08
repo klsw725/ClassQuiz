@@ -233,7 +233,9 @@
         "disable_reorder": "Desativar modo reordenador",
         "enable_reorder": "Ativar modo reordenador",
         "hide_question_results": "Ocultar o resultado das respostas?",
-        "advanced_settings": "Configurações Avançadas"
+        "advanced_settings": "Configurações Avançadas",
+        "time_based_scoring": "Pontuação baseada no tempo",
+        "time_based_scoring_description": "Respostas corretas mais rápidas recebem mais pontos. Desative isto para que cada resposta correta receba o valor total de pontos."
     },
     "result_page": {
         "correct_answer_plural": "{{count}} respostas corretas",

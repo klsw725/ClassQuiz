@@ -228,7 +228,9 @@
         "enable_reorder": "Enable reorder mode",
         "disable_reorder": "Disable reorder mode",
         "advanced_settings": "Advanced Settings",
-        "hide_question_results": "Hide question resuluts?"
+        "hide_question_results": "Hide question resuluts?",
+        "time_based_scoring": "Time-based scoring",
+        "time_based_scoring_description": "Faster correct answers earn more points. Turn this off to give every correct answer its full point value."
     },
     "import_page": {
         "need_help": "Need help?",

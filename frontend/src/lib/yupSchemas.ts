@@ -47,6 +47,7 @@ export const TextQuestionSchema = yup
 
 export const dataSchema = yup.object({
 	public: yup.boolean().required(),
+	time_based_scoring: yup.boolean().required(),
 	type: yup.string(),
 	title: yup
 		.string()

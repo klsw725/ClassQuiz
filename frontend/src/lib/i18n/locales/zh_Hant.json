@@ -125,7 +125,9 @@
         "need_more_help": "需要更多協助嗎？",
         "visit_docs": "查看說明文件。",
         "enable_reorder": "啟用重新排序模式",
-        "disable_reorder": "停用重新排序模式"
+        "disable_reorder": "停用重新排序模式",
+        "time_based_scoring": "依時間計分",
+        "time_based_scoring_description": "越快答對可獲得越多分。關閉後，每個正確答案都會獲得該題的完整分數。"
     },
     "import_page": {
         "need_help": "需要協助嗎？",

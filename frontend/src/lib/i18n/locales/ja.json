@@ -304,7 +304,9 @@
         },
         "need_more_help": "もっとヘルプが必要？",
         "time_in_seconds": "記録間隔（秒）",
-        "right_or_true?": "ねえ…？"
+        "right_or_true?": "ねえ…？",
+        "time_based_scoring": "時間ベースの採点",
+        "time_based_scoring_description": "正解が早いほど多くの点を獲得できます。オフにすると、すべての正解にその問題の満点が与えられます。"
     },
     "result_page": {
         "custom_field": "カスタム欄",

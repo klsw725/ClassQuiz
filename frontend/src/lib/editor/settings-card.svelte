@@ -22,6 +22,8 @@ SPDX-License-Identifier: MPL-2.0
 
 	let { edit_id = $bindable(), data = $bindable() }: Props = $props();
 
+	data.time_based_scoring ??= true;
+
 	let custom_bg_color = $state(Boolean(data.background_color));
 	const tippy = createTippy({
 		arrow: true,
@@ -130,6 +132,32 @@ SPDX-License-Identifier: MPL-2.0
 						<span>{$t('words.private')}</span>
 					{/if}
 				</button>
+			</div>
+			<div class="pt-10 w-full flex justify-center">
+				<div class="w-1/3 rounded-lg bg-gray-100 p-4 dark:bg-gray-600">
+					<label
+						for="time-based-scoring-toggle"
+						class="flex items-center justify-between gap-4 cursor-pointer"
+					>
+						<span>
+							<span class="block font-medium">{$t('editor.time_based_scoring')}</span>
+							<span class="block pt-1 text-sm text-gray-600 dark:text-gray-300">
+								{$t('editor.time_based_scoring_description')}
+							</span>
+						</span>
+						<span class="relative inline-flex items-center">
+							<input
+								type="checkbox"
+								bind:checked={data.time_based_scoring}
+								id="time-based-scoring-toggle"
+								class="sr-only peer"
+							/>
+							<span
+								class="w-14 h-7 bg-gray-200 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+							></span>
+						</span>
+					</label>
+				</div>
 			</div>
 			<div class="pt-10 w-full flex justify-center">
 				<div class="grid grid-cols-3 w-fit h-fit gap-4">

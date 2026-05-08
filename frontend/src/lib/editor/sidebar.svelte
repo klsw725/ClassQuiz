@@ -38,6 +38,7 @@ SPDX-License-Identifier: MPL-2.0
 	const empy_slide: Question = {
 		type: QuizQuestionType.SLIDE,
 		time: '120',
+		points: 1000,
 		question: 'Slide',
 		image: undefined,
 		answers: ''

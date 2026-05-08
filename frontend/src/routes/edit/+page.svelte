@@ -24,11 +24,13 @@ SPDX-License-Identifier: MPL-2.0
 		title: string;
 		description: string;
 		questions: Question[];
+		time_based_scoring: boolean;
 	}
 
 	interface Question {
 		question: string;
 		time: string;
+		points: number;
 		answers: Answer[];
 	}
 
@@ -55,6 +57,8 @@ SPDX-License-Identifier: MPL-2.0
 					temp_data.questions[i].type = QuizQuestionType[question.type];
 				}
 			}
+			temp_data.time_based_scoring ??= true;
+			for (const question of temp_data.questions) question.points ??= 1000;
 			quiz_data = temp_data;
 			return;
 		}

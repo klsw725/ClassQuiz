@@ -295,7 +295,9 @@
         "disable_reorder": "Desactivar el modo reordenar",
         "enable_reorder": "Activar el modo reordenar",
         "hide_question_results": "¿Ocultar los resultados de la pregunta?",
-        "advanced_settings": "Ajustes avanzados"
+        "advanced_settings": "Ajustes avanzados",
+        "time_based_scoring": "Puntuación basada en el tiempo",
+        "time_based_scoring_description": "Las respuestas correctas más rápidas obtienen más puntos. Desactiva esto para que cada respuesta correcta reciba todo su valor en puntos."
     },
     "import_page": {
         "need_help": "¿Necesitas ayuda?",

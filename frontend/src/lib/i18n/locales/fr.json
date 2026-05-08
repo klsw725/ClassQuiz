@@ -233,7 +233,9 @@
         "enable_reorder": "Activer le mode réorganisation",
         "disable_reorder": "Désactiver le mode réorganisation",
         "advanced_settings": "Paramètres avancés",
-        "hide_question_results": "Cacher les résultats de la question ?"
+        "hide_question_results": "Cacher les résultats de la question ?",
+        "time_based_scoring": "Score basé sur le temps",
+        "time_based_scoring_description": "Les bonnes réponses plus rapides rapportent plus de points. Désactivez cette option pour donner à chaque bonne réponse toute sa valeur en points."
     },
     "import_page": {
         "need_help": "Besoin d'aide ?",

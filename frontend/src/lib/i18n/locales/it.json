@@ -233,7 +233,9 @@
         "disable_reorder": "Disabilita la modalità di riordino",
         "enable_reorder": "Abilita la modalità di riordino",
         "hide_question_results": "Nascondere i risultati della domanda?",
-        "advanced_settings": "Impostazioni avanzate"
+        "advanced_settings": "Impostazioni avanzate",
+        "time_based_scoring": "Punteggio basato sul tempo",
+        "time_based_scoring_description": "Le risposte corrette più veloci ottengono più punti. Disattiva questa opzione per assegnare a ogni risposta corretta il suo valore pieno."
     },
     "import_page": {
         "need_help": "Hai bisogno di aiuto?",

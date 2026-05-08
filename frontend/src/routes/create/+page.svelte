@@ -21,6 +21,7 @@ SPDX-License-Identifier: MPL-2.0
 		title: string;
 		description: string;
 		questions: Question[];
+		time_based_scoring: boolean;
 	}
 
 	let responseData = {
@@ -37,18 +38,22 @@ SPDX-License-Identifier: MPL-2.0
 			data = {
 				description: '',
 				public: false,
+				time_based_scoring: true,
 				title,
 				questions: [
 					/*					{
 						type: QuizQuestionType.ABCD,
 						question: '',
 						time: '20',
+						points: 1000,
 						answers: [{ right: false, answer: '' }]
 					}*/
 				]
 			};
 		} else {
 			data = JSON.parse(from_localstorage);
+			data.time_based_scoring ??= true;
+			for (const question of data.questions) question.points ??= 1000;
 		}
 	});
 </script>

@@ -20,6 +20,7 @@ from pydantic import (
     ConfigDict,
     RootModel,
     ValidationInfo,
+    Field,
 )
 from enum import Enum
 from . import metadata, database
@@ -146,6 +147,7 @@ class TextQuizAnswer(BaseModel):
 class QuizQuestion(BaseModel):
     question: str
     time: str  # in Secs
+    points: int = Field(default=1000, ge=0)
     type: None | QuizQuestionType = QuizQuestionType.ABCD
     answers: list[ABCDQuizAnswer] | RangeQuizAnswer | list[TextQuizAnswer] | list[VotingQuizAnswer] | str
     image: str | None = None
@@ -178,6 +180,7 @@ class QuizInput(BaseModel):
     background_color: str | None = None
     questions: list[QuizQuestion]
     background_image: str | None = None
+    time_based_scoring: bool = True
 
 
 class Quiz(ormar.Model):
@@ -193,6 +196,7 @@ class Quiz(ormar.Model):
     cover_image: Optional[str] = ormar.Text(nullable=True, unique=False)
     background_color: str | None = ormar.Text(nullable=True, unique=False)
     background_image: str | None = ormar.Text(nullable=True, unique=False)
+    time_based_scoring: bool = ormar.Boolean(default=True, nullable=False, server_default="true")
     kahoot_id: uuid.UUID | None = ormar.UUID(nullable=True, default=None)
     likes: int = ormar.Integer(nullable=False, default=0, server_default="0")
     dislikes: int = ormar.Integer(nullable=False, default=0, server_default="0")
@@ -251,6 +255,7 @@ class PlayGame(BaseModel):
     background_image: str | None = None
     custom_field: str | None = None
     question_show: bool = False
+    time_based_scoring: bool = True
 
     @classmethod
     async def get_from_redis(self, game_pin: str) -> Self:

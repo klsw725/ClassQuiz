@@ -228,7 +228,9 @@
         "advanced_settings": "Haladó beállítások",
         "hide_question_results": "Kérdés eredményeinek elrejtése?",
         "need_more_help": "Kell segítség?",
-        "enable_reorder": "Újrarendezési mód bekapcsolása"
+        "enable_reorder": "Újrarendezési mód bekapcsolása",
+        "time_based_scoring": "Időalapú pontozás",
+        "time_based_scoring_description": "A gyorsabb helyes válaszok több pontot érnek. Kapcsold ki, hogy minden helyes válasz a teljes pontértékét kapja."
     },
     "import_page": {
         "url_should_look_like_this": "Az URL-nek így kell kinéznie: https://create.kahoot.it/details/...",

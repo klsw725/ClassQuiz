@@ -232,7 +232,9 @@
         "empty": "",
         "abcd_description": "",
         "bg_image": "",
-        "no_title": ""
+        "no_title": "",
+        "time_based_scoring": "Puntuació basada en el temps",
+        "time_based_scoring_description": "Les respostes correctes més ràpides obtenen més punts. Desactiva-ho perquè cada resposta correcta rebi tot el seu valor de punts."
     },
     "import_page": {
         "need_help": "Us cal ajuda?",

@@ -233,7 +233,9 @@
         "enable_reorder": "Aktifkan mode urutkan ulang",
         "disable_reorder": "Nonaktifkan mode urutkan ulang",
         "advanced_settings": "Pengaturan Lanjutan",
-        "hide_question_results": "Sembunyikan hasil pertanyaan?"
+        "hide_question_results": "Sembunyikan hasil pertanyaan?",
+        "time_based_scoring": "Penilaian berbasis waktu",
+        "time_based_scoring_description": "Jawaban benar yang lebih cepat mendapatkan lebih banyak poin. Matikan ini agar setiap jawaban benar mendapat nilai poin penuh."
     },
     "import_page": {
         "need_help": "Butuh bantuan?",
