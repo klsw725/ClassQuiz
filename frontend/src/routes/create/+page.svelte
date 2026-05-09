@@ -67,31 +67,31 @@ SPDX-License-Identifier: MPL-2.0
 {/if}
 
 <div
-	class="fixed z-10 inset-0 overflow-y-auto"
+	class="fixed inset-0 z-10 overflow-y-auto text-cq-text"
 	aria-labelledby="modal-title"
 	role="dialog"
 	aria-modal="true"
 	class:hidden={!responseData.open}
 >
 	<div
-		class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
+		class="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0"
 	>
-		<div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+		<div class="fixed inset-0 bg-black/45 dark:bg-black/65 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
 
 		<span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"
 			>&#8203;</span
 		>
 		<div
-			class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+			class="cq-card inline-block transform overflow-hidden text-left align-bottom transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle"
 		>
-			<div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+			<div class="bg-cq-surface px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
 				<div class="sm:flex sm:items-start">
 					<div
-						class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
+						class="cq-surface-muted mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full sm:mx-0 sm:h-10 sm:w-10"
 					>
 						<!-- Heroicon name: outline/exclamation -->
 						<svg
-							class="w-6 h-6 text-green-600"
+							class="h-6 w-6 text-green-600"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -106,22 +106,22 @@ SPDX-License-Identifier: MPL-2.0
 						</svg>
 					</div>
 					<div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-						<h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+						<h3 class="text-lg leading-6 font-medium text-cq-text" id="modal-title">
 							{$t('create_page.success.title')}
 						</h3>
 						<div class="mt-2">
-							<p class="text-sm text-gray-500">{$t('create_page.success.body')}</p>
+							<p class="text-sm text-cq-muted">{$t('create_page.success.body')}</p>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+			<div class="cq-surface-muted rounded-none border-x-0 border-b-0 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
 				<button
 					type="button"
 					onclick={() => {
 						window.location.href = '/dashboard';
 					}}
-					class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-xm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+					class="action-button mt-3 inline-flex w-full justify-center text-base font-medium sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
 					>{$t('words.close')}
 				</button>
 			</div>

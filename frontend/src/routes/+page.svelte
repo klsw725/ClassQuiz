@@ -131,7 +131,7 @@ SPDX-License-Identifier: MPL-2.0
 	/>
 	<meta name="twitter:image" content={WebPOpenGraph} />
 </svelte:head>
-<div class="min-h-screen flex flex-col">
+<div class="flex min-h-screen flex-col text-cq-text">
 	<section class="pb-40">
 		<div class="pt-12 text-center">
 			<h1 class="sm:text-8xl text-6xl mt-6 marck-script">ClassQuiz</h1>
@@ -142,13 +142,11 @@ SPDX-License-Identifier: MPL-2.0
 		<h2 class="text-center text-5xl mb-6">{$t('index_page.how_does_classquiz_work')}</h2>
 
 		<div class="flex justify-center w-full">
-			<h3 class="text-center text-3xl rounded-t-lg bg-white/40 py-2 px-6">
+			<h3 class="cq-surface rounded-b-none px-6 py-2 text-center text-3xl">
 				{$t('index_page.get_a_quiz')}
 			</h3>
 		</div>
-		<div
-			class="grid grid-rows-2 lg:grid-rows-1 lg:grid-cols-2 bg-white/40 shadow-lg mb-12 lg:mx-12 mx-4 rounded-lg"
-		>
+		<div class="cq-card mx-4 mb-12 grid grid-rows-2 lg:mx-12 lg:grid-cols-2 lg:grid-rows-1">
 			<div>
 				<div class="p-2 rounded-lg">
 					{#if selected_create_thing === SelectedCreateThing.Create}
@@ -177,11 +175,9 @@ SPDX-License-Identifier: MPL-2.0
 					{/if}
 				</div>
 			</div>
-			<div
-				class="lg:border-l lg:border-l-black lg:border-t-0 border-t border-t-black flex lg:flex-col flex-row stretch"
-			>
+			<div class="stretch flex flex-row border-t border-cq-border lg:flex-col lg:border-t-0 lg:border-l">
 				<div
-					class="m-2 rounded-lg p-2 bg-white/40 transition-all cursor-pointer lg:h-full"
+					class="cq-surface cq-card-interactive m-2 cursor-pointer p-2 transition-all lg:h-full"
 					onclick={() => {
 						selected_create_thing = SelectedCreateThing.Create;
 					}}
@@ -193,12 +189,10 @@ SPDX-License-Identifier: MPL-2.0
 					role="button"
 					tabindex="0"
 				>
-					<div
-						class="rounded-lg w-fit p-1 bg-lime-500 hover:bg-lime-400 transition shadow-lg"
-					>
+					<div class="cq-surface-muted w-fit p-1 transition">
 						<svg
 							aria-label="Pencil-Icon"
-							class="w-8 h-8 text-black"
+							class="h-8 w-8 text-cq-text"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -212,11 +206,11 @@ SPDX-License-Identifier: MPL-2.0
 							/>
 						</svg>
 					</div>
-					<h5 class="text-xl w-fit dark:text-black">{$t('words.create')}</h5>
-					<p class="dark:text-black">{$t('index_page.create_a_quiz_from_scratch')}</p>
+					<h5 class="w-fit text-xl text-cq-text">{$t('words.create')}</h5>
+					<p class="text-cq-muted">{$t('index_page.create_a_quiz_from_scratch')}</p>
 				</div>
 				<div
-					class="m-2 rounded-lg p-2 bg-white/40 transition-all cursor-pointer lg:h-full"
+					class="cq-surface cq-card-interactive m-2 cursor-pointer p-2 transition-all lg:h-full"
 					onclick={() => {
 						selected_create_thing = SelectedCreateThing.Find;
 					}}
@@ -228,11 +222,9 @@ SPDX-License-Identifier: MPL-2.0
 					class:shadow-2xl={selected_create_thing === SelectedCreateThing.Find}
 					class:opacity-70={selected_create_thing !== SelectedCreateThing.Find}
 				>
-					<div
-						class="rounded-lg w-fit p-1 bg-lime-500 hover:bg-lime-400 transition shadow-lg"
-					>
+					<div class="cq-surface-muted w-fit p-1 transition">
 						<svg
-							class="w-8 h-8 text-black"
+							class="h-8 w-8 text-cq-text"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -247,8 +239,8 @@ SPDX-License-Identifier: MPL-2.0
 							/>
 						</svg>
 					</div>
-					<h5 class="text-xl dark:text-black">{$t('words.find')}</h5>
-					<p class="dark:text-black">{$t('index_page.find_or_explore')}</p>
+					<h5 class="text-xl text-cq-text">{$t('words.find')}</h5>
+					<p class="text-cq-muted">{$t('index_page.find_or_explore')}</p>
 				</div>
 			</div>
 		</div>
@@ -256,14 +248,12 @@ SPDX-License-Identifier: MPL-2.0
 
 	<section class="mt-24">
 		<div class="flex justify-center w-full">
-			<h2 class="text-center text-3xl rounded-t-lg bg-white/40 py-2 px-6">
+			<h2 class="cq-surface rounded-b-none px-6 py-2 text-center text-3xl">
 				{$t('index_page.play_quiz')}
 			</h2>
 		</div>
 
-		<div
-			class="grid grid-rows-2 lg:grid-rows-1 lg:grid-cols-2 bg-white/40 shadow-lg mb-12 lg:mx-12 mx-4 rounded-lg"
-		>
+		<div class="cq-card mx-4 mb-12 grid grid-rows-2 lg:mx-12 lg:grid-cols-2 lg:grid-rows-1">
 			<div>
 				<div class="p-2 rounded-lg">
 					{#if selected_play_thing === SelectedPlayThing.Select}
@@ -292,11 +282,9 @@ SPDX-License-Identifier: MPL-2.0
 					{/if}
 				</div>
 			</div>
-			<div
-				class="lg:border-l lg:border-l-black lg:border-t-0 border-t border-t-black flex lg:flex-col flex-row stretch"
-			>
+			<div class="stretch flex flex-row border-t border-cq-border lg:flex-col lg:border-t-0 lg:border-l">
 				<div
-					class="m-2 rounded-lg p-2 bg-white/40 transition-all cursor-pointer lg:h-full"
+					class="cq-surface cq-card-interactive m-2 cursor-pointer p-2 transition-all lg:h-full"
 					onclick={() => {
 						selected_play_thing = SelectedPlayThing.Select;
 					}}
@@ -308,12 +296,10 @@ SPDX-License-Identifier: MPL-2.0
 					class:shadow-2xl={selected_play_thing === SelectedPlayThing.Select}
 					class:opacity-70={selected_play_thing !== SelectedPlayThing.Select}
 				>
-					<div
-						class="rounded-lg bg-emerald-300 w-fit p-1 hover:bg-lime-400 transition shadow-lg"
-					>
+					<div class="cq-surface-muted w-fit p-1 transition">
 						<svg
 							aria-label="Mouse-Click icon"
-							class="w-8 h-8 text-black"
+							class="h-8 w-8 text-cq-text"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -327,11 +313,11 @@ SPDX-License-Identifier: MPL-2.0
 							/>
 						</svg>
 					</div>
-					<h5 class="text-xl w-fit dark:text-black">{$t('index_page.select_answer')}</h5>
-					<p class="dark:text-black">{$t('index_page.choose_answer_wisely')}</p>
+					<h5 class="w-fit text-xl text-cq-text">{$t('index_page.select_answer')}</h5>
+					<p class="text-cq-muted">{$t('index_page.choose_answer_wisely')}</p>
 				</div>
 				<div
-					class="m-2 rounded-lg p-2 bg-white/40 transition-all cursor-pointer lg:h-full"
+					class="cq-surface cq-card-interactive m-2 cursor-pointer p-2 transition-all lg:h-full"
 					role="button"
 					tabindex="0"
 					onclick={() => {
@@ -343,12 +329,10 @@ SPDX-License-Identifier: MPL-2.0
 					class:shadow-2xl={selected_play_thing === SelectedPlayThing.Results}
 					class:opacity-70={selected_play_thing !== SelectedPlayThing.Results}
 				>
-					<div
-						class="rounded-lg bg-emerald-300 w-fit p-1 hover:bg-lime-400 transition shadow-lg"
-					>
+					<div class="cq-surface-muted w-fit p-1 transition">
 						<svg
 							aria-label="context-menu icon"
-							class="w-8 h-8 text-black"
+							class="h-8 w-8 text-cq-text"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -362,11 +346,11 @@ SPDX-License-Identifier: MPL-2.0
 							/>
 						</svg>
 					</div>
-					<h5 class="text-xl dark:text-black">{$t('index_page.view_results')}</h5>
-					<p class="dark:text-black">{$t('index_page.check_if_chosen_wisely')}</p>
+					<h5 class="text-xl text-cq-text">{$t('index_page.view_results')}</h5>
+					<p class="text-cq-muted">{$t('index_page.check_if_chosen_wisely')}</p>
 				</div>
 				<div
-					class="m-2 rounded-lg p-2 bg-white/40 transition-all cursor-pointer lg:h-full"
+					class="cq-surface cq-card-interactive m-2 cursor-pointer p-2 transition-all lg:h-full"
 					role="button"
 					tabindex="0"
 					onclick={() => {
@@ -378,12 +362,10 @@ SPDX-License-Identifier: MPL-2.0
 					class:shadow-2xl={selected_play_thing === SelectedPlayThing.Winners}
 					class:opacity-70={selected_play_thing !== SelectedPlayThing.Winners}
 				>
-					<div
-						class="rounded-lg bg-emerald-300 w-fit p-1 hover:bg-lime-400 transition shadow-lg"
-					>
+					<div class="cq-surface-muted w-fit p-1 transition">
 						<svg
 							aria-label="sparkling stars-icon"
-							class="w-8 h-8 text-black"
+							class="h-8 w-8 text-cq-text"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -397,8 +379,8 @@ SPDX-License-Identifier: MPL-2.0
 							/>
 						</svg>
 					</div>
-					<h5 class="text-xl dark:text-black">{$t('index_page.list_winners')}</h5>
-					<p class="dark:text-black">{$t('index_page.get_ranking_and_winners')}</p>
+					<h5 class="text-xl text-cq-text">{$t('index_page.list_winners')}</h5>
+					<p class="text-cq-muted">{$t('index_page.get_ranking_and_winners')}</p>
 				</div>
 			</div>
 		</div>
@@ -406,27 +388,23 @@ SPDX-License-Identifier: MPL-2.0
 
 	<section class="mt-24">
 		<div class="flex justify-center w-full">
-			<h2 class="text-center text-3xl rounded-t-lg bg-white/40 py-2 px-6">
+			<h2 class="cq-surface rounded-b-none px-6 py-2 text-center text-3xl">
 				{$t('index_page.why_classquiz')}
 			</h2>
 		</div>
 
-		<div
-			class="grid grid-rows-2 lg:grid-rows-1 lg:grid-cols-2 bg-white/40 shadow-lg mb-12 lg:mx-12 mx-4 rounded-lg"
-		>
+		<div class="cq-card mx-4 mb-12 grid grid-rows-2 lg:mx-12 lg:grid-cols-2 lg:grid-rows-1">
 			<div>
 				<div class="p-12 rounded-lg flex justify-center items-center h-full">
-					<p class="dark:text-black">
+					<p class="text-cq-muted">
 						{classquiz_reasons[selected_classquiz_reason].content}
 					</p>
 				</div>
 			</div>
-			<div
-				class="lg:border-l lg:border-l-black lg:border-t-0 border-t border-t-black flex lg:flex-col flex-row stretch overflow-x-auto why-classquiz"
-			>
+			<div class="why-classquiz stretch flex flex-row overflow-x-auto border-t border-cq-border lg:flex-col lg:border-t-0 lg:border-l">
 				{#each classquiz_reasons as reason, index}
 					<div
-						class="m-2 rounded-lg p-2 bg-white/40 transition-all cursor-pointer lg:h-full"
+						class="cq-surface cq-card-interactive m-2 cursor-pointer p-2 transition-all lg:h-full"
 						role="button"
 						tabindex="0"
 						onclick={() => {
@@ -438,7 +416,7 @@ SPDX-License-Identifier: MPL-2.0
 						class:shadow-2xl={selected_classquiz_reason === index}
 						class:opacity-70={selected_classquiz_reason !== index}
 					>
-						<h5 class="text-xl dark:text-black">{reason.headline}</h5>
+						<h5 class="text-xl text-cq-text">{reason.headline}</h5>
 					</div>
 				{/each}
 			</div>
@@ -447,7 +425,7 @@ SPDX-License-Identifier: MPL-2.0
 </div>
 {#if newsletterModalOpen}
 	<div
-		class="fixed bottom-8 right-5 bg-white rounded-lg h-fit w-11/12 ml-5 lg:w-2/12 z-50 p-2 dark:bg-gray-700"
+		class="cq-card fixed right-5 bottom-8 z-50 ml-5 h-fit w-11/12 p-2 lg:w-2/12"
 		transition:fly|global
 	>
 		<Newsletter bind:open={newsletterModalOpen} />
@@ -467,13 +445,13 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	.why-classquiz::-webkit-scrollbar-thumb {
-		box-shadow: inset 0 0 10px 10px #374151;
+		box-shadow: inset 0 0 10px 10px var(--cq-border-strong);
 		border: solid 3px transparent;
 		border-radius: 15px;
 	}
 
 	.why-classquiz::-webkit-scrollbar-thumb:hover {
-		box-shadow: inset 0 0 10px 10px #555;
+		box-shadow: inset 0 0 10px 10px var(--cq-text-muted);
 		border: solid 3px transparent;
 	}
 </style>

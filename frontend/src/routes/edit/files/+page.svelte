@@ -66,7 +66,7 @@ SPDX-License-Identifier: MPL-2.0
 	<div class="grid grid-cols-1 lg:grid-cols-2 p-4 gap-4">
 		{#each images as image}
 			<div
-				class="border-2 border-[#B07156] rounded-sm p-2 grid grid-cols-2 hover:opacity-100 transition-all"
+				class="cq-card p-2 grid grid-cols-2 hover:opacity-100 transition-all"
 				class:opacity-40={image.quiztivities.length === 0 && image.quizzes.length === 0}
 			>
 				<img
@@ -125,10 +125,10 @@ SPDX-License-Identifier: MPL-2.0
 {#if edit_popup}
 	<div
 		transition:fade={{ duration: 100 }}
-		class="fixed top-0 left-0 h-screen w-screen z-40 flex bg-black/50"
+		class="fixed top-0 left-0 h-screen w-screen z-40 flex bg-cq-text/50"
 		onclick={close_popup_handler}
 	>
-		<div class="w-auto h-auto m-auto rounded-sm bg-white dark:bg-gray-700 p-4">
+		<div class="cq-card w-auto h-auto m-auto p-4">
 			<h1 class="text-2xl text-center">{$t('file_dashboard.edit_the_image')}</h1>
 			<form class="flex flex-col" onsubmit={save_image_metadata}>
 				<div class="flex flex-row">
@@ -139,14 +139,14 @@ SPDX-License-Identifier: MPL-2.0
 					</div>
 					<div class="flex flex-col gap-3">
 						<input
-							class="rounded-sm outline-hidden dark:bg-gray-500 p-0.5 border-4 border-transparent"
+							class="rounded-lg bg-cq-surface outline-hidden p-0.5 border-4 border-transparent"
 							id="name"
 							type="text"
 							bind:value={edit_popup.filename}
 						/>
 						<input
 							class:border-red-700={!edit_popup.alt_text}
-							class="transition rounded-sm outline-hidden dark:bg-gray-500 p-0.5 border-4 border-transparent"
+							class="transition rounded-lg bg-cq-surface outline-hidden p-0.5 border-4 border-transparent"
 							id="alt_text"
 							type="text"
 							bind:value={edit_popup.alt_text}

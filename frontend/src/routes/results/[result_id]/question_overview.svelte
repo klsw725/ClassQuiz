@@ -19,7 +19,7 @@ SPDX-License-Identifier: MPL-2.0
 			username: string;
 			answer: string;
 			right: boolean;
-			tike_taken: number;
+			time_taken: number;
 			score: number;
 		}[][];
 	}
@@ -60,23 +60,21 @@ SPDX-License-Identifier: MPL-2.0
 	<div class="flex flex-col w-full gap-4">
 		{#each questions as question, i}
 			<div class="transition-all">
-				<div
-					class="w-full bg-white/60 p-2 rounded-sm grid grid-cols-3 z-40 dark:bg-gray-700/80"
-				>
+				<div class="cq-card w-full p-2 grid grid-cols-3 z-40">
 					<button
-						class="text-center underline text-xl"
+						class="text-center underline text-xl link-hover"
 						onclick={() => {
 							toggle_dropdown(i);
 						}}>{@html question.question}</button
 					>
 					{#if question.type !== QuizQuestionType.VOTING}
 						{@const correct_answers = get_number_of_correct_answers(i)}
-						<p class="text-center text-sm my-auto">
+						<p class="text-center text-sm my-auto text-cq-muted">
 							{$t('result_page.average_score', {
 								average_score: get_average_score(i)
 							})}
 						</p>
-						<p class="text-center text-sm my-auto">
+						<p class="text-center text-sm my-auto text-cq-muted">
 							{$t('result_page.correct_answer', { count: correct_answers })}
 							<!--							{correct_answers} correct
 							{#if correct_answers === 1}Answer{:else}Answers{/if}-->

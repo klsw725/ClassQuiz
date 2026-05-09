@@ -21,7 +21,7 @@ SPDX-License-Identifier: MPL-2.0
 	/>
 </svelte:head>
 <article
-	class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto mt-10 prose-slate px-4 dark:prose-invert"
+	class="cq-card prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto mt-10 px-6 py-8 text-cq-text prose-slate dark:prose-invert sm:px-8 lg:px-10"
 >
 	<h1>Self-Hosting</h1>
 	<p>Since ClassQuiz is open-source, it can also be self-hosted.</p>

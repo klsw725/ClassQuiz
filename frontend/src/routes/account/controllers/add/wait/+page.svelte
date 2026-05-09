@@ -40,17 +40,19 @@ SPDX-License-Identifier: MPL-2.0
 	});
 </script>
 
-<div class="w-full h-full flex">
-	<div class="m-auto flex flex-col">
-		<div class="block">
+<div class="flex min-h-screen w-full items-center justify-center p-4 text-cq-text">
+	<div class="cq-card m-auto flex w-full max-w-2xl flex-col items-center gap-6 p-6">
+		<div class="block w-full">
 			<CodeDisplay code={data.code} />
 		</div>
 		{#if controller_seen}
-			<div class="mt-10">
-				<p class="text-center">Controller set up successfully!</p>
+			<div class="cq-surface-muted w-full p-4">
+				<p class="text-center text-cq-text">Controller set up successfully!</p>
 			</div>
 		{:else}
-			<div class="mt-10 flex-col flex gap-2 justify-center">
+			<div
+				class="cq-surface-muted flex w-full flex-col justify-center gap-2 p-4 text-center text-cq-muted"
+			>
 				<p>Checking if controller has been connected in {5 - check_tick} seconds.</p>
 				<Spinner my_20={false} />
 			</div>

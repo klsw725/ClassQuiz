@@ -17,22 +17,22 @@ SPDX-License-Identifier: MPL-2.0
 	let { data }: Props = $props();
 </script>
 
-<div class="w-full">
+<div class="w-full text-cq-text">
 	<div class="flex justify-center w-full">
 		<div class="w-11/12 m-auto">
 			{#if data.results.length === 0}
-				<p class="text-center text-3xl mt-8">{$t('results_page.no_results_so_far')}</p>
+				<p class="text-center text-3xl mt-8 text-cq-muted">{$t('results_page.no_results_so_far')}</p>
 			{:else}
-				<table class="w-full">
+				<table class="cq-surface w-full">
 					<thead>
-						<tr class="border-b-2 dark:border-gray-500 text-left border-gray-300">
-							<th class="border-r dark:border-gray-500 p-1 mx-auto border-gray-300"
+						<tr class="border-b-2 text-left border-cq-border">
+							<th class="border-r p-1 mx-auto border-cq-border"
 								>{$t('results_page.quiz_title')}
 							</th>
-							<th class="border-r dark:border-gray-500 p-1 mx-auto border-gray-300"
+							<th class="border-r p-1 mx-auto border-cq-border"
 								>{$t('results_page.date_played')}
 							</th>
-							<th class="border-r dark:border-gray-500 p-1 mx-auto border-gray-300"
+							<th class="border-r p-1 mx-auto border-cq-border"
 								>{$t('results_page.player_count')}
 							</th>
 							<th class="mx-auto p-1">{$t('words.note')}</th>
@@ -41,15 +41,15 @@ SPDX-License-Identifier: MPL-2.0
 					<tbody>
 						{#each data.results as result}
 							<tr class="text-left">
-								<td class="border-r dark:border-gray-500 p-1 border-gray-300"
-									><a href="/results/{result.id}" class="underline text-lg"
+								<td class="border-r p-1 border-cq-border"
+									><a href="/results/{result.id}" class="link-hover underline text-lg"
 										>{@html result.title}</a
 									></td
 								>
-								<td class="border-r dark:border-gray-500 p-1 border-gray-300"
+								<td class="border-r p-1 border-cq-border"
 									>{new Date(result.timestamp).toLocaleString()}</td
 								>
-								<td class="border-r dark:border-gray-500 p-1 border-gray-300"
+								<td class="border-r p-1 border-cq-border"
 									>{Object.keys(result.player_scores).length}</td
 								>
 								<td class:p-1={result.note}>

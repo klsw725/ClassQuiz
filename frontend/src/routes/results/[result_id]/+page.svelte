@@ -33,8 +33,8 @@ SPDX-License-Identifier: MPL-2.0
 	let selected_tab: SelectedTab = $state(SelectedTab.Overview);
 </script>
 
-<div class="w-full">
-	<div class="flex flex-row w-full justify-around border-b-2 border-gray-500 mb-4">
+<div class="w-full text-cq-text">
+	<div class="flex flex-row w-full justify-around border-b-2 border-cq-border mb-4">
 		<div
 			class="w-full py-2 flex transition-all hover:opacity-100"
 			class:text-lg={selected_tab === SelectedTab.Overview}
@@ -49,7 +49,7 @@ SPDX-License-Identifier: MPL-2.0
 			</button>
 		</div>
 		<div
-			class="w-full py-2 flex border-x-2 border-gray-500 transition-all hover:opacity-100"
+			class="w-full py-2 flex border-x-2 border-cq-border transition-all hover:opacity-100"
 			class:text-lg={selected_tab === SelectedTab.Players}
 			class:opacity-60={selected_tab !== SelectedTab.Players}
 		>

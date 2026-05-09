@@ -6,11 +6,19 @@ SPDX-License-Identifier: MPL-2.0
 
 <script lang="ts">
 	import Spinner from '$lib/Spinner.svelte';
+	import type { EditorData } from '$lib/quiz_types';
 
 	let uppyOpen = $state(false);
-	let edit_id = $state(null);
-	let selected_question = $state(undefined);
-	let data = $state({ cover_image: undefined });
+	let edit_id: string | undefined = $state(undefined);
+	let selected_question: number | undefined = $state(undefined);
+	let data: EditorData = $state({
+		public: false,
+		title: '',
+		description: '',
+		questions: [],
+		time_based_scoring: true,
+		cover_image: undefined
+	});
 
 	$effect(() => {
 		if (data.cover_image) {

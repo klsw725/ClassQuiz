@@ -48,8 +48,16 @@ SPDX-License-Identifier: MPL-2.0
 	let status: Status = $state(Status.Idle);
 
 	let file_size_in_mi: undefined | number = $state(undefined);
-	let original_file_size_in_mi: undefined | number = undefined;
 	let file_data: undefined | Blob = undefined;
+
+	interface RawUploadResult {
+		success: boolean;
+		body: string;
+	}
+
+	interface StorageUploadResponse {
+		id: string;
+	}
 
 	const compress_video = async () => {
 		if (status !== Status.Idle) {
@@ -58,7 +66,6 @@ SPDX-License-Identifier: MPL-2.0
 		status = Status.Compressing;
 		const ffmpeg = new FFmpeg();
 		const file = file_input.files[0];
-		original_file_size_in_mi = file.size / 1_048_576;
 		ffmpeg.on('log', ({ message }) => {
 			const speed_match = message.match(speed_extraction_regex);
 			stats.speed = speed_match ? parseFloat(speed_match[1]) : 0;
@@ -70,7 +77,7 @@ SPDX-License-Identifier: MPL-2.0
 			}
 			stats.time_elapsed = p.time ?? 0;
 			last_time_elapsed = stats.time_elapsed;
-			stats.progress = p.ratio ?? 0;
+			stats.progress = p.progress ?? 0;
 		});
 		await ffmpeg.load({
 			// log: true,
@@ -89,7 +96,13 @@ SPDX-License-Identifier: MPL-2.0
 		]);
 		const data = await ffmpeg.readFile('out.mp4');
 		file_size_in_mi = data.length / 1_048_576;
-		file_data = new Blob([data]);
+		if (typeof data === 'string') {
+			file_data = new Blob([data]);
+		} else {
+			const video_data = new Uint8Array(data.length);
+			video_data.set(data);
+			file_data = new Blob([video_data]);
+		}
 		status = Status.CompressDone;
 		stats.progress = 1;
 	};
@@ -119,11 +132,12 @@ SPDX-License-Identifier: MPL-2.0
                 });
                 const json = await response.json()*/
 		const xhr = new XMLHttpRequest();
-		const success = await new Promise((resolve) => {
+		const success = await new Promise<RawUploadResult>((resolve) => {
 			xhr.upload.addEventListener('progress', (event) => {
 				if (event.lengthComputable) {
 					upload_stats.progress = event.loaded / event.total;
-					upload_stats.time_elapsed = (new Date() - upload_stats.upload_started) / 1000;
+					upload_stats.time_elapsed =
+						(Date.now() - upload_stats.upload_started.getTime()) / 1000;
 				}
 			});
 			xhr.addEventListener('loadend', () => {
@@ -137,7 +151,7 @@ SPDX-License-Identifier: MPL-2.0
 			xhr.send(file_data);
 		});
 		console.log('success:', success);
-		const json = JSON.parse(success.body);
+		const json: StorageUploadResponse = JSON.parse(success.body);
 		localStorage.setItem('video_upload_id', json.id);
 		console.log(json, 'done');
 		status = Status.Done;
@@ -145,7 +159,7 @@ SPDX-License-Identifier: MPL-2.0
 	};
 </script>
 
-<div class="w-screen h-screen m-auto flex flex-col dark:bg-gray-700 p-2 bg-white">
+<div class="w-screen h-screen m-auto flex flex-col bg-cq-surface p-2 text-cq-text">
 	<input type="file" bind:this={file_input} class="m-auto" accept="video/mp4" />
 	<div class="mt-auto flex justify-center">
 		{#if status === Status.Compressing || status === Status.CompressDone}
@@ -203,7 +217,7 @@ SPDX-License-Identifier: MPL-2.0
 			>
 		</div>
 		<span
-			class="h-full transition-all absolute rounded-sm bg-black/50"
+			class="h-full transition-all absolute rounded-lg bg-cq-text/50"
 			style="width: {100 - stats.progress * 100}%"
 		></span>
 	</div>

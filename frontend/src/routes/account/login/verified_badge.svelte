@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <div
-	class="flex items-center justify-center p-4 text-green-700 border-2 border-current rounded-lg bg-white"
+	class="cq-surface flex items-center justify-center p-4 text-cq-text border-cq-border"
 	role="alert"
 >
 	<svg
@@ -28,5 +28,5 @@ SPDX-License-Identifier: MPL-2.0
 		/>
 	</svg>
 
-	<h3 class="ml-3 text-sm font-medium">You've successfully confirmed your email address.</h3>
+	<h3 class="ml-3 text-sm font-medium text-cq-text">You've successfully confirmed your email address.</h3>
 </div>

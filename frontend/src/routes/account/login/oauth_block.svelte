@@ -12,11 +12,11 @@ SPDX-License-Identifier: MPL-2.0
 	<div class="flex items-center justify-center pt-4">
 		<a
 			href="/api/v1/users/oauth/google/login"
-			class="inline-flex w-fit p-1 rounded-lg border-gray-500 border border-2 hover:bg-[#4285F4] transition"
+			class="inline-flex w-fit p-1 rounded-lg border-cq-border border-2 text-cq-text hover:bg-[#4285F4] transition"
 			>Google Login
 
 			<svg
-				class="h-6 w-6 ml-4 dark:fill-gray-300"
+				class="h-6 w-6 ml-4 fill-current"
 				role="img"
 				viewBox="0 0 24 24"
 				xmlns="http://www.w3.org/2000/svg"
@@ -32,10 +32,10 @@ SPDX-License-Identifier: MPL-2.0
 	<div class="flex items-center w-full justify-center pt-4">
 		<a
 			href="/api/v1/users/oauth/github/login"
-			class="inline-flex w-fit p-1 rounded-lg border-gray-500 border border-2 hover:bg-[#181717] transition hover:text-white group"
+			class="inline-flex w-fit p-1 rounded-lg border-cq-border border-2 text-cq-text hover:bg-[#181717] transition hover:text-white group"
 			>GitHub Login
 			<svg
-				class="h-6 w-6 ml-4 dark:fill-gray-300 group-hover:fill-white transition"
+				class="h-6 w-6 ml-4 fill-current group-hover:fill-white transition"
 				role="img"
 				viewBox="0 0 24 24"
 				xmlns="http://www.w3.org/2000/svg"
@@ -51,10 +51,10 @@ SPDX-License-Identifier: MPL-2.0
 	<div class="flex items-center w-full justify-center pt-4">
 		<a
 			href="/api/v1/users/oauth/custom/login"
-			class="inline-flex w-fit p-1 rounded-lg border-gray-500 border border-2 hover:bg-[#F78C40] transition hover:text-white group"
+			class="inline-flex w-fit p-1 rounded-lg border-cq-border border-2 text-cq-text hover:bg-[#F78C40] transition hover:text-white group"
 			>OpenID Login
 			<svg
-				class="h-6 w-6 ml-4 dark:fill-gray-300 group-hover:fill-white transition"
+				class="h-6 w-6 ml-4 fill-current group-hover:fill-white transition"
 				role="img"
 				viewBox="0 0 24 24"
 				xmlns="http://www.w3.org/2000/svg"

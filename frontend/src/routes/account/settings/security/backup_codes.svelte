@@ -27,33 +27,40 @@ SPDX-License-Identifier: MPL-2.0
 	};
 </script>
 
-<div class="w-screen h-screen fixed top-0 left-0 p-48 z-30 bg-black/50">
-	<div class="w-full h-full">
+<div
+	class="fixed top-0 left-0 z-30 h-screen w-screen bg-black/45 p-4 backdrop-blur-sm md:p-12 xl:p-24"
+>
+	<div class="mx-auto h-full w-full max-w-4xl">
 		<button
-			class="bg-gray-200 dark:bg-gray-900 px-2 py-1 rounded-t-lg hover:bg-gray-300 transition"
+			class="action-button w-fit rounded-b-none"
 			onclick={() => {
 				backup_code = undefined;
 			}}
 			>{$t('words.close')}
 		</button>
 		<div
-			class="bg-white dark:bg-gray-700 rounded-b-lg rounded-tr-lg w-full h-full flex flex-col"
+			class="cq-card flex h-[calc(100%-2.5rem)] w-full flex-col gap-6 overflow-y-auto rounded-tl-none p-6 text-center"
 		>
-			<h2 class="text-3xl m-auto">{$t('security_settings.backup_codes.your_backup_code')}</h2>
-			<p
-				class="select-all font-mono text-xl m-auto"
+			<h2 class="m-auto text-3xl font-semibold text-cq-text">
+				{$t('security_settings.backup_codes.your_backup_code')}
+			</h2>
+			<button
+				type="button"
+				class="cq-surface-muted m-auto select-all break-all p-4 font-mono text-xl text-cq-text"
 				onclick={() => {
 					download_code(false);
 				}}
 			>
 				{backup_code}
+			</button>
+			<p class="m-auto text-cq-muted">
+				{$t('security_settings.backup_codes.save_somewhere_save')}
 			</p>
-			<p class="m-auto">{$t('security_settings.backup_codes.save_somewhere_save')}</p>
 			<button
 				onclick={() => {
 					download_code(true);
 				}}
-				class="m-auto p-2 bg-[#B07156] rounded-lg"
+				class="accent-button m-auto w-fit"
 				>{$t('security_settings.backup_codes.download_code')}
 			</button>
 		</div>

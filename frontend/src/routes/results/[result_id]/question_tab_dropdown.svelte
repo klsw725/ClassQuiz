@@ -7,11 +7,11 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { getLocalization } from '$lib/i18n';
-	import type { Question } from '$lib/quiz_types';
+	import type { Answer as QuizAnswer, Question } from '$lib/quiz_types';
 
 	const { t } = getLocalization();
 
-	interface Answer {
+	interface PlayerAnswer {
 		username: string;
 		answer: string;
 		right: boolean;
@@ -21,7 +21,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	interface Props {
 		question: Question;
-		answers: Answer[];
+		answers: PlayerAnswer[];
 	}
 
 	let { question, answers }: Props = $props();
@@ -30,8 +30,9 @@ SPDX-License-Identifier: MPL-2.0
 		let count = 0;
 		let answer_id = 0;
 		if (question.type === QuizQuestionType.CHECK) {
-			for (let i = 0; i < question.answers.length; i++) {
-				if (answer === question.answers[i].answer) {
+			const answer_options = question.answers as QuizAnswer[];
+			for (let i = 0; i < answer_options.length; i++) {
+				if (answer === answer_options[i].answer) {
 					answer_id = i;
 					break;
 				}
@@ -53,18 +54,16 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="flex justify-center">
-	<div class="bg-white p-2 -z-10 w-10/12 rounded-sm dark:bg-gray-700">
-		{#if question.type !== QuizQuestionType.ORDER && question.type !== QuizQuestionType.RANGE}
+	<div class="cq-surface-muted p-2 -z-10 w-10/12">
+		{#if question.type !== QuizQuestionType.ORDER && question.type !== QuizQuestionType.RANGE && question.type !== QuizQuestionType.SLIDE}
 			<div class="flex flex-col mb-4">
 				{#each question.answers as answer}
 					<div class="grid grid-cols-4">
 						<p>{answer.answer}</p>
-						<div
-							class="col-span-3 flex w-full border-l border-gray-300 px-1 dark:border-gray-500"
-						>
+						<div class="col-span-3 flex w-full border-l border-cq-border px-1">
 							<div class="my-auto w-full mr-1">
 								<span
-									class="h-1 block bg-green-600 my-auto"
+									class="h-1 block bg-cq-brand my-auto"
 									style="width: {(get_answer_count_for_answer(answer.answer) /
 										answers.length) *
 										100}%"
@@ -84,21 +83,21 @@ SPDX-License-Identifier: MPL-2.0
 		<div>
 			<table class="w-full text-left">
 				<thead>
-					<tr class="border-b-2 dark:border-gray-500 text-left border-gray-300">
-						<th class="border-r dark:border-gray-500 p-1 mx-auto border-gray-300"
+					<tr class="border-b-2 text-left border-cq-border">
+						<th class="border-r p-1 mx-auto border-cq-border"
 							>{$t('result_page.player_name')}
 						</th>
 						{#if question.type !== QuizQuestionType.VOTING}
-							<th class="border-r dark:border-gray-500 p-1 mx-auto border-gray-300"
+							<th class="border-r p-1 mx-auto border-cq-border"
 								>{$t('words.score')}</th
 							>
 						{/if}
-						<th class="border-r dark:border-gray-500 p-1 mx-auto border-gray-300"
+						<th class="border-r p-1 mx-auto border-cq-border"
 							>{$t('result_page.time_taken')}
 						</th>
 						<th class="p-1 mx-auto">{$t('words.answer')} </th>
 						{#if question.type !== QuizQuestionType.VOTING}
-							<th class="border-l dark:border-gray-500 p-1 mx-auto border-gray-300"
+							<th class="border-l p-1 mx-auto border-cq-border"
 								>{$t('words.correct')}?
 							</th>
 						{/if}
@@ -107,20 +106,20 @@ SPDX-License-Identifier: MPL-2.0
 				<tbody>
 					{#each answers as answer}
 						<tr>
-							<td class="border-r dark:border-gray-500 p-1 border-gray-300"
+							<td class="border-r p-1 border-cq-border"
 								>{answer.username}</td
 							>
 							{#if question.type !== QuizQuestionType.VOTING}
-								<td class="border-r dark:border-gray-500 p-1 border-gray-300"
+								<td class="border-r p-1 border-cq-border"
 									>{answer.score}</td
 								>
 							{/if}
-							<td class="border-r dark:border-gray-500 p-1 border-gray-300"
+							<td class="border-r p-1 border-cq-border"
 								>{(answer.time_taken / 1000).toFixed(3)}s
 							</td>
 							<td class="p-1">{answer.answer}</td>
 							{#if question.type !== QuizQuestionType.VOTING}
-								<td class="p-1 border-l dark:border-gray-500 border-gray-300">
+								<td class="p-1 border-l border-cq-border">
 									{#if answer.right}✅{:else}❌{/if}
 								</td>
 							{/if}

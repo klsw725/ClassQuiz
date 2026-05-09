@@ -18,14 +18,27 @@ SPDX-License-Identifier: MPL-2.0
 	import TotpComponent from './totp_component.svelte';
 	import { browserSupportsWebAuthn } from '@simplewebauthn/browser';
 
+	type LoginMethod = 'PASSWORD' | 'PASSKEY' | 'BACKUP' | 'TOTP';
+
+	interface LoginSessionData {
+		session_id: string;
+		step_1: LoginMethod[];
+		step_2: LoginMethod[];
+		webauthn_data?: string;
+	}
+
 	navbarVisible.visible = true;
 
 	let { data } = $props();
 	let { verified } = data;
 
-	let session_data = $state({});
+	let session_data = $state<LoginSessionData>({
+		session_id: '',
+		step_1: [],
+		step_2: []
+	});
 	let step = $state(0);
-	let selected_method = $state(null);
+	let selected_method = $state<LoginMethod | null>(null);
 	let done = $state(false);
 
 	const redirect_back = (done_var: boolean) => {
@@ -57,7 +70,7 @@ SPDX-License-Identifier: MPL-2.0
 						session_data.step_1.splice(i, 1);
 					}
 				}
-				session_data.step_1 = session_data.step_1;
+				session_data.step_1 = [...session_data.step_1];
 			}
 			if (session_data.step_1.length === 1) {
 				selected_method = session_data.step_1[0];
@@ -70,7 +83,7 @@ SPDX-License-Identifier: MPL-2.0
 						session_data.step_2.splice(i, 1);
 					}
 				}
-				session_data.step_2 = session_data.step_2;
+				session_data.step_2 = [...session_data.step_2];
 			}
 			if (session_data.step_2.length === 1) {
 				selected_method = session_data.step_2[0];
@@ -83,14 +96,12 @@ SPDX-License-Identifier: MPL-2.0
 <svelte:head>
 	<title>ClassQuiz - Login</title>
 </svelte:head>
-<div class="flex items-center justify-center h-screen">
+<div class="flex min-h-screen items-center justify-center px-4 py-10 text-cq-text">
 	{#if verified}
 		<VerifiedBadge />
 	{/if}
 
-	<div
-		class="lg:w-1/3 max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-2xl dark:bg-gray-800"
-	>
+	<div class="cq-card w-full max-w-sm mx-auto overflow-hidden">
 		{#if step === 0}
 			<!--			<p>StartWindow</p>-->
 			<div transition:slide|global>

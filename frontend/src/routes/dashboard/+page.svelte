@@ -16,39 +16,36 @@ SPDX-License-Identifier: MPL-2.0
 	import Fuse from 'fuse.js';
 	import BrownButton from '$lib/components/buttons/brown.svelte';
 	import type { PageData } from './$types';
-	import { fly } from 'svelte/transition';
 	import StartGamePopup from '$lib/dashboard/start_game.svelte';
 	import Analytics from './Analytics.svelte';
 	import MediaComponent from '$lib/editor/MediaComponent.svelte';
-	import { createTippy } from 'svelte-tippy';
 	import { onMount } from 'svelte';
 
 	interface Props {
 		// import GrayButton from "$lib/components/buttons/gray.svelte";
-		data: PageData;
+		data: Omit<PageData, 'quizzes' | 'quiztivities'> & {
+			quizzes: QuizData[];
+			quiztivities: QuizData[];
+		};
 	}
 
 	let { data }: Props = $props();
 	let search_term = $state('');
-	let start_game = $state(null);
+	let start_game: string | null = $state(null);
 	let download_id: string | null = $state(null);
 	signedIn.set(true);
 	navbarVisible.visible = true;
 	const { t } = getLocalization();
 
-	let items_to_show = $state([]);
-	let all_items: Array<any> = $state();
-	let fuse;
-	const tippy = createTippy({
-		arrow: true,
-		animation: 'perspective-subtle',
-		placement: 'bottom'
-	});
+	type DashboardItem = QuizData & { public?: boolean; type: 'quiz' | 'quiztivity' };
 
-	let id_to_position_map = {};
+	let items_to_show: DashboardItem[] = $state([]);
+	let all_items: DashboardItem[] | undefined = $state();
+	let fuse: Fuse<DashboardItem>;
+	let id_to_position_map: Record<string, number> = {};
 
-	const getData = async (): Promise<{ items: Array<QuizData>; fuse: Fuse<any> }> => {
-		const items: any[] = [];
+	const getData = async (): Promise<{ items: DashboardItem[]; fuse: Fuse<DashboardItem> }> => {
+		const items: DashboardItem[] = [];
 
 		for (const q of data.quizzes) items.push({ ...q, type: 'quiz' });
 		for (const q of data.quiztivities) items.push({ ...q, type: 'quiztivity' });
@@ -101,7 +98,6 @@ SPDX-License-Identifier: MPL-2.0
 		}
 		window.location.reload();
 	};
-	let create_button_clicked = $state(false);
 
 	let analytics_quiz_selected: undefined | QuizData = $state(undefined);
 </script>
@@ -115,20 +111,16 @@ SPDX-License-Identifier: MPL-2.0
 	{#if !all_items}
 		<svg class="h-8 w-8 animate-spin mx-auto my-20" viewBox="3 3 18 18">
 			<path
-				class="fill-black"
+				class="fill-cq-text"
 				d="M12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5ZM3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z"
 			/>
 			<path
-				class="fill-blue-100"
+				class="fill-[var(--cq-surface-muted)]"
 				d="M16.9497 7.05015C14.2161 4.31648 9.78392 4.31648 7.05025 7.05015C6.65973 7.44067 6.02656 7.44067 5.63604 7.05015C5.24551 6.65962 5.24551 6.02646 5.63604 5.63593C9.15076 2.12121 14.8492 2.12121 18.364 5.63593C18.7545 6.02646 18.7545 6.65962 18.364 7.05015C17.9734 7.44067 17.3403 7.44067 16.9497 7.05015Z"
 			/>
 		</svg>
 	{:else}
 		<div class="flex flex-col w-full mx-auto">
-			<!--		<button
-                    class='px-4 py-2 font-medium tracking-wide text-gray-500 whitespace-nowrap dark:text-gray-400 capitalize transition-colors dark:bg-gray-700 duration-200 transform bg-[#B07156] rounded-md hover:bg-green-600 focus:outline-hidden focus:ring focus:ring-blue-300 focus:ring-opacity-80'>
-                    Primary
-                </button>-->
 			<div class="w-full grid lg:grid-cols-4 gap-2 grid-cols-2 px-4">
 				<!-- {#if create_button_clicked}
 					<div
@@ -163,7 +155,7 @@ SPDX-License-Identifier: MPL-2.0
 						<div>
 							<input
 								bind:value={search_term}
-								class="p-2 rounded-lg outline-hidden text-center w-96 dark:bg-gray-700"
+								class="cq-surface p-2 outline-hidden text-center w-96 placeholder:text-cq-muted"
 								placeholder={$t('dashboard.search_for_own_quizzes')}
 							/>
 							<button
@@ -193,7 +185,7 @@ SPDX-License-Identifier: MPL-2.0
 				<div class="flex flex-col gap-4 mt-4 px-2">
 					{#each items_to_show as quiz}
 						<div
-							class="grid grid-cols-2 lg:grid-cols-3 w-full rounded-sm border-[#B07156] border-2 p-2 h-[20vh] overflow-hidden max-h-[20vh]"
+							class="cq-card grid grid-cols-2 lg:grid-cols-3 w-full p-2 h-[20vh] overflow-hidden max-h-[20vh]"
 						>
 							<div class="hidden lg:flex w-auto h-full items-center relative">
 								{#if quiz.cover_image}
@@ -201,17 +193,19 @@ SPDX-License-Identifier: MPL-2.0
 										src="/api/v1/storage/download/{quiz.cover_image}"
 										alt="user provided"
 										loading="lazy"
-										class="shrink-0 max-w-full max-h-full absolute rounded-sm"
+									class="absolute max-h-full max-w-full shrink-0 rounded-md"
 									/>-->
 									<MediaComponent
 										src={quiz.cover_image}
-										css_classes="shrink-0 max-w-full max-h-full absolute rounded-sm"
+										css_classes="absolute max-h-full max-w-full shrink-0 rounded-md"
 									/>
 								{/if}
 							</div>
 							<div class="my-auto mx-auto max-h-full overflow-hidden">
-								<p class="text-xl text-center">{@html quiz.title}</p>
-								<p class="text-sm text-center text-clip overflow-hidden">
+								<p class="text-xl text-center text-cq-text">{@html quiz.title}</p>
+								<p
+									class="text-sm text-center text-cq-muted text-clip overflow-hidden"
+								>
 									{@html quiz.description ?? ''}
 								</p>
 							</div>

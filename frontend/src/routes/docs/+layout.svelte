@@ -16,9 +16,11 @@ SPDX-License-Identifier: MPL-2.0
 	navbarVisible.visible = true;
 </script>
 
-<div class="min-h-screen flex flex-col">
-	{@render children?.()}
-</div>
-<div class="pt-4">
-	<Footer />
+<div class="flex min-h-screen flex-col text-cq-text">
+	<main class="flex-1 px-4 pb-10 sm:px-6 lg:px-8">
+		{@render children?.()}
+	</main>
+	<div class="pt-4">
+		<Footer />
+	</div>
 </div>

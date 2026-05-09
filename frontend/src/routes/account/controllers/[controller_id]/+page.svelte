@@ -92,59 +92,65 @@ SPDX-License-Identifier: MPL-2.0
 	};
 </script>
 
-<div>
-	<div class="w-full flex flex-col">
-		<h2 class="text-2xl mx-auto">{$t('controllers.controller_name')}</h2>
-		<div class="mx-auto flex">
-			<input
-				class="rounded-sm p-1 transition-all outline-hidden text-center dark:bg-gray-700"
-				bind:value={controller.name}
-				onkeyup={save_player_name_debounce}
-			/>
-			<SaveIndicator status={saved_status} />
-		</div>
-	</div>
-	<div class="flex flex-col">
-		<h2 class="mx-auto text-2xl">{$t('controllers.player_name')}</h2>
-		<div class="mx-auto flex">
-			<input
-				class="rounded-sm p-1 transition-all outline-hidden text-center dark:bg-gray-700"
-				bind:value={controller.player_name}
-				onkeyup={save_player_name_debounce}
-			/>
-			<SaveIndicator status={saved_status} />
-		</div>
-	</div>
-	<div class="flex flex-col">
-		<h2 class="mx-auto text-2xl">{$t('words.update')}</h2>
-		{#await get_latest_version()}
-			<Spinner my_20={false} />
-		{:then _}
-			<p class="mx-auto">
-				{$t('controllers.version_overview', {
-					newest_version,
-					current_version: controller.os_version
-				})}
-			</p>
-		{/await}
-		{#if newest_version && controller.os_version}
-			<div class="mx-auto">
-				<BrownButton
-					disabled={newest_version === controller.os_version}
-					onclick={allow_update_to_version}
-				>
-					{#if newest_version === controller.os_version}
-						{$t('controllers.already_latest_version')}
-					{:else if newest_version === controller.wanted_os_version}
-						{$t('controllers.cancel_update')}
-					{:else}
-						{$t('controllers.update_from_to', {
-							newest_version,
-							current_version: controller.os_version
-						})}
-					{/if}
-				</BrownButton>
+<div class="min-h-screen p-4 text-cq-text">
+	<div class="cq-card mx-auto flex w-full max-w-4xl flex-col gap-6 p-6">
+		<div class="cq-surface-muted flex w-full flex-col gap-3 p-4">
+			<h2 class="mx-auto text-2xl font-semibold text-cq-text">
+				{$t('controllers.controller_name')}
+			</h2>
+			<div class="mx-auto flex items-center gap-2">
+				<input
+					class="cq-surface p-2 text-center transition-all outline-hidden focus:ring-2 focus:ring-cq-brand"
+					bind:value={controller.name}
+					onkeyup={save_player_name_debounce}
+				/>
+				<SaveIndicator status={saved_status} />
 			</div>
-		{/if}
+		</div>
+		<div class="cq-surface-muted flex flex-col gap-3 p-4">
+			<h2 class="mx-auto text-2xl font-semibold text-cq-text">
+				{$t('controllers.player_name')}
+			</h2>
+			<div class="mx-auto flex items-center gap-2">
+				<input
+					class="cq-surface p-2 text-center transition-all outline-hidden focus:ring-2 focus:ring-cq-brand"
+					bind:value={controller.player_name}
+					onkeyup={save_player_name_debounce}
+				/>
+				<SaveIndicator status={saved_status} />
+			</div>
+		</div>
+		<div class="cq-surface-muted flex flex-col gap-3 p-4">
+			<h2 class="mx-auto text-2xl font-semibold text-cq-text">{$t('words.update')}</h2>
+			{#await get_latest_version()}
+				<Spinner my_20={false} />
+			{:then _}
+				<p class="mx-auto text-center text-cq-muted">
+					{$t('controllers.version_overview', {
+						newest_version,
+						current_version: controller.os_version
+					})}
+				</p>
+			{/await}
+			{#if newest_version && controller.os_version}
+				<div class="mx-auto">
+					<BrownButton
+						disabled={newest_version === controller.os_version}
+						onclick={allow_update_to_version}
+					>
+						{#if newest_version === controller.os_version}
+							{$t('controllers.already_latest_version')}
+						{:else if newest_version === controller.wanted_os_version}
+							{$t('controllers.cancel_update')}
+						{:else}
+							{$t('controllers.update_from_to', {
+								newest_version,
+								current_version: controller.os_version
+							})}
+						{/if}
+					</BrownButton>
+				</div>
+			{/if}
+		</div>
 	</div>
 </div>

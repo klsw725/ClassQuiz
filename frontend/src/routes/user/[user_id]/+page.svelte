@@ -40,7 +40,7 @@ SPDX-License-Identifier: MPL-2.0
 	<title>ClassQuiz - {data.user.username ? `@${data.user.username}` : 'User not found'}</title>
 </svelte:head>
 
-<div class="h-full">
+<div class="h-full text-cq-text">
 	<div class="grid grid-cols-6 h-full">
 		<div class="pl-2">
 			{#if data.user.username === undefined}
@@ -60,15 +60,13 @@ SPDX-License-Identifier: MPL-2.0
 			{/if}
 		</div>
 		<div
-			class="col-start-2 col-end-7 border-l border-black h-full p-4 overflow-y-scroll flex flex-col gap-4"
+			class="col-start-2 col-end-7 border-l border-cq-border h-full p-4 overflow-y-scroll flex flex-col gap-4"
 		>
 			{#if data.quizzes.length === 0}
 				<p class="text-center text-4xl">{$t('public_user_page.no_original_quizzes')}</p>
 			{:else}
 				{#each data.quizzes as quiz}
-					<div
-						class="rounded-lg border-2 border-black hover:outline transition-all outline-[#B07156] -outline-offset-2 outline-8"
-					>
+					<div class="cq-card cq-card-interactive">
 						<div class="grid grid-cols-6 h-[25vh]">
 							<div class="col-start-2 col-end-6">
 								<h3 class="text-center text-2xl">{@html quiz.title}</h3>
@@ -108,7 +106,7 @@ SPDX-License-Identifier: MPL-2.0
 									<a
 										href="/api/v1/eximport/{quiz.id}"
 										aria-label="Download the quiz"
-										class="flex justify-center px-4 py-2 leading-5 text-black dark:text-white transition-colors duration-200 transform bg-gray-50 dark:bg-gray-700 rounded-sm text-center hover:bg-gray-300 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-gray-600"
+										class="action-button flex justify-center"
 										><!-- heroicons/download -->
 										<svg
 											class="w-5 h-5"

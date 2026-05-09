@@ -10,7 +10,7 @@ SPDX-License-Identifier: MPL-2.0
 	import CollapsSection from '$lib/collapsible.svelte';
 	import { createTippy } from 'svelte-tippy';
 	import ImportedOrNot from '$lib/view_quiz/imported_or_not.svelte';
-	import { QuizQuestionType } from '$lib/quiz_types.js';
+	import { QuizQuestionType, type Answer, type Question, type RangeQuizAnswer } from '$lib/quiz_types.js';
 	import StartGamePopup from '$lib/dashboard/start_game.svelte';
 	import { onMount } from 'svelte';
 	import Spinner from '$lib/Spinner.svelte';
@@ -29,7 +29,7 @@ SPDX-License-Identifier: MPL-2.0
 		placement: 'right'
 	});
 
-	let start_game = $state(null);
+	let start_game: string | null = $state(null);
 	let download_id: string | null = $state(null);
 	const urlparams = page.url.searchParams;
 	const mod_view = Boolean(urlparams.get('mod'));
@@ -48,18 +48,20 @@ SPDX-License-Identifier: MPL-2.0
 	const { t } = getLocalization();
 	let { data } = $props();
 	let { quiz, logged_in }: { quiz: QuizData; logged_in: boolean } = $state(data);
-
-	interface Question {
-		time: string;
-		question: string;
-		image?: string;
+	type ChoiceQuestion = Question & {
+		type: QuizQuestionType.ABCD | QuizQuestionType.CHECK | undefined;
 		answers: Answer[];
-	}
-
-	interface Answer {
-		right: boolean;
-		answer: string;
-	}
+	};
+	type RangeQuestion = Question & {
+		type: QuizQuestionType.RANGE;
+		answers: RangeQuizAnswer;
+	};
+	const is_choice_question = (question: Question): question is ChoiceQuestion =>
+		question.type === QuizQuestionType.ABCD ||
+		question.type === undefined ||
+		question.type === QuizQuestionType.CHECK;
+	const is_range_question = (question: Question): question is RangeQuestion =>
+		question.type === QuizQuestionType.RANGE;
 
 	interface QuizData {
 		id: string;
@@ -68,11 +70,19 @@ SPDX-License-Identifier: MPL-2.0
 		description: string;
 		created_at: string;
 		updated_at: string;
-		user_id: string;
+		user_id: {
+			id: string;
+			username: string;
+		};
 		imported_from_kahoot?: boolean;
+		cover_image?: string | null;
 		questions: Question[];
 		kahoot_id?: string;
 		mod_rating?: number;
+		likes: number;
+		dislikes: number;
+		plays: number;
+		views: number;
 	}
 </script>
 
@@ -80,14 +90,14 @@ SPDX-License-Identifier: MPL-2.0
 	<title>ClassQuiz - View {quiz.title}</title>
 </svelte:head>
 
-<div>
-	<h1 class="text-4xl text-center">{@html quiz.title}</h1>
+<div class="text-cq-text">
+	<h1 class="text-center text-4xl text-cq-text">{@html quiz.title}</h1>
 	<div class="text-center">
-		<p>{@html quiz.description}</p>
+		<p class="text-cq-muted">{@html quiz.description}</p>
 	</div>
-	<p class="text-center">
+	<p class="text-center text-cq-muted">
 		{$t('view_quiz_page.made_by')}
-		<a href="/user/{quiz.user_id.id}" class="underline">@{quiz.user_id.username}</a>
+		<a href="/user/{quiz.user_id.id}" class="link-hover underline">@{quiz.user_id.username}</a>
 	</p>
 	{#if quiz.cover_image}
 		<div class="flex justify-center align-middle items-center">
@@ -231,7 +241,7 @@ SPDX-License-Identifier: MPL-2.0
 		<div class="flex justify-center">
 			<a
 				href="mailto:report@mawoka.eu?subject=Report quiz {quiz.id}"
-				class="text-sm underline"
+				class="link-hover text-sm text-cq-muted underline"
 			>
 				{$t('words.report')}
 			</a>
@@ -241,7 +251,7 @@ SPDX-License-Identifier: MPL-2.0
 	{#each quiz.questions as question, index_question}
 		<div class="px-4 py-1">
 			<CollapsSection headerText={question.question} expanded={auto_expand}>
-				<div class="grid grid-cols-1 gap-2 rounded-b-lg bg-white dark:bg-gray-700 -mt-1">
+				<div class="cq-surface grid grid-cols-1 gap-2 rounded-b-lg -mt-1">
 					<h3 class="text-3xl m-1 text-center">
 						{index_question + 1}: {@html question.question}
 					</h3>
@@ -273,7 +283,7 @@ SPDX-License-Identifier: MPL-2.0
 						</svg>
 						<span class="text-lg">{question.time}s</span>
 					</p>
-					{#if question.type === QuizQuestionType.ABCD || question.type === undefined || question.type === QuizQuestionType.CHECK}
+					{#if is_choice_question(question)}
 						<div class="grid grid-cols-2 gap-4 m-4 p-6">
 							{#each question.answers as answer, index_answer}
 								<div
@@ -282,19 +292,16 @@ SPDX-License-Identifier: MPL-2.0
 										default_colors[index_answer]}; color: {get_foreground_color(
 										answer.color ?? default_colors[index_answer]
 									)}"
-									class:shadow-blue-500={answer.right &&
-										question.type !== QuizQuestionType.VOTING}
-									class:shadow-yellow-500={!answer.right &&
-										question.type !== QuizQuestionType.VOTING}
+									class:shadow-blue-500={answer.right}
+									class:shadow-yellow-500={!answer.right}
 								>
 									<h4 class="text-center">
-										{quiz.questions[index_question].answers[index_answer]
-											.answer}
+										{answer.answer}
 									</h4>
 								</div>
 							{/each}
 						</div>
-					{:else if question.type === QuizQuestionType.RANGE}
+					{:else if is_range_question(question)}
 						<p class="m-1 text-center">
 							All numbers between {question.answers.min_correct}
 							and {question.answers.max_correct} are correct, where numbers between {question
@@ -303,7 +310,7 @@ SPDX-License-Identifier: MPL-2.0
 					{:else if question.type === QuizQuestionType.ORDER}
 						<ul class="flex flex-col gap-4 m-4 p-6">
 							{#each question.answers as answer}
-								<li class="p-1 rounded-lg py-3 dark:bg-gray-500 bg-gray-300">
+								<li class="cq-surface-muted p-1 rounded-lg py-3">
 									<h4 class="text-center">
 										{answer.answer}
 									</h4>
@@ -312,11 +319,10 @@ SPDX-License-Identifier: MPL-2.0
 						</ul>
 					{:else if question.type === QuizQuestionType.VOTING || question.type === QuizQuestionType.TEXT}
 						<div class="grid grid-cols-2 gap-4 m-4 p-6">
-							{#each question.answers as _, index_answer}
-								<div class="p-1 rounded-lg py-4 dark:bg-gray-500 bg-gray-300">
+							{#each question.answers as answer}
+								<div class="cq-surface-muted p-1 rounded-lg py-4">
 									<h4 class="text-center">
-										{quiz.questions[index_question].answers[index_answer]
-											.answer}
+										{answer.answer}
 									</h4>
 								</div>
 							{/each}

@@ -4,27 +4,45 @@ SPDX-FileCopyrightText: 2023 Marlon W (Mawoka)
 SPDX-License-Identifier: MPL-2.0
 -->
 <script lang="ts">
-	let { session_data = {}, step, selected_method = $bindable() } = $props();
+	type LoginMethod = 'PASSWORD' | 'PASSKEY' | 'BACKUP' | 'TOTP';
 
-	const set_available_methods = (step_var: number): string => {
+	interface LoginSessionData {
+		step_1: LoginMethod[];
+		step_2: LoginMethod[];
+	}
+
+	interface Props {
+		session_data?: LoginSessionData;
+		step: number;
+		selected_method?: LoginMethod | null;
+	}
+
+	let {
+		session_data = { step_1: [], step_2: [] },
+		step,
+		selected_method = $bindable()
+	}: Props = $props();
+
+	const set_available_methods = (step_var: number): LoginMethod[] => {
 		if (step_var === 1) {
 			return session_data.step_1;
 		} else if (step_var === 2) {
 			return session_data.step_2;
 		}
+		return [];
 	};
 	let available_methods = $derived(set_available_methods(step));
 </script>
 
-<div class="px-6 py-4">
-	<h2 class="text-3xl font-bold text-center text-gray-700 dark:text-white">ClassQuiz</h2>
+<div class="px-6 py-5">
+	<h2 class="text-3xl font-bold text-center text-cq-text">ClassQuiz</h2>
 
 	<div class="w-full mt-4">
-		<div class="dark:bg-gray-800 bg-white p-4 rounded-lg">
+		<div class="cq-surface-muted p-4">
 			<ul class="flex flex-col gap-4">
 				{#if available_methods.includes('PASSKEY')}
 					<div
-						class="flex flex-row bg-gray-100 dark:bg-gray-700 rounded-lg p-2 hover:cursor-pointer hover:bg-gray-200 transition"
+						class="cq-card cq-card-interactive flex flex-row p-2 hover:cursor-pointer"
 						onclick={() => {
 							selected_method = 'PASSKEY';
 						}}
@@ -34,7 +52,7 @@ SPDX-License-Identifier: MPL-2.0
 					>
 						<!-- heroicons/key -->
 						<svg
-							class="w-12 h-12"
+							class="w-12 h-12 text-cq-text"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -48,14 +66,14 @@ SPDX-License-Identifier: MPL-2.0
 							/>
 						</svg>
 						<div class="ml-2">
-							<p>Key</p>
-							<p class="text-sm">Authenticate using a security key</p>
+							<p class="text-cq-text">Key</p>
+							<p class="text-sm text-cq-muted">Authenticate using a security key</p>
 						</div>
 					</div>
 				{/if}
 				{#if available_methods.includes('PASSWORD')}
 					<div
-						class="flex flex-row bg-gray-100 dark:bg-gray-700 rounded-lg p-2 hover:cursor-pointer hover:bg-gray-200 transition"
+						class="cq-card cq-card-interactive flex flex-row p-2 hover:cursor-pointer"
 						onclick={() => {
 							selected_method = 'PASSWORD';
 						}}
@@ -65,7 +83,7 @@ SPDX-License-Identifier: MPL-2.0
 					>
 						<!-- iconoir/password-cursor -->
 						<svg
-							class="w-12 h-12 dark:text-white"
+							class="w-12 h-12 text-cq-text"
 							stroke-width="2"
 							viewBox="0 0 24 24"
 							fill="none"
@@ -94,14 +112,14 @@ SPDX-License-Identifier: MPL-2.0
 							/>
 						</svg>
 						<div class="ml-2">
-							<p>Password</p>
-							<p class="text-sm">Authenticate using a Password</p>
+							<p class="text-cq-text">Password</p>
+							<p class="text-sm text-cq-muted">Authenticate using a Password</p>
 						</div>
 					</div>
 				{/if}
 				{#if available_methods.includes('TOTP')}
 					<div
-						class="flex flex-row bg-gray-100 rounded-lg p-2 hover:cursor-pointer hover:bg-gray-200 transition"
+						class="cq-card cq-card-interactive flex flex-row p-2 hover:cursor-pointer"
 						onclick={() => {
 							selected_method = 'TOTP';
 						}}
@@ -111,7 +129,7 @@ SPDX-License-Identifier: MPL-2.0
 					>
 						<!-- heroicons/clock -->
 						<svg
-							class="w-12 h-12"
+							class="w-12 h-12 text-cq-text"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -125,8 +143,8 @@ SPDX-License-Identifier: MPL-2.0
 							/>
 						</svg>
 						<div class="ml-2">
-							<p>Totp</p>
-							<p class="text-sm">Authenticate using a one-time password</p>
+							<p class="text-cq-text">Totp</p>
+							<p class="text-sm text-cq-muted">Authenticate using a one-time password</p>
 						</div>
 					</div>
 				{/if}

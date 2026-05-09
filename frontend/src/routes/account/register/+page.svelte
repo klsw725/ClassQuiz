@@ -80,33 +80,29 @@ SPDX-License-Identifier: MPL-2.0
 <svelte:head>
 	<title>ClassQuiz - Register</title>
 </svelte:head>
-<div class="flex items-center justify-center h-full px-4">
+<div class="flex items-center justify-center h-full px-4 text-cq-text">
 	<div>
-		<div
-			class="w-full max-w-sm mx-auto overflow-hidden bg-white rounded-lg shadow-md dark:bg-gray-800"
-		>
-			<div class="px-6 py-4">
-				<h2 class="text-3xl font-bold text-center text-gray-700 dark:text-white">
-					ClassQuiz
-				</h2>
+		<div class="cq-card w-full max-w-sm mx-auto overflow-hidden">
+			<div class="px-6 py-5">
+				<h2 class="text-3xl font-bold text-center text-cq-text">ClassQuiz</h2>
 
-				<h3 class="mt-1 text-xl font-medium text-center text-gray-600 dark:text-gray-200">
+				<h3 class="mt-1 text-xl font-medium text-center text-cq-text">
 					{$t('register_page.greeting')}
 				</h3>
 
-				<p class="mt-1 text-center text-gray-500 dark:text-gray-400">
+				<p class="mt-1 text-center text-cq-muted">
 					{$t('register_page.create_account')}
 				</p>
 
 				<form use:form>
 					<div class="w-full mt-4">
-						<div class="dark:bg-gray-800 bg-white p-4 rounded-lg">
+						<div class="cq-surface-muted p-4">
 							<div class="relative bg-inherit w-full">
 								<input
 									id="email"
 									name="email"
 									type="email"
-									class="w-full peer bg-transparent h-10 rounded-lg text-gray-700 dark:text-white placeholder-transparent ring-2 px-2 ring-gray-500 focus:ring-sky-600 focus:outline-hidden focus:border-rose-600"
+									class="w-full peer bg-transparent h-10 rounded-lg text-cq-text placeholder-transparent ring-2 px-2 ring-cq-border focus:ring-cq-brand focus:outline-hidden"
 									placeholder={$t('words.email')}
 									class:ring-red-700={$errors.email !== null}
 									class:ring-green-600={$touched.email === true &&
@@ -114,19 +110,19 @@ SPDX-License-Identifier: MPL-2.0
 								/>
 								<label
 									for="email"
-									class="absolute cursor-text left-0 -top-3 text-sm text-gray-700 dark:text-white bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-sky-600 peer-focus:text-sm transition-all"
+									class="absolute cursor-text left-0 -top-3 text-sm text-cq-text bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-cq-muted peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-cq-text peer-focus:text-sm transition-all"
 								>
 									{$t('words.email')}
 								</label>
 							</div>
 						</div>
-						<div class="dark:bg-gray-800 bg-white p-4 rounded-lg">
+						<div class="cq-surface-muted p-4">
 							<div class="relative bg-inherit w-full">
 								<input
 									id="username"
 									name="username"
 									type="text"
-									class="w-full peer bg-transparent h-10 rounded-lg text-gray-700 dark:text-white placeholder-transparent ring-2 px-2 ring-gray-500 focus:ring-sky-600 focus:outline-hidden focus:border-rose-600"
+									class="w-full peer bg-transparent h-10 rounded-lg text-cq-text placeholder-transparent ring-2 px-2 ring-cq-border focus:ring-cq-brand focus:outline-hidden"
 									placeholder={$t('words.username')}
 									class:ring-red-700={$errors.username !== null}
 									class:ring-green-600={$touched.username === true &&
@@ -134,13 +130,13 @@ SPDX-License-Identifier: MPL-2.0
 								/>
 								<label
 									for="username"
-									class="absolute cursor-text left-0 -top-3 text-sm text-gray-700 dark:text-white bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-sky-600 peer-focus:text-sm transition-all"
+									class="absolute cursor-text left-0 -top-3 text-sm text-cq-text bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-cq-muted peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-cq-text peer-focus:text-sm transition-all"
 								>
 									{$t('words.username')}
 								</label>
 							</div>
 						</div>
-						<div class="dark:bg-gray-800 bg-white p-4 rounded-lg">
+						<div class="cq-surface-muted p-4">
 							<div class="relative bg-inherit w-full">
 								<input
 									id="password1"
@@ -149,24 +145,24 @@ SPDX-License-Identifier: MPL-2.0
 									class:ring-red-700={$errors.password1 !== null}
 									class:ring-green-600={$touched.password1 === true &&
 										$errors.password1 === null}
-									class="w-full peer bg-transparent h-10 rounded-lg text-gray-700 dark:text-white placeholder-transparent ring-2 px-2 ring-gray-500 focus:ring-sky-600 focus:outline-hidden focus:border-rose-600"
+									class="w-full peer bg-transparent h-10 rounded-lg text-cq-text placeholder-transparent ring-2 px-2 ring-cq-border focus:ring-cq-brand focus:outline-hidden"
 									placeholder={$t('words.password')}
 								/>
 								<label
 									for="password1"
-									class="absolute cursor-text left-0 -top-3 text-sm text-gray-500 bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-sky-600 peer-focus:text-sm transition-all"
+									class="absolute cursor-text left-0 -top-3 text-sm text-cq-muted bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-cq-muted peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-cq-text peer-focus:text-sm transition-all"
 								>
 									{$t('words.password')}
 								</label>
 							</div>
 						</div>
-						<div class="dark:bg-gray-800 bg-white p-4 rounded-lg">
+						<div class="cq-surface-muted p-4">
 							<div class="relative bg-inherit w-full">
 								<input
 									id="password2"
 									name="password2"
 									type="password"
-									class="w-full peer bg-transparent h-10 rounded-lg text-gray-700 dark:text-white placeholder-transparent ring-2 px-2 ring-gray-500 focus:ring-sky-600 focus:outline-hidden focus:border-rose-600"
+									class="w-full peer bg-transparent h-10 rounded-lg text-cq-text placeholder-transparent ring-2 px-2 ring-cq-border focus:ring-cq-brand focus:outline-hidden"
 									placeholder={$t('words.password')}
 									class:ring-red-700={$errors.password2 !== null}
 									class:ring-green-600={$touched.password2 === true &&
@@ -174,50 +170,50 @@ SPDX-License-Identifier: MPL-2.0
 								/>
 								<label
 									for="password2"
-									class="absolute cursor-text left-0 -top-3 text-sm text-gray-500 bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-sky-600 peer-focus:text-sm transition-all"
+									class="absolute cursor-text left-0 -top-3 text-sm text-cq-muted bg-inherit mx-1 px-1 peer-placeholder-shown:text-base peer-placeholder-shown:text-cq-muted peer-placeholder-shown:top-2 peer-focus:-top-3 peer-focus:text-cq-text peer-focus:text-sm transition-all"
 								>
 									{$t('words.password')}
 								</label>
 							</div>
 						</div>
 						<div
-							class="ring-1 ring-gray-500 focus:outline-hidden rounded-lg m-4 py-2"
+							class="cq-surface-muted focus:outline-hidden m-4 py-2"
 							class:ring-red-700={$errors.privacy_accept !== null}
 							class:ring-green-600={$touched.privacy_accept === true &&
 								$errors.privacy_accept === null}
 						>
 							<!--						<div class='flex items-center justify-between mt-4 w-full'>-->
 							<input type="checkbox" name="privacy_accept" class="ml-3" />
-							<label class="text-sm text-gray-600 dark:text-gray-200">
+							<label class="text-sm text-cq-muted">
 								I've read the <a href="/docs/privacy-policy" class="underline"
 									>Privacy policy</a
 								>.
 							</label>
 						</div>
 						<div
-							class="ring-1 ring-gray-500 focus:outline-hidden rounded-lg m-4 py-2"
+							class="cq-surface-muted focus:outline-hidden m-4 py-2"
 							class:ring-red-700={$errors.tos_accept !== null}
 							class:ring-green-600={$touched.tos_accept === true &&
 								$errors.tos_accept === null}
 						>
 							<!--						<div class='flex items-center justify-between mt-4 w-full'>-->
 							<input type="checkbox" name="tos_accept" class="ml-3" />
-							<label class="text-sm text-gray-600 dark:text-gray-200">
+							<label class="text-sm text-cq-muted">
 								I agree to the <a href="/docs/tos" class="underline"
 									>Terms of Service</a
 								>.
 							</label>
 						</div>
 
-						<div class="flex items-center justify-between mt-4">
+						<div class="flex items-center justify-between mt-4 gap-3">
 							<a
 								href="/account/reset-password"
-								class="text-sm text-gray-600 dark:text-gray-200 hover:text-gray-500"
+								class="text-sm text-cq-muted link-hover"
 								>{$t('register_page.forgot_password?')}</a
 							>
 
 							<button
-								class="px-4 py-2 leading-5 text-white transition-colors duration-200 transform bg-gray-700 rounded-sm hover:bg-gray-600 focus:outline-hidden"
+								class="accent-button w-fit"
 								disabled={!$isValid || $isSubmitting}
 								class:cursor-not-allowed={!$isValid || $isSubmitting}
 								class:opacity-50={!$isValid || $isSubmitting}
@@ -226,11 +222,11 @@ SPDX-License-Identifier: MPL-2.0
 								{#if $isSubmitting}
 									<svg class="h-4 w-4 animate-spin" viewBox="3 3 18 18">
 										<path
-											class="fill-blue-800"
+											class="fill-cq-text"
 											d="M12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5ZM3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z"
 										/>
 										<path
-											class="fill-blue-100"
+											class="fill-[var(--cq-surface-muted)]"
 											d="M16.9497 7.05015C14.2161 4.31648 9.78392 4.31648 7.05025 7.05015C6.65973 7.44067 6.02656 7.44067 5.63604 7.05015C5.24551 6.65962 5.24551 6.02646 5.63604 5.63593C9.15076 2.12121 14.8492 2.12121 18.364 5.63593C18.7545 6.02646 18.7545 6.65962 18.364 7.05015C17.9734 7.44067 17.3403 7.44067 16.9497 7.05015Z"
 										/>
 									</svg>
@@ -244,15 +240,13 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 
 			<div
-				class="flex items-center justify-center py-4 text-center bg-gray-50 dark:bg-gray-700"
+				class="cq-surface-muted flex items-center justify-center py-4 text-center rounded-none border-x-0 border-b-0"
 			>
-				<span class="text-sm text-gray-600 dark:text-gray-200"
+				<span class="text-sm text-cq-muted"
 					>{$t('register_page.already_have_account?')}
 				</span>
 
-				<a
-					href="/account/login"
-					class="mx-2 text-sm font-bold text-blue-500 dark:text-blue-400 hover:underline"
+				<a href="/account/login" class="mx-2 text-sm font-bold text-cq-text link-hover"
 					>{$t('words.login')}</a
 				>
 			</div>
@@ -270,24 +264,27 @@ SPDX-License-Identifier: MPL-2.0
 	<div
 		class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
 	>
-		<div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+		<div
+			class="fixed inset-0 bg-black/45 dark:bg-black/65 transition-opacity"
+			aria-hidden="true"
+		></div>
 
 		<!-- This element is to trick the browser into centering the modal contents. -->
 		<span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"
 			>&#8203;</span
 		>
 		<div
-			class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+			class="cq-card inline-block align-bottom text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
 		>
-			<div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+			<div class="bg-cq-surface px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
 				<div class="sm:flex sm:items-start">
 					<div
-						class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
+						class="cq-surface-muted mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10"
 					>
 						<!-- Heroicon name: outline/exclamation -->
 						{#if responseData.data === '409' || responseData.data === 'error' || responseData.data === '400'}
 							<svg
-								class="h-6 w-6 text-red-600"
+								class="h-6 w-6 text-cq-accent"
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
 								viewBox="0 0 24 24"
@@ -303,7 +300,7 @@ SPDX-License-Identifier: MPL-2.0
 							</svg>
 						{:else}
 							<svg
-								class="w-6 h-6 text-green-600"
+								class="w-6 h-6 text-cq-text"
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
@@ -319,7 +316,7 @@ SPDX-License-Identifier: MPL-2.0
 						{/if}
 					</div>
 					<div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-						<h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+						<h3 class="text-lg leading-6 font-medium text-cq-text" id="modal-title">
 							{#if responseData.data === '409'}
 								Account already exists!
 							{:else if responseData.data === 'error'}
@@ -333,7 +330,7 @@ SPDX-License-Identifier: MPL-2.0
 							{/if}
 						</h3>
 						<div class="mt-2">
-							<p class="text-sm text-gray-500">
+							<p class="text-sm text-cq-muted">
 								{#if responseData.data === '200'}
 									<!-- TODO: Add translation -->
 									You signed up successfully! Please check your mailbox to confirm
@@ -352,14 +349,16 @@ SPDX-License-Identifier: MPL-2.0
 					</div>
 				</div>
 			</div>
-			<div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+			<div
+				class="cq-surface-muted px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse rounded-none border-x-0 border-b-0"
+			>
 				<button
 					type="button"
 					onclick={() => {
 						responseData.open = false;
 						window.location.assign('/');
 					}}
-					class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-xm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+					class="action-button mt-3 w-full inline-flex justify-center text-base font-medium sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
 					>{$t('words.close')}
 				</button>
 			</div>

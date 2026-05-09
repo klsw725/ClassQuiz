@@ -7,10 +7,10 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import Editor from '$lib/editor.svelte';
 	import { getLocalization } from '$lib/i18n';
-	import { navbarVisible} from '$lib/stores.svelte.ts';
-	import { QuizQuestionType } from '$lib/quiz_types';
+	import { navbarVisible } from '$lib/stores.svelte.ts';
+	import { QuizQuestionType, type EditorData, type Question } from '$lib/quiz_types';
 
-	navbarVisible.visible= false;
+	navbarVisible.visible = false;
 
 	const { t } = getLocalization();
 
@@ -19,47 +19,30 @@ SPDX-License-Identifier: MPL-2.0
 		data: ''
 	};
 
-	interface Data {
-		public: boolean;
-		title: string;
-		description: string;
-		questions: Question[];
-		time_based_scoring: boolean;
-	}
-
-	interface Question {
-		question: string;
-		time: string;
-		points: number;
-		answers: Answer[];
-	}
-
-	interface Answer {
-		right: boolean;
-		answer: string;
-	}
-
 	let { data } = $props();
 	let { quiz_id } = $state(data);
-	let quiz_data: Data = $state();
+	let quiz_data: EditorData | undefined = $state();
+
+	type EditableQuestionResponse = Question & { type?: keyof typeof QuizQuestionType | QuizQuestionType };
+	type QuizResponse = Omit<EditorData, 'questions'> & { questions: EditableQuestionResponse[] };
 
 	const get_quiz = async (): Promise<void> => {
 		const response = await fetch(`/api/v1/quiz/get/${quiz_id}`);
 		if (response.status === 404) {
 			throw new Error('Quiz not found');
 		} else if (response.status === 200) {
-			let temp_data = await response.json();
+			let temp_data: QuizResponse = await response.json();
 			for (let i = 0; i < temp_data.questions.length; i++) {
 				let question = temp_data.questions[i];
 				if (question.type === undefined) {
 					temp_data.questions[i].type = QuizQuestionType.ABCD;
 				} else {
-					temp_data.questions[i].type = QuizQuestionType[question.type];
+					temp_data.questions[i].type = QuizQuestionType[question.type as keyof typeof QuizQuestionType];
 				}
 			}
 			temp_data.time_based_scoring ??= true;
 			for (const question of temp_data.questions) question.points ??= 1000;
-			quiz_data = temp_data;
+			quiz_data = temp_data as EditorData;
 			return;
 		}
 	};
@@ -71,17 +54,17 @@ SPDX-License-Identifier: MPL-2.0
 {#await get_quiz()}
 	<svg class="h-8 w-8 animate-spin mx-auto my-20" viewBox="3 3 18 18">
 		<path
-			class="fill-black"
+			class="fill-cq-text"
 			d="M12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5ZM3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12Z"
 		/>
 		<path
-			class="fill-blue-100"
+			class="fill-[var(--cq-surface-muted)]"
 			d="M16.9497 7.05015C14.2161 4.31648 9.78392 4.31648 7.05025 7.05015C6.65973 7.44067 6.02656 7.44067 5.63604 7.05015C5.24551 6.65962 5.24551 6.02646 5.63604 5.63593C9.15076 2.12121 14.8492 2.12121 18.364 5.63593C18.7545 6.02646 18.7545 6.65962 18.364 7.05015C17.9734 7.44067 17.3403 7.44067 16.9497 7.05015Z"
 		/>
 	</svg>
 {:then _}
 	{#if quiz_data !== undefined}
-		<Editor bind:data={quiz_data} submit_button_text={$t('words.save')} bind:quiz_id />
+		<Editor bind:data={quiz_data} bind:quiz_id />
 	{/if}
 {:catch err}
 	<div class="text-center">
@@ -99,18 +82,18 @@ SPDX-License-Identifier: MPL-2.0
 	<div
 		class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0"
 	>
-		<div class="fixed inset-0 bg-gray-500/75 transition-opacity" aria-hidden="true"></div>
+		<div class="fixed inset-0 bg-cq-text/50 transition-opacity" aria-hidden="true"></div>
 
 		<span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true"
 			>&#8203;</span
 		>
 		<div
-			class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+			class="cq-card inline-block align-bottom text-left overflow-hidden transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
 		>
-			<div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+			<div class="bg-cq-surface px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
 				<div class="sm:flex sm:items-start">
 					<div
-						class="mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10"
+						class="cq-surface-muted mx-auto shrink-0 flex items-center justify-center h-12 w-12 rounded-full sm:mx-0 sm:h-10 sm:w-10"
 					>
 						<!-- Heroicon name: outline/exclamation -->
 						<svg
@@ -129,24 +112,24 @@ SPDX-License-Identifier: MPL-2.0
 						</svg>
 					</div>
 					<div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-						<h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+						<h3 class="text-lg leading-6 font-medium text-cq-text" id="modal-title">
 							{$t('edit_page.success_update_title')}
 						</h3>
 						<div class="mt-2">
-							<p class="text-sm text-gray-500">
+							<p class="text-sm text-cq-muted">
 								{$t('edit_page.success_update_body')}
 							</p>
 						</div>
 					</div>
 				</div>
 			</div>
-			<div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+			<div class="cq-surface-muted rounded-none border-x-0 border-b-0 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
 				<button
 					type="button"
 					onclick={() => {
 						window.location.href = '/dashboard';
 					}}
-					class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-xm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-hidden focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+					class="action-button mt-3 w-full inline-flex justify-center text-base font-medium sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
 					>{$t('words.close')}
 				</button>
 			</div>
