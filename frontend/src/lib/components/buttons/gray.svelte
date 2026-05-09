@@ -11,7 +11,7 @@ SPDX-License-Identifier: MPL-2.0
 		href?: undefined | string;
 		target?: undefined | string;
 		children?: import('svelte').Snippet;
-		onclick?: (event: MouseEvent) => void;
+		onclick?: (_event: MouseEvent) => void;
 	}
 
 	let {
@@ -28,7 +28,7 @@ SPDX-License-Identifier: MPL-2.0
 	<a
 		{href}
 		{target}
-		class="w-full px-4 py-2 leading-5 text-black dark:text-white transition-colors duration-200 transform bg-gray-50 dark:bg-gray-700 rounded-sm text-center hover:bg-gray-300 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-gray-600"
+		class="action-button w-full transition-colors duration-200"
 		{onclick}
 		class:flex
 		class:block={!flex}
@@ -39,7 +39,7 @@ SPDX-License-Identifier: MPL-2.0
 {:else}
 	<button
 		{disabled}
-		class="w-full px-4 py-2 leading-5 text-black dark:text-white transition-colors duration-200 transform bg-gray-50 dark:bg-gray-700 rounded-sm text-center hover:bg-gray-300 focus:outline-hidden disabled:cursor-not-allowed disabled:opacity-50 dark:hover:bg-gray-600"
+		class="action-button w-full transition-colors duration-200"
 		{onclick}
 		class:flex
 		class:justify-center={flex}

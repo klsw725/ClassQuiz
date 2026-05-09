@@ -18,10 +18,10 @@ SPDX-License-Identifier: MPL-2.0
 	let { code }: Props = $props();
 </script>
 
-<div class="flex flex-row gap-2 mx-auto">
+<div class="cq-card mx-auto flex flex-row justify-center gap-3 p-4">
 	{#each code as c}
-		<div class="flex flex-col">
-			<p class="text-center">{c}</p>
+		<div class="cq-surface-muted flex flex-col items-center gap-2 p-2">
+			<p class="text-center font-mono text-cq-text">{c}</p>
 			<span
 				style="background-color: {color_map[
 					c.toLowerCase()

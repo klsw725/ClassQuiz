@@ -194,7 +194,7 @@ This should be okay, right?
 		selected -= 1;
 	};
 
-	const on_enter = (e: KeyboardEvent) => {
+	const on_enter = (_e: KeyboardEvent) => {
 		if (selected === null) {
 			return;
 		}
@@ -226,7 +226,7 @@ This should be okay, right?
 
 {#if open}
 	<div
-		class="fixed top-0 left-0 w-screen h-screen flex bg-black/50 z-50"
+		class="fixed top-0 left-0 z-50 flex h-screen w-screen bg-cq-text/50"
 		onclick={close_on_outside}
 		onkeyup={close_on_outside}
 		role="button"
@@ -234,28 +234,28 @@ This should be okay, right?
 		tabindex="0"
 		transition:fade|global={{ duration: 60 }}
 	>
-		<div class="m-auto w-1/3 h-2/3 rounded-sm bg-black flex flex-col">
-			<div class="grid grid-cols-1 grid-rows-1 border-b border-b-white">
+		<div class="cq-card m-auto flex h-2/3 w-1/3 flex-col overflow-hidden">
+			<div class="grid grid-cols-1 grid-rows-1 border-b border-cq-border">
 				<p
-					class="col-start-1 row-start-1 w-full p-4 outline-hidden bg-gray-700 rounded-t text-gray-400"
+					class="cq-surface-muted col-start-1 row-start-1 w-full rounded-b-none border-0 p-4 text-cq-muted outline-hidden"
 				>
 					{bg_text}
 				</p>
 				<input
 					type="text"
-					class="col-start-1 row-start-1 w-full p-4 outline-hidden bg-gray-700 rounded-sm"
+					class="col-start-1 row-start-1 w-full rounded-md bg-transparent p-4 text-cq-text outline-hidden"
 					bind:value={input}
 					oninput={() => search(input)}
 					autofocus
 				/>
 			</div>
-			<div class="flex flex-col p-2 gap-2 overflow-scroll">
+			<div class="flex flex-col gap-2 overflow-scroll p-2">
 				{#each visible_items as vi, i}
 					<div
 						transition:fade={{ duration: 60 }}
-						class="p-2 transition rounded-sm"
-						class:bg-[#B07156]={selected === i}
-						class:bg-gray-700={selected !== i}
+						class="{selected === i
+							? 'cq-card'
+							: 'cq-surface-muted'} rounded-md p-2 transition"
 						onmouseenter={() => (selected = i)}
 						onmousedown={execute_action}
 						tabindex="-2"
@@ -263,11 +263,11 @@ This should be okay, right?
 					>
 						<div class="flex">
 							<h3 class="text-lg my-auto">{vi.title}</h3>
-							<p class="font-mono my-auto ml-auto h-fit bg-black/50 rounded-sm p-0.5">
+							<p class="cq-surface my-auto ml-auto h-fit p-0.5 font-mono">
 								/{vi.command}
 								{#if vi.args}
 									{#each vi.args as arg}
-										&lbrace;<span class="text-indigo-400">{arg}</span
+										&lbrace;<span class="text-cq-muted">{arg}</span
 										>&rbrace;{/each}
 								{/if}
 							</p>

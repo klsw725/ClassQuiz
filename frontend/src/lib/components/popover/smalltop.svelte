@@ -26,14 +26,14 @@ SPDX-License-Identifier: MPL-2.0
 		transition:fly|global={{ y: -100 }}
 	>
 		<div
-			class="flex items-center p-4 w-full max-w-xs text-gray-500 bg-white rounded-lg shadow-smdark:text-gray-400 dark:bg-gray-800"
+			class="cq-card flex w-full max-w-xs items-center p-4 text-cq-muted"
 			role="alert"
 		>
 			<div class="ml-3 text-sm font-normal">
 				{#if type === PopoverTypes.Copy}
 					{$t('components.popover.copied_to_clipboard')}
-				{:else if type === PopoverTypes.GameInLobby}A game is currently in the lobby. Click <a
-						class="underline"
+				{:else if type === PopoverTypes.GameInLobby && data && typeof data !== 'string'}A game is currently in the lobby. Click <a
+						class="link-hover underline"
 						href="/remote?game_pin={data.game_pin}&game_id={data.game_id}">here</a
 					> to join as a remote.
 				{:else if type === PopoverTypes.Generic}
@@ -44,7 +44,7 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 			<button
 				type="button"
-				class="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
+				class="cq-surface-muted -my-1.5 -mx-1.5 ml-auto inline-flex h-8 w-8 p-1.5 text-cq-muted hover:text-cq-text focus:ring-2 focus:ring-cq-brand"
 				data-dismiss-target="#toast-default"
 				aria-label="Close"
 				onclick={() => {

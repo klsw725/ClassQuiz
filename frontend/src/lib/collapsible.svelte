@@ -20,13 +20,13 @@ SPDX-License-Identifier: MPL-2.0
 		<button
 			aria-expanded={expanded}
 			onclick={() => (expanded = !expanded)}
-			class="bg-white dark:bg-gray-700 flex justify-between w-full border-none m-0 p-2 rounded-t-lg hover:bg-gray-200 dark:hover:bg-gray-500 transition"
+			class="cq-surface cq-card-interactive flex justify-between w-full m-0 p-2 rounded-t-lg transition"
 			class:rounded-b-lg={!expanded}
 			><span>{@html headerText}</span>
 			<svg
 				viewBox="0 0 20 20"
 				fill="none"
-				class="my-auto fill-black dark:fill-white"
+				class="my-auto fill-current text-cq-text"
 				stroke="currentColor"
 			>
 				<path class="vert" d="M10 1V19" stroke-width="2" stroke="currentColor" />

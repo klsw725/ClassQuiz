@@ -5,12 +5,21 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { QuizData } from '$lib/quiz_types';
 	import Hoverable from '$lib/view_quiz/Hoverable.svelte';
 	import { createTippy } from 'svelte-tippy';
+	import { htmlElementAction } from '$lib/svelte-action-helpers';
+
+	interface RateableQuiz {
+		id?: string;
+		quiz_id?: string;
+		likes: number;
+		dislikes: number;
+		plays: number;
+		views: number;
+	}
 
 	interface Props {
-		quiz: QuizData;
+		quiz: RateableQuiz;
 	}
 
 	let { quiz = $bindable() }: Props = $props();
@@ -19,14 +28,14 @@ SPDX-License-Identifier: MPL-2.0
 		dislike: false,
 		like: false
 	});
-	const tippy = createTippy({
+	const tippy = htmlElementAction(createTippy({
 		arrow: true,
 		animation: 'perspective-subtle',
 		placement: 'top'
-	});
+	}));
 
 	const complete_action = async (positive: boolean) => {
-		const res = await fetch(`/api/v1/community/rate/${quiz.id}`, {
+		const res = await fetch(`/api/v1/community/rate/${quiz.id ?? quiz.quiz_id}`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
@@ -47,7 +56,7 @@ SPDX-License-Identifier: MPL-2.0
 	};
 </script>
 
-<div class="flex flex-col border-[#B07156] rounded-sm border-2 p-2 gap-2">
+<div class="cq-card flex flex-col p-2 gap-2">
 	<div class="grid grid-cols-2 gap-2 group mx-auto">
 		<Hoverable bind:hovering={FeedBackButtonsHovered.like}>
 			<button
@@ -100,7 +109,7 @@ SPDX-License-Identifier: MPL-2.0
 		<span class="text-center">{quiz.likes}</span>
 		<span class="text-center">{quiz.dislikes}</span>
 	</div>
-	<span class="w-full border-t-2 border-[#B07156]"></span>
+	<span class="w-full border-t-2 border-cq-border"></span>
 	<div class="mx-auto grid grid-cols-2 gap-2">
 		<div class="flex flex-col">
 			<!-- heroicons/legacy-outline/Play -->

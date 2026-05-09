@@ -11,13 +11,13 @@ SPDX-License-Identifier: MPL-2.0
 	const { t } = getLocalization();
 </script>
 
-<footer class="text-center text-white border-black w-screen">
-	<div class="grid grid-cols-12 w-full pt-4 bg-gray-700 pb-2">
+<footer class="cq-surface w-screen text-center">
+	<div class="grid w-full grid-cols-12 pt-4 pb-2">
 		<p class="col-start-3 col-end-11 text-center w-full">
 			{@html $t('footer.self_ads', {
 				mawoka_link:
-					'<a href="https://mawoka.eu?utm_source=ClassQuiz&utm_medium=footer" target="_blank" class="underline text-blue-300 hover:text-blue-500 transition">Mawoka</a>',
-				others_link: `<a href='/docs/attribution' class='underline text-blue-300 hover:text-blue-500 transition'>${$t(
+					'<a href="https://mawoka.eu?utm_source=ClassQuiz&utm_medium=footer" target="_blank" class="link-hover underline">Mawoka</a>',
+				others_link: `<a href='/docs/attribution' class='link-hover underline'>${$t(
 					'words.other',
 					{ count: 2 }
 				)}</a>`,
@@ -26,7 +26,7 @@ SPDX-License-Identifier: MPL-2.0
 			<br />
 
 			{@html $t('footer.donate', {
-				donate_link: `<a href='https://mawoka.eu/donate' target='_blank' class='underline text-blue-300 hover:text-blue-500 transition'>${$t(
+				donate_link: `<a href='https://mawoka.eu/donate' target='_blank' class='link-hover underline'>${$t(
 					'words.donating'
 				)}</a>`,
 				interpolation: { escapeValue: false }
@@ -34,7 +34,7 @@ SPDX-License-Identifier: MPL-2.0
 			<a
 				href="https://mawoka.eu/donate"
 				target="_blank"
-				class="underline text-blue-300 hover:text-blue-500 transition"
+				class="link-hover underline"
 				>{$t('footer.more_details_here')}.</a
 			>
 		</p>
@@ -47,14 +47,14 @@ SPDX-License-Identifier: MPL-2.0
 		</div>
 	</div>
 	<div class="md:hidden block">
-		<div class="self-end flex justify-center min-h-full h-full bg-gray-700 pb-2 md:pb-0">
+		<div class="flex h-full min-h-full justify-center self-end pb-2 md:pb-0">
 			<div class="m-auto md:invisible visible">
 				<LanguageToggle />
 			</div>
 		</div>
 	</div>
 
-	<div class="bg-gray-700">
+	<div>
 		<p>
 			Consider following
 			<svg
@@ -71,7 +71,7 @@ SPDX-License-Identifier: MPL-2.0
 			<a
 				href="https://fosstodon.org/@classquiz"
 				rel="me"
-				class="underline text-blue-300 hover:text-blue-500 transition"
+				class="link-hover underline"
 				>@classquiz@fosstodon.org</a
 			> for updates!
 		</p>

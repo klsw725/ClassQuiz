@@ -34,7 +34,7 @@ SPDX-License-Identifier: MPL-2.0
 		onclick={handle_on_click}
 		transition:fade={{ duration: 100 }}
 	>
-		<div class="m-auto w-1/3 h-auto bg-white dark:bg-gray-700 p-4 rounded-sm">
+		<div class="cq-card m-auto w-1/3 h-auto p-4">
 			<h1 class="text-3xl text-center mb-4">{$t('downloader.select_download_type')}</h1>
 			<div class="flex flex-row gap-4">
 				<div class="w-full flex justify-center">

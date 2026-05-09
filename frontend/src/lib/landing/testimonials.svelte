@@ -6,7 +6,7 @@ SPDX-License-Identifier: MPL-2.0
 
 <script lang="ts">
 	import { Swiper, SwiperSlide } from 'swiper/svelte';
-	import { Autoplay } from 'swiper';
+	import Autoplay from 'swiper';
 	import 'swiper/css';
 	// import 'swiper/css/autoplay';
 
@@ -35,18 +35,16 @@ I like it and would use it for my house parties next time!`,
 			{#each testimotionals as testi}
 				<SwiperSlide>
 					<div class="flex justify-center">
-						<div class="max-w-3xl p-4 text-gray-800 rounded-lg text-white">
+						<div class="cq-card max-w-3xl p-4 text-cq-text">
 							<div class="mb-2">
-								<div class="h-3 text-3xl text-left text-indigo-600">“</div>
-								<p
-									class="px-4 text-center text-gray-800 font-medium dark:text-gray-300"
-								>
+								<div class="h-3 text-left text-3xl text-cq-muted">“</div>
+								<p class="px-4 text-center font-medium text-cq-text">
 									{@html testi.quote}
 								</p>
-								<div class="h-3 text-3xl text-right text-indigo-600">”</div>
+								<div class="h-3 text-right text-3xl text-cq-muted">”</div>
 								<div class="text-center">
-									<h5 class="font-bold text-indigo-600">{testi.name}</h5>
-									<a class="text-sm text-gray-500" href={testi.source}>Source</a>
+									<h5 class="font-bold text-cq-text">{testi.name}</h5>
+									<a class="link-hover text-sm text-cq-muted" href={testi.source}>Source</a>
 								</div>
 							</div>
 						</div>

@@ -45,16 +45,16 @@ SPDX-License-Identifier: MPL-2.0
 	};
 </script>
 
-<nav class="w-screen px-4 lg:px-10 py-2 fixed backdrop-blur-2xl bg-white/70 shadow-md z-30 top-0">
+<nav class="nav-shell w-screen px-4 lg:px-10 py-2 fixed backdrop-blur-2xl z-30 top-0">
 	<!-- Desktop navbar -->
 	<div class="hidden lg:flex lg:items-center lg:flex-row lg:justify-between">
 		<div class="lg:flex lg:items-center lg:flex-row gap-1">
 			<a
 				href="/"
-				class="font-black tracking-tight text-xl lg:text-2xl text-black marck-script link-hover px-3 lg:px-5"
+				class="font-black tracking-tight text-xl lg:text-2xl text-cq-text marck-script link-hover px-3 lg:px-5"
 				>ClassQuiz</a
 			>
-			<a class="btn-nav border-2 rounded-sm" href="/play">{$t('words.play')}</a>
+			<a class="btn-nav nav-featured" href="/play">{$t('words.play')}</a>
 			<a class="btn-nav" href="/explore">{$t('words.explore')}</a>
 			<a class="btn-nav" href="/search">{$t('words.search')}</a>
 			{#if $signedIn}
@@ -116,7 +116,7 @@ SPDX-License-Identifier: MPL-2.0
 						>
 							<!-- Heroicons: sun -->
 							<svg
-								class="w-6 h-6 text-black"
+								class="w-6 h-6 text-cq-text"
 								fill="none"
 								aria-label="Sun-Icon"
 								stroke="currentColor"
@@ -169,7 +169,7 @@ SPDX-License-Identifier: MPL-2.0
 		<div class="flex items-center justify-between">
 			<a
 				href="/"
-				class="font-black tracking-tight text-xl lg:text-2xl text-black marck-script link-hover px-3 lg:px-5"
+				class="font-black tracking-tight text-xl lg:text-2xl text-cq-text marck-script link-hover px-3 lg:px-5"
 				>ClassQuiz</a
 			>
 			<a class="btn-nav flex" href="/play">{$t('words.play')}</a>
@@ -188,7 +188,7 @@ SPDX-License-Identifier: MPL-2.0
 					>
 						<!-- Heroicons: sun -->
 						<svg
-							class="w-6 h-6 text-black"
+							class="w-6 h-6 text-cq-text"
 							fill="none"
 							aria-label="Sun-Icon"
 							stroke="currentColor"
@@ -207,7 +207,7 @@ SPDX-License-Identifier: MPL-2.0
 				{:else}
 					<!-- Moon icon -->
 					<button
-						class="px-3"
+						class="px-3 text-cq-text"
 						onclick={() => {
 							switchDarkMode();
 						}}
@@ -246,7 +246,7 @@ SPDX-License-Identifier: MPL-2.0
 							height="24"
 							viewBox="0 0 24 24"
 							fill="none"
-							stroke="#000000"
+							stroke="currentColor"
 							stroke-width="2"
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -256,7 +256,7 @@ SPDX-License-Identifier: MPL-2.0
 					</button>
 				{:else}
 					<button
-						class="px-3"
+						class="px-3 text-cq-text"
 						id="close-menu"
 						onclick={toggleMenu}
 						aria-label="Close navbar"
@@ -267,7 +267,7 @@ SPDX-License-Identifier: MPL-2.0
 							height="24"
 							viewBox="0 0 24 24"
 							fill="none"
-							stroke="#000000"
+							stroke="currentColor"
 							stroke-width="2"
 							stroke-linecap="round"
 							stroke-linejoin="round"
@@ -318,7 +318,7 @@ SPDX-License-Identifier: MPL-2.0
 					</a>
 				{/if}
 
-				<hr class="my-1 border" />
+				<hr class="my-1 border-cq-border" />
 				{#if $signedIn}
 					<a class="btn-nav" href="/api/v1/users/logout">{$t('words.logout')}</a>
 				{:else}
