@@ -25,16 +25,29 @@ SPDX-License-Identifier: MPL-2.0
 		data: EditorData;
 	}
 
-	let { selected_question, check_choice = false, data = $bindable() }: Props = $props();
-	if (!Array.isArray(data.questions[selected_question].answers)) {
-		data.questions[selected_question].answers = [];
-	}
+	let { selected_question = $bindable(), check_choice = false, data = $bindable() }: Props = $props();
+
+	const set_answer_options = (new_answers: Answer[]) => {
+		answers = new_answers;
+		data.questions[selected_question] = {
+			...data.questions[selected_question],
+			type: check_choice ? QuizQuestionType.CHECK : QuizQuestionType.ABCD,
+			answers
+		};
+	};
+
+	let answers = $state<Answer[]>(
+		Array.isArray(data.questions[selected_question].answers)
+			? (data.questions[selected_question].answers as Answer[])
+			: []
+	);
+	set_answer_options(answers);
 	const save_colors = (data_local: EditorData) => {
 		if (selected_question === 0) {
-			for (let i = 0; i < data_local.questions[selected_question].answers.length; i++) {
+			for (let i = 0; i < answers.length; i++) {
 				localStorage.setItem(
 					`quiz_color:${i}:${data_local.title}`,
-					data_local.questions[selected_question].answers[i].color
+					answers[i].color
 				);
 			}
 		}
@@ -50,12 +63,10 @@ SPDX-License-Identifier: MPL-2.0
 	run(() => {
 		save_colors(data);
 	});
-	data.questions[selected_question].type =
-		check_choice === true ? QuizQuestionType.CHECK : QuizQuestionType.ABCD;
 	const set_colors_if_unset = () => {
-		for (let i = 0; i < data.questions[selected_question].answers.length; i++) {
-			if (!data.questions[selected_question].answers[i].color) {
-				data.questions[selected_question].answers[i].color = default_colors[i];
+		for (let i = 0; i < answers.length; i++) {
+			if (!answers[i].color) {
+				answers[i].color = default_colors[i];
 			}
 		}
 	};
@@ -67,8 +78,8 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-4 w-full px-10">
-	{#if Array.isArray(data.questions[selected_question].answers)}
-		{#each data.questions[selected_question].answers as answer, index}
+	{#if Array.isArray(answers)}
+		{#each answers as answer, index}
 			<div
 				out:fade={{ duration: 150 }}
 				class="p-4 rounded-lg flex justify-center w-full transition relative"
@@ -82,9 +93,8 @@ SPDX-License-Identifier: MPL-2.0
 					class="rounded-full absolute -top-2 -right-2 opacity-70 hover:opacity-100 transition"
 					type="button"
 					onclick={() => {
-						data.questions[selected_question].answers.splice(index, 1);
-						data.questions[selected_question].answers =
-							data.questions[selected_question].answers;
+						answers.splice(index, 1);
+						set_answer_options(answers);
 					}}
 				>
 					<svg
@@ -150,7 +160,7 @@ SPDX-License-Identifier: MPL-2.0
 					{/if}
 				</button>
 				<input
-					class="rounded-lg p-1 border-black border"
+					class="rounded-lg p-1 border-cq-border border"
 					type="color"
 					bind:value={answer.color}
 					oncontextmenu={preventDefault(() => {
@@ -160,16 +170,13 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 		{/each}
 	{/if}
-	{#if data.questions[selected_question].answers.length < 4}
+	{#if answers.length < 4}
 		<button
-			class="p-4 rounded-lg bg-transparent border-gray-500 border-2 hover:bg-gray-300 transition dark:hover:bg-gray-600"
+			class="cq-surface cq-card-interactive p-4 rounded-lg transition"
 			type="button"
 			in:fade={{ duration: 150 }}
 			onclick={() => {
-				data.questions[selected_question].answers = [
-					...data.questions[selected_question].answers,
-					{ ...get_empty_answer(data.questions[selected_question].answers.length) }
-				];
+				set_answer_options([...answers, { ...get_empty_answer(answers.length) }]);
 			}}
 		>
 			<span class="italic text-center">{$t('editor_page.add_an_answer')}</span>

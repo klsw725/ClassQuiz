@@ -17,7 +17,7 @@ SPDX-License-Identifier: MPL-2.0
 	<input
 		bind:value={data}
 		type="text"
-		class="w-full h-full dark:text-black text-center text-3xl min-h-fit"
+		class="h-full min-h-fit w-full text-center text-3xl text-black"
 	/>
 {:else}
 	<h2 class="w-full h-full text-center text-3xl min-h-fit">

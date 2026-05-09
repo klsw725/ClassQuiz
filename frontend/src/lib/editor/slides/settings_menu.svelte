@@ -19,7 +19,7 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div
-	class="bg-white m-auto rounded-lg shadow-lg p-4 dark:bg-gray-600 h-fit gap-2 w-fit auto-cols-min flex"
+	class="cq-card m-auto p-4 h-fit gap-2 w-fit auto-cols-min flex"
 	transition:fade|global={{ duration: 100 }}
 >
 	<label class="w-fit">
@@ -27,7 +27,7 @@ SPDX-License-Identifier: MPL-2.0
 		<input
 			bind:value={time}
 			type="number"
-			class="w-20 bg-transparent rounded-lg text-lg border-2 border-gray-500 p-1 outline-hidden"
+			class="w-20 bg-transparent rounded-lg text-lg border-2 border-cq-border p-1 outline-hidden text-cq-text"
 		/>
 	</label>
 	<label class="w-fit">
@@ -35,7 +35,7 @@ SPDX-License-Identifier: MPL-2.0
 		<input
 			bind:value={title}
 			type="text"
-			class="bg-transparent rounded-lg text-lg border-2 border-gray-500 p-1 transition outline-hidden"
+			class="bg-transparent rounded-lg text-lg border-2 border-cq-border p-1 transition outline-hidden text-cq-text"
 		/>
 	</label>
 </div>

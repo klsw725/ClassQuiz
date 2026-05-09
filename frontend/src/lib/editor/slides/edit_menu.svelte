@@ -14,7 +14,12 @@ SPDX-License-Identifier: MPL-2.0
 		selected_el: null | ShapeModel<Konva.Shape | Konva.Group, Konva.ShapeConfig>;
 	}
 
-	let { selected_el }: Props = $props();
+	type TextShapeModel = ShapeModel<Konva.Shape | Konva.Group, Konva.ShapeConfig> & {
+		updateText: (_attributes: Record<string, string | number>) => void;
+		node?: { children?: { attrs?: { fontSize?: number } }[] };
+	};
+
+	let { selected_el = $bindable() }: Props = $props();
 
 	let opened_dropdown = $state(null);
 
@@ -52,19 +57,20 @@ SPDX-License-Identifier: MPL-2.0
 	};
 
 	const change_color = (e: Event) => {
+		const value = (e.currentTarget as HTMLInputElement).value;
 		if (available_modifiers.includes('text_color')) {
-			selected_el.updateText({
-				fill: e.target.value
+			(selected_el as TextShapeModel).updateText({
+				fill: value
 			});
 		} else if (available_modifiers.includes('fill_color')) {
-			selected_el.update({ fill: e.target.value });
+			selected_el?.update({ fill: value });
 		}
 		opened_dropdown = null;
 	};
 
 	const change_fontsize = (e: Event) => {
-		selected_el.updateText({
-			fontSize: e.target.value
+		(selected_el as TextShapeModel).updateText({
+			fontSize: Number((e.currentTarget as HTMLInputElement).value)
 		});
 	};
 
@@ -75,11 +81,11 @@ SPDX-License-Identifier: MPL-2.0
 	});
 </script>
 
-<div class="flex flex-row justify-evenly z-40">
+<div class="flex flex-row justify-evenly z-40 text-cq-text">
 	<div>
 		<button
 			type="button"
-			class="disabled:opacity-50 transition"
+			class="disabled:opacity-50 transition text-cq-text"
 			disabled={!(
 				available_modifiers.includes('fill_color') ||
 				available_modifiers.includes('text_color')
@@ -108,7 +114,7 @@ SPDX-License-Identifier: MPL-2.0
 		</button>
 		{#if opened_dropdown === 'color'}
 			<div
-				class="bg-white m-auto rounded-lg shadow-lg p-4 dark:bg-gray-600 h-fit gap-2 w-fit auto-cols-min flex absolute z-40"
+				class="cq-card m-auto p-4 h-fit gap-2 w-fit auto-cols-min flex absolute z-40"
 				transition:fade|global={{ duration: 100 }}
 			>
 				<input type="color" onchange={change_color} />
@@ -118,7 +124,7 @@ SPDX-License-Identifier: MPL-2.0
 	<div>
 		<button
 			type="button"
-			class="disabled:opacity-50 transition"
+			class="disabled:opacity-50 transition text-cq-text"
 			onclick={() => {
 				toggle_switch('font_size');
 			}}
@@ -144,13 +150,13 @@ SPDX-License-Identifier: MPL-2.0
 		</button>
 		{#if opened_dropdown === 'font_size'}
 			<div
-				class="bg-white m-auto rounded-lg shadow-lg p-4 dark:bg-gray-600 h-fit gap-2 w-fit auto-cols-min flex absolute z-40"
+				class="cq-card m-auto p-4 h-fit gap-2 w-fit auto-cols-min flex absolute z-40"
 				transition:fade|global={{ duration: 100 }}
 			>
 				<input
 					type="range"
 					onchange={change_fontsize}
-					value={selected_el?.node?.children?.[1]?.attrs?.fontSize}
+					value={(selected_el as TextShapeModel)?.node?.children?.[1]?.attrs?.fontSize}
 					min="10"
 					max="250"
 				/>
@@ -160,7 +166,7 @@ SPDX-License-Identifier: MPL-2.0
 	<div class="flex flex-row gap-2">
 		<button
 			type="button"
-			class="disabled:opacity-50 transition"
+			class="disabled:opacity-50 transition text-cq-text"
 			onclick={() => {
 				selected_el.update({ zIndex: selected_el.node.getZIndex() + 1 });
 			}}
@@ -186,7 +192,7 @@ SPDX-License-Identifier: MPL-2.0
 		</button>
 		<button
 			type="button"
-			class="disabled:opacity-50 transition"
+			class="disabled:opacity-50 transition text-cq-text"
 			onclick={() => {
 				selected_el.update({ zIndex: selected_el.node.getZIndex() - 1 });
 			}}

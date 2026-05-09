@@ -6,7 +6,7 @@ SPDX-License-Identifier: MPL-2.0
 
 <script lang="ts">
 	import { dataSchema } from '$lib/yupSchemas';
-	import type { EditorData, Question } from './quiz_types';
+	import type { EditorData } from './quiz_types';
 	import Sidebar from '$lib/editor/sidebar.svelte';
 	import SettingsCard from '$lib/editor/settings-card.svelte';
 	import QuizCard from '$lib/editor/card.svelte';
@@ -23,7 +23,7 @@ SPDX-License-Identifier: MPL-2.0
 		quiz_id: string | null;
 	}
 
-	let { data = $bindable(), quiz_id }: Props = $props();
+	let { data = $bindable(), quiz_id = $bindable() }: Props = $props();
 	let selected_question = $state(-1);
 
 	const validateInput = async (data: EditorData) => {
@@ -103,19 +103,19 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 			<div class="col-span-5 flex flex-col">
 				<div
-					class="h-10 w-full bg-white mb-10 flex align-middle justify-center rounded-br-lg"
+					class="cq-surface h-10 w-full mb-10 flex align-middle justify-center rounded-br-lg"
 				>
 					{#if schemaInvalid}
 						<p class="text-center w-full text-red-600 h-full mt-0.5 font-semibold">
 							{yupErrorMessage}
 						</p>
 					{:else}
-						<p class="text-center w-full text-black h-full align-bottom mt-0.5">
+						<p class="text-center w-full text-cq-text h-full align-bottom mt-0.5">
 							{@html data.title}
 						</p>
 					{/if}
 					<button
-						class="pr-2 align-middle bg-[#B07156] pl-2 ml-auto whitespace-nowrap disabled:opacity-60 rounded-br-lg"
+						class="pr-2 align-middle bg-cq-accent text-[var(--cq-accent-text)] pl-2 ml-auto whitespace-nowrap disabled:opacity-60 rounded-br-lg"
 						disabled={schemaInvalid}
 					>
 						<span>{$t('words.save')}</span>

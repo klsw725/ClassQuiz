@@ -33,12 +33,12 @@ SPDX-License-Identifier: MPL-2.0
 
 	let { text = $bindable('') }: Props = $props();
 
-	let html_el = $state();
+	let html_el = $state<HTMLElement>();
 
 	run(() => {
 		text = text.replace('<p>', '').replace('</p>', '');
 	});
-	let editor;
+	let editor: Awaited<ReturnType<typeof BalloonEditor.create>>;
 	onMount(() => {
 		class Editor extends BalloonEditor {
 			static builtinPlugins = [
@@ -58,13 +58,12 @@ SPDX-License-Identifier: MPL-2.0
 			};
 		}
 		// BalloonEditor.builtinPlugins = [Strikethrough]
+		if (!html_el) {
+			return;
+		}
 		Editor.create(html_el, {
 			licenseKey: 'GPL',
 			// plugins: [Strikethrough],
-			config: {
-				enterMode: BalloonEditor.ENTER_DIV,
-				shiftEnterMode: BalloonEditor.ENTER_BR
-			},
 			toolbar: [
 				'bold',
 				'italic',
@@ -89,11 +88,11 @@ SPDX-License-Identifier: MPL-2.0
 	});
 </script>
 
-<div class="w-fit rounded-lg border-gray-500 border">
+<div class="w-fit rounded-lg border-cq-border border">
 	<div
 		bind:this={html_el}
 		contenteditable="true"
-		class="rounded-lg border-gray-500 border text-center w-fit h-fit resize-none dark:bg-gray-500 min-w-[5rem] dark:text-white"
+		class="rounded-lg border-cq-border border text-center w-fit h-fit resize-none bg-cq-surface min-w-[5rem] text-cq-text"
 	></div>
 </div>
 

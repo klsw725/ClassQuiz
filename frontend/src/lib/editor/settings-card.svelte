@@ -36,22 +36,22 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="w-full h-full pb-20 px-20">
-	<div class="rounded-lg bg-white w-full h-full border-gray-500 dark:bg-gray-700">
-		<div class="h-fit bg-gray-300 rounded-t-lg dark:bg-gray-500">
+	<div class="cq-card w-full h-full">
+		<div class="cq-surface-muted h-fit">
 			<div class="flex align-middle p-4 gap-3">
 				<span
-					class="inline-block bg-gray-600 w-4 h-4 rounded-full hover:bg-red-400 transition"
+					class="inline-block bg-cq-muted w-4 h-4 rounded-full hover:bg-cq-brand transition"
 				></span>
 				<span
-					class="inline-block bg-gray-600 w-4 h-4 rounded-full hover:bg-yellow-400 transition"
+					class="inline-block bg-cq-muted w-4 h-4 rounded-full hover:bg-cq-brand transition"
 				></span>
 				<span
-					class="inline-block bg-gray-600 w-4 h-4 rounded-full hover:bg-green-400 transition"
+					class="inline-block bg-cq-muted w-4 h-4 rounded-full hover:bg-cq-brand transition"
 				></span>
 			</div>
 		</div>
 		<div
-			class="dark:bg-gray-700 h-full"
+			class="h-full"
 			style="background-repeat: no-repeat;background-size: 100% 100%;background-image: {data.background_image
 				? `url("/api/v1/storage/download/${data.background_image}")`
 				: `unset`}"
@@ -67,7 +67,7 @@ SPDX-License-Identifier: MPL-2.0
 				<textarea
 					placeholder="Description"
 					bind:value={data.description}
-					class="p-3 rounded-lg border-gray-500 border text-center w-1/3 h-20 resize-none dark:bg-gray-500 outline-hidden focus:shadow-2xl transition-all"
+					class="cq-surface p-3 text-center w-1/3 h-20 resize-none outline-hidden focus:shadow-2xl transition-all"
 				></textarea>
 			</div>
 
@@ -134,14 +134,14 @@ SPDX-License-Identifier: MPL-2.0
 				</button>
 			</div>
 			<div class="pt-10 w-full flex justify-center">
-				<div class="w-1/3 rounded-lg bg-gray-100 p-4 dark:bg-gray-600">
+				<div class="cq-surface-muted w-1/3 p-4">
 					<label
 						for="time-based-scoring-toggle"
 						class="flex items-center justify-between gap-4 cursor-pointer"
 					>
 						<span>
 							<span class="block font-medium">{$t('editor.time_based_scoring')}</span>
-							<span class="block pt-1 text-sm text-gray-600 dark:text-gray-300">
+							<span class="block pt-1 text-sm text-cq-muted">
 								{$t('editor.time_based_scoring_description')}
 							</span>
 						</span>
@@ -153,7 +153,7 @@ SPDX-License-Identifier: MPL-2.0
 								class="sr-only peer"
 							/>
 							<span
-								class="w-14 h-7 bg-gray-200 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+								class="w-14 h-7 cq-surface-muted peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-cq-brand rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cq-border after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-cq-surface after:border-cq-border after:border after:rounded-full after:h-6 after:w-6 after:transition-all border-cq-border peer-checked:bg-cq-brand"
 							></span>
 						</span>
 					</label>
@@ -167,10 +167,10 @@ SPDX-License-Identifier: MPL-2.0
 						use:tippy={{ content: 'use the standard background', placement: 'left' }}
 					>
 						<div
-							class="bg-gray-200 rounded-lg w-full h-full p-1"
+							class="cq-surface-muted w-full h-full p-1"
 							class:pointer-events-none={custom_bg_color}
 						>
-							<span class="inline-block w-full h-full bg-[#d6edc9] dark:bg-[#4e6e58]"
+							<span class="inline-block w-full h-full" style="background: var(--cq-background);"
 							></span>
 						</div>
 					</div>
@@ -186,7 +186,7 @@ SPDX-License-Identifier: MPL-2.0
 								class="sr-only peer"
 							/>
 							<span
-								class="w-14 h-7 bg-gray-200 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+								class="w-14 h-7 cq-surface-muted peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-cq-brand rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cq-border after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-cq-surface after:border-cq-border after:border after:rounded-full after:h-6 after:w-6 after:transition-all border-cq-border peer-checked:bg-cq-brand"
 							></span>
 						</label>
 					</div>
@@ -198,7 +198,7 @@ SPDX-License-Identifier: MPL-2.0
 						<input
 							class:pointer-events-none={!custom_bg_color}
 							type="color"
-							class="rounded-lg p-1 min-h-full hover:cursor-pointer border-black border"
+							class="cq-surface p-1 min-h-full hover:cursor-pointer"
 							bind:value={data.background_color}
 						/>
 					</div>
@@ -213,7 +213,7 @@ SPDX-License-Identifier: MPL-2.0
 						onclick={() => {
 							data.background_image = undefined;
 						}}
-						class="mt-10 bg-red-500 p-2 rounded-lg border-2 border-black transition hover:bg-red-400"
+						class="mt-10 bg-red-500 p-2 rounded-lg border-2 border-cq-border transition hover:bg-red-400"
 						>Remove Background-Image
 					</button>
 				{:else}

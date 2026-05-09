@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { EditorData, Question } from '../quiz_types';
+	import type { EditorData, Question, RangeQuizAnswer } from '../quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { reach } from 'yup';
 	import { ABCDQuestionSchema, dataSchema } from '../yupSchemas';
@@ -31,8 +31,8 @@ SPDX-License-Identifier: MPL-2.0
 		animation: 'perspective-subtle',
 		placement: 'right'
 	});
-	let arr_of_cards = $state(Array(data.questions.length));
-	let propertyCard = $state();
+	let arr_of_cards = $state<HTMLElement[]>(Array(data.questions.length));
+	let propertyCard = $state<HTMLElement>();
 	let add_new_question_popup_open = $state(false);
 
 	const empy_slide: Question = {
@@ -84,25 +84,23 @@ SPDX-License-Identifier: MPL-2.0
 			>
 		</div>
 	</div>
-	<div class="border-r-2 pt-6 px-6 overflow-scroll h-full">
+	<div class="border-r-2 border-cq-border pt-6 px-6 overflow-scroll h-full">
 		<div
 			bind:this={propertyCard}
-			class="bg-white shadow-smrounded-lg h-40 p-2 mb-6 hover:cursor-pointer drop-shadow-2xl border border-gray-500 dark:bg-gray-600 transition"
+			class="cq-card cq-card-interactive h-40 p-2 mb-6 hover:cursor-pointer transition"
 			class:bg-green-300={selected_question === -1}
 			class:dark:bg-green-500={selected_question === -1}
 			onclick={() => setSelectedQuestion(-1)}
 		>
 			<div
 				use:tippy={{ content: data.title === '' ? "It's empty!" : data.title }}
-				class="m-1 border border-gray-500 rounded-lg p-0.5 transition"
+				class="m-1 border border-cq-border rounded-lg p-0.5 transition"
 				class:border-red-600={!reach(dataSchema, 'title').isValidSync(data.title)}
 				class:border-solid={!reach(dataSchema, 'title').isValidSync(data.title)}
 				class:border-2={!reach(dataSchema, 'title').isValidSync(data.title)}
 			>
 				<p
-					type="text"
-					class="whitespace-nowrap truncate text-center w-full bg-transparent rounded-sm dark:text-white"
-					class:dark:text-black={selected_question === -1}
+					class="whitespace-nowrap truncate text-center w-full bg-transparent rounded-lg text-cq-text"
 				>
 					{#if data.title}
 						{@html data.title}
@@ -113,7 +111,7 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 			<div
 				use:tippy={{ content: data.description === '' ? "It's empty!" : data.description }}
-				class="m-1 border border-gray-500 rounded-lg p-0.5 transition"
+				class="m-1 border border-cq-border rounded-lg p-0.5 transition"
 				class:border-red-600={!reach(dataSchema, 'description').isValidSync(
 					data.description
 				)}
@@ -122,13 +120,11 @@ SPDX-License-Identifier: MPL-2.0
 			>
 				<textarea
 					bind:value={data.description}
-					class="bg-transparent resize-none w-full rounded-sm text-sm dark:text-white"
-					class:dark:text-black={selected_question === -1}
+					class="bg-transparent resize-none w-full rounded-lg text-sm text-cq-text"
 				></textarea>
 			</div>
 			<div
-				class="w-full flex justify-center dark:text-white"
-				class:dark:text-black={selected_question === -1}
+				class="w-full flex justify-center text-cq-text"
 			>
 				<button
 					type="button"
@@ -175,7 +171,7 @@ SPDX-License-Identifier: MPL-2.0
 		</div>
 		{#each data.questions as question, index}
 			<div
-				class="bg-white shadow-smrounded-lg h-40 p-2 mb-6 hover:cursor-pointer drop-shadow-2xl border border-gray-500 dark:bg-gray-600 transition relative"
+				class="cq-card cq-card-interactive h-40 p-2 mb-6 hover:cursor-pointer transition relative"
 				class:bg-green-300={index === selected_question}
 				class:dark:bg-green-500={index === selected_question}
 				onclick={() => {
@@ -186,7 +182,7 @@ SPDX-License-Identifier: MPL-2.0
 				{#if reorder_mode}
 					<div
 						transition:fade|global={{ duration: 90 }}
-						class="absolute z-10 grid grid-cols-2 bg-transparent w-full rounded-sm h-full"
+						class="absolute z-10 grid grid-cols-2 bg-transparent w-full rounded-lg h-full"
 					>
 						<!-- Div is used, since it just put me on the dashboard when using button elements... Idk why and I hate it-->
 						<div
@@ -280,17 +276,16 @@ SPDX-License-Identifier: MPL-2.0
 					use:tippy={{
 						content: question.question === '' ? 'No title' : question.question
 					}}
-					class="m-1 border border-gray-500 rounded-lg p-0.5"
+					class="m-1 border border-cq-border rounded-lg p-0.5"
 				>
 					<h1
-						class="whitespace-nowrap truncate text-center rounded-lg dark:text-white transition"
+						class="whitespace-nowrap truncate text-center rounded-lg text-cq-text transition"
 						class:bg-yellow-500={!reach(dataSchema, 'questions[].question').isValidSync(
 							question.question
 						)}
-						class:dark:text-black={index === selected_question}
 					>
 						{#if question.question === ''}
-							<span class="italic text-gray-500">{$t('editor.no_title')}</span>
+							<span class="italic text-cq-muted">{$t('editor.no_title')}</span>
 						{:else}
 							{@html question.question}
 						{/if}
@@ -303,7 +298,7 @@ SPDX-License-Identifier: MPL-2.0
 							class="h-10 border rounded-lg"
 							alt="Not available"
 							use:tippy={{
-								content: `<img src="/api/v1/storage/download/${question.image}" alt="Not available" class="rounded-sm">`,
+								content: `<img src="/api/v1/storage/download/${question.image}" alt="Not available" class="rounded-lg">`,
 								allowHTML: true
 							}}
 						/>
@@ -315,7 +310,7 @@ SPDX-License-Identifier: MPL-2.0
 						{#if Array.isArray(question.answers)}
 							{#each question.answers as answer}
 								<span
-									class="whitespace-nowrap truncate rounded-lg p-0.5 text-sm text-center border border-gray-700"
+									class="whitespace-nowrap truncate rounded-lg p-0.5 text-sm text-center border border-cq-border"
 									class:bg-green-500={answer.right}
 									class:bg-red-500={!answer.right}
 									class:bg-yellow-500={!reach(
@@ -338,19 +333,19 @@ SPDX-License-Identifier: MPL-2.0
 						{/if}
 					</div>
 				{:else if question.type === QuizQuestionType.RANGE}
+					{@const range_answer = question.answers as RangeQuizAnswer}
 					<p class="text-center text-sm p-0.5">
-						All numbers between {question.answers.min_correct}
-						and {question.answers.max_correct} are correct, where numbers between {question
-							.answers.min} and {question.answers.max} can be selected.
+						All numbers between {range_answer.min_correct}
+						and {range_answer.max_correct} are correct, where numbers between {range_answer.min}
+						and {range_answer.max} can be selected.
 					</p>
 				{:else if question.type === QuizQuestionType.VOTING || question.type === QuizQuestionType.TEXT}
 					{#if Array.isArray(question.answers)}
 						<div class="grid grid-cols-2 gap-2">
 							{#each question.answers as answer}
 								<span
-									class="whitespace-nowrap truncate rounded-lg p-0.5 text-sm text-center border border-gray-700"
-									class:dark:bg-gray-500={answer.answer}
-									class:bg-gray-300={answer.answer}
+									class="whitespace-nowrap truncate rounded-lg p-0.5 text-sm text-center border border-cq-border"
+									class:cq-surface-muted={answer.answer}
 									class:bg-yellow-500={!reach(
 										ABCDQuestionSchema,
 										'answer'
@@ -380,11 +375,11 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 		{/each}
 		<div
-			class="bg-white shadow-smrounded-lg h-40 p-2 hover:cursor-pointer drop-shadow-2xl border border-gray-500 dark:bg-gray-600 grid grid-cols-2"
+			class="cq-card cq-card-interactive h-40 p-2 hover:cursor-pointer grid grid-cols-2"
 		>
 			<button
 				type="button"
-				class="h-full flex justify-center w-full flex-col border-r border-black dark:text-white"
+				class="h-full flex justify-center w-full flex-col border-r border-cq-border text-cq-text"
 				onclick={() => {
 					add_new_question_popup_open = true;
 				}}
@@ -407,7 +402,7 @@ SPDX-License-Identifier: MPL-2.0
 			</button>
 			<button
 				type="button"
-				class="h-full flex justify-center w-full dark:text-white flex-col"
+				class="h-full flex justify-center w-full text-cq-text flex-col"
 				onclick={() => {
 					data.questions = [...data.questions, { ...empy_slide }];
 				}}

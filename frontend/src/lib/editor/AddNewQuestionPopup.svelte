@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { Answers, Question } from '$lib/quiz_types';
+	import type { Question } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -38,61 +38,89 @@ SPDX-License-Identifier: MPL-2.0
 	const question_types: {
 		name: string;
 		description: string;
-		answers: Answers;
-		type: QuizQuestionType;
+		question: Question;
 	}[] = [
 		{
 			name: $t('words.multiple_choice'),
 			description: $t('editor.abcd_description'),
-			answers: [],
-			type: QuizQuestionType.ABCD
+			question: {
+				type: QuizQuestionType.ABCD,
+				time: '20',
+				points: 1000,
+				question: '',
+				image: undefined,
+				answers: []
+			}
 		},
 		{
 			name: $t('words.voting'),
 			description: $t('editor.voting_description'),
-			answers: [],
-			type: QuizQuestionType.VOTING
+			question: {
+				type: QuizQuestionType.VOTING,
+				time: '20',
+				points: 1000,
+				question: '',
+				image: undefined,
+				answers: []
+			}
 		},
 		{
 			name: $t('words.check_choice'),
 			description: $t('editor.check_choice_description'),
-			answers: [],
-			type: QuizQuestionType.CHECK
+			question: {
+				type: QuizQuestionType.CHECK,
+				time: '20',
+				points: 1000,
+				question: '',
+				image: undefined,
+				answers: []
+			}
 		},
 		{
 			name: $t('words.order'),
 			description: $t('editor.order_description'),
-			answers: [],
-			type: QuizQuestionType.ORDER
+			question: {
+				type: QuizQuestionType.ORDER,
+				time: '20',
+				points: 1000,
+				question: '',
+				image: undefined,
+				answers: []
+			}
 		},
 		{
 			name: $t('words.text'),
 			description: $t('editor.text_description'),
-			answers: [],
-			type: QuizQuestionType.TEXT
+			question: {
+				type: QuizQuestionType.TEXT,
+				time: '20',
+				points: 1000,
+				question: '',
+				image: undefined,
+				answers: []
+			}
 		},
 		{
 			name: $t('words.range'),
 			description: $t('editor.range_description'),
-			answers: {
-				max: 10,
-				min: 0,
-				max_correct: 7,
-				min_correct: 3
-			},
-			type: QuizQuestionType.RANGE
+			question: {
+				type: QuizQuestionType.RANGE,
+				time: '20',
+				points: 1000,
+				question: '',
+				image: undefined,
+				answers: {
+					max: 10,
+					min: 0,
+					max_correct: 7,
+					min_correct: 3
+				}
+			}
 		}
 	];
 
 	const add_question = (index: number) => {
-		const empty_question: Question = {
-			type: question_types[index].type,
-			time: '20',
-			points: 1000,
-			question: '',
-			image: undefined,
-			answers: question_types[index].answers
-		};
+		const empty_question = question_types[index].question;
 		questions = [...questions, { ...empty_question }];
 		selected_question = questions.length - 1;
 		open = false;
@@ -100,24 +128,24 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div
-	class="fixed top-0 left-0 w-screen h-screen flex bg-black/50 z-50"
+	class="fixed top-0 left-0 w-screen h-screen flex bg-cq-text/50 z-50"
 	onclick={on_parent_click}
 	transition:fade={{ duration: 100 }}
 >
 	<div
-		class="m-auto w-2/3 h-5/6 rounded-sm shadow-2xl bg-white dark:bg-gray-600 p-6 flex flex-col"
+		class="cq-card m-auto w-2/3 h-5/6 p-6 flex flex-col"
 	>
 		<h1 class="text-center text-3xl mb-6">{$t('quiztivity.editor.select_page_type')}</h1>
 		<div class="grid grid-cols-4 gap-4 overflow-y-scroll">
 			{#each question_types as qt, i}
-				<div class="rounded-sm p-6 border-[#B07156] border">
+				<div class="cq-card cq-card-interactive p-6">
 					<button
-						class="text-xl text-black dark:text-white"
+						class="text-xl text-cq-text"
 						onclick={() => {
 							add_question(i);
 						}}>{qt.name}</button
 					>
-					<p class="text-sm">{qt.description}</p>
+					<p class="text-sm text-cq-muted">{qt.description}</p>
 				</div>
 			{/each}
 		</div>
@@ -128,7 +156,7 @@ SPDX-License-Identifier: MPL-2.0
 				<a
 					href="/docs/quiz/question-types"
 					target="_blank"
-					class="text-sm font-bold underline text-blue-500 dark:text-blue-400"
+					class="text-sm font-bold underline link-hover"
 					>{$t('editor.visit_docs')}</a
 				>
 			</p>

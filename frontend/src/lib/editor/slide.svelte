@@ -159,7 +159,7 @@ SPDX-License-Identifier: MPL-2.0
 			}
 		}
 		canvas.on('*', () => {
-			data.answers = JSON.stringify(canvas.export.toJson());
+			data.answers = JSON.stringify(canvas.export.toJson()) as unknown as import('$lib/quiz_types').Answers;
 		});
 		canvas.on('selection:change', (data) => {
 			/*			data.shapes[0].update({fill: "#ffffff"})

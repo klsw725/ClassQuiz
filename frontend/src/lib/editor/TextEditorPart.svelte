@@ -7,6 +7,7 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import { fade } from 'svelte/transition';
 	import type { EditorData, TextQuizAnswer } from '$lib/quiz_types';
+	import { QuizQuestionType } from '$lib/quiz_types';
 	import { getLocalization } from '$lib/i18n';
 	import { reach } from 'yup';
 	import { TextQuestionSchema } from '$lib/yupSchemas';
@@ -17,17 +18,29 @@ SPDX-License-Identifier: MPL-2.0
 		data: EditorData;
 	}
 
-	let { selected_question, data = $bindable() }: Props = $props();
+	let { selected_question = $bindable(), data = $bindable() }: Props = $props();
 
 	const { t } = getLocalization();
 
-	if (!Array.isArray(data.questions[selected_question].answers)) {
-		data.questions[selected_question].answers = [];
-	}
+	const set_text_answers = (new_answers: TextQuizAnswer[]) => {
+		answers = new_answers;
+		data.questions[selected_question] = {
+			...data.questions[selected_question],
+			type: QuizQuestionType.TEXT,
+			answers
+		};
+	};
 
-	for (let i = 0; i < data.questions[selected_question].answers.length; i++) {
-		data.questions[selected_question].answers[i] = {
-			answer: data.questions[selected_question].answers[i].answer,
+	let answers = $state<TextQuizAnswer[]>(
+		Array.isArray(data.questions[selected_question].answers)
+			? (data.questions[selected_question].answers as TextQuizAnswer[])
+			: []
+	);
+	set_text_answers(answers);
+
+	for (let i = 0; i < answers.length; i++) {
+		answers[i] = {
+			answer: answers[i].answer,
 			case_sensitive: false
 		};
 	}
@@ -46,13 +59,12 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="grid grid-cols-2 gap-4 w-full px-10">
-	{#if Array.isArray(data.questions[selected_question].answers)}
-		{#each data.questions[selected_question].answers as answer, index}
+	{#if Array.isArray(answers)}
+		{#each answers as answer, index}
 			<div
 				out:fade={{ duration: 150 }}
 				class="p-4 rounded-lg flex justify-center w-full transition relative"
-				class:dark:bg-gray-500={answer.answer}
-				class:bg-gray-300={answer.answer}
+								class:cq-surface-muted={answer.answer}
 				class:bg-yellow-500={!reach(TextQuestionSchema, 'answer').isValidSync(
 					answer.answer
 				)}
@@ -61,9 +73,8 @@ SPDX-License-Identifier: MPL-2.0
 					class="rounded-full absolute -top-2 -right-2 opacity-70 hover:opacity-100 transition"
 					type="button"
 					onclick={() => {
-						data.questions[selected_question].answers.splice(index, 1);
-						data.questions[selected_question].answers =
-							data.questions[selected_question].answers;
+						answers.splice(index, 1);
+						set_text_answers(answers);
 					}}
 				>
 					<svg
@@ -129,16 +140,13 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 		{/each}
 	{/if}
-	{#if data.questions[selected_question].answers.length < 4}
+	{#if answers.length < 4}
 		<button
-			class="p-4 rounded-lg bg-transparent border-gray-500 border-2 hover:bg-gray-300 transition dark:hover:bg-gray-600"
+			class="cq-surface cq-card-interactive p-4 rounded-lg transition"
 			type="button"
 			in:fade={{ duration: 150 }}
 			onclick={() => {
-				data.questions[selected_question].answers = [
-					...data.questions[selected_question].answers,
-					{ ...get_empty_answer() }
-				];
+				set_text_answers([...answers, { ...get_empty_answer() }]);
 			}}
 		>
 			<span class="italic text-center">{$t('editor_page.add_an_answer')}</span>

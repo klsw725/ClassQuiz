@@ -18,7 +18,7 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	let {
-		src,
+		src = $bindable(),
 		css_classes = 'max-h-64 h-auto w-auto',
 		added_thumbhash_classes = 'h-full',
 		muted = true,
@@ -26,7 +26,13 @@ SPDX-License-Identifier: MPL-2.0
 	}: Props = $props();
 	let type: 'img' | 'video' | undefined = $state(undefined);
 
-	let img_data = $state();
+	interface ImageData {
+		data: string;
+		alt_text?: string;
+	}
+
+	let img_data = $state<ImageData>();
+	let video_el = $state<HTMLVideoElement>();
 	let thumbhash_data: string = $state();
 
 	function base64ToBytes(base64: string): Uint8Array {
@@ -34,21 +40,21 @@ SPDX-License-Identifier: MPL-2.0
 		return Uint8Array.from(binString, (m) => m.codePointAt(0));
 	}
 
-	const get_media = async (_: string) => {
+	const get_media = async (_: string): Promise<void> => {
 		if (!browser) {
 			return;
 		}
 		const res = await fetch(`/api/v1/storage/info/${src}`);
 		const fileType = res.headers.get('Content-Type');
-		if (fileType.includes('video')) {
+		if (fileType?.includes('video')) {
 			type = 'video';
 		} else {
 			type = 'img';
-			thumbhash_data = thumbHashToDataURL(base64ToBytes(res.headers.get('x-thumbhash')));
+			thumbhash_data = thumbHashToDataURL(base64ToBytes(res.headers.get('x-thumbhash') ?? ''));
 			const data = await fetch(`/api/v1/storage/download/${src}`);
 			img_data = {
 				data: URL.createObjectURL(await data.blob()),
-				alt_text: new TextDecoder().decode(base64ToBytes(res.headers.get('X-Alt-Text')))
+				alt_text: new TextDecoder().decode(base64ToBytes(res.headers.get('X-Alt-Text') ?? ''))
 			};
 			thumbhash_data = undefined;
 		}
@@ -63,12 +69,16 @@ SPDX-License-Identifier: MPL-2.0
 		}
 		fullscreen_open = true;
 	};
+
+	$effect(() => {
+		video_el?.setAttribute('x-webkit-airplay', 'deny');
+	});
 </script>
 
 {#await media}
 	<img src={thumbhash_data} class={`${css_classes} ${added_thumbhash_classes}`} />
-{:then data}
-	{#if type === 'img'}
+{:then _}
+	{#if type === 'img' && img_data}
 		<img
 			in:fade|global={{ duration: 300 }}
 			src={img_data.data}
@@ -78,9 +88,9 @@ SPDX-License-Identifier: MPL-2.0
 		/>
 	{:else if type === 'video'}
 		<video
+			bind:this={video_el}
 			class={css_classes}
 			disablepictureinpicture
-			x-webkit-airplay="deny"
 			controls
 			autoplay
 			loop
@@ -94,16 +104,16 @@ SPDX-License-Identifier: MPL-2.0
 	{/if}
 {/await}
 
-{#if fullscreen_open}
+{#if fullscreen_open && img_data}
 	<div
-		class="fixed top-0 left-0 z-50 w-screen h-screen bg-black/50 fle p-2"
+		class="fixed top-0 left-0 z-50 w-screen h-screen bg-cq-text/50 fle p-2"
 		transition:fade|global={{ duration: 80 }}
 		onclick={() => (fullscreen_open = false)}
 	>
 		<img
 			src={img_data.data}
 			alt={img_data.alt_text ?? 'Not available'}
-			class="object-cover rounded-sm m-auto max-h-full max-w-full"
+			class="object-cover rounded-lg m-auto max-h-full max-w-full"
 		/>
 	</div>
 {/if}

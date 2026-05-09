@@ -9,6 +9,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	import { getLocalization } from '$lib/i18n';
 	import type { EditorData, OrderQuizAnswer } from '$lib/quiz_types';
+	import { QuizQuestionType } from '$lib/quiz_types';
 	import { fade } from 'svelte/transition';
 	import { flip } from 'svelte/animate';
 	import { get_foreground_color } from '$lib/helpers.ts';
@@ -20,11 +21,11 @@ SPDX-License-Identifier: MPL-2.0
 		data: EditorData;
 	}
 
-	let { selected_question, data = $bindable() }: Props = $props();
+	let { selected_question = $bindable(), data = $bindable() }: Props = $props();
 
 	let parent_el: HTMLDivElement = $state();
 
-	const swapArrayElements = (arr: OrderQuizAnswer[], a: number, b: number): Array<any> => {
+	const swapArrayElements = (arr: OrderQuizAnswer[], a: number, b: number): OrderQuizAnswer[] => {
 		let _arr = [...arr];
 		let temp = _arr[a];
 		_arr[a] = _arr[b];
@@ -32,37 +33,38 @@ SPDX-License-Identifier: MPL-2.0
 		return _arr;
 	};
 
-	const move_item = (up: boolean, index: number) => {
-		if (up) {
-			data.questions[selected_question].answers = swapArrayElements(
-				data.questions[selected_question].answers,
-				index,
-				index - 1
-			);
-		} else {
-			data.questions[selected_question].answers = swapArrayElements(
-				data.questions[selected_question].answers,
-				index,
-				index + 1
-			);
-		}
+	const set_order_answers = (new_answers: OrderQuizAnswer[]) => {
+		answers = new_answers;
+		data.questions[selected_question] = {
+			...data.questions[selected_question],
+			type: QuizQuestionType.ORDER,
+			answers
+		};
 	};
 
-	if (!Array.isArray(data.questions[selected_question].answers)) {
-		data.questions[selected_question].answers = [];
-	}
-	for (let i = 0; i < data.questions[selected_question].answers.length; i++) {
-		data.questions[selected_question].answers[i] = {
-			answer: data.questions[selected_question].answers[i].answer,
-			color: data.questions[selected_question].answers[i].color ?? undefined,
-			id: [i]
+	let answers = $state<OrderQuizAnswer[]>(
+		Array.isArray(data.questions[selected_question].answers)
+			? (data.questions[selected_question].answers as OrderQuizAnswer[])
+			: []
+	);
+	set_order_answers(answers);
+
+	const move_item = (up: boolean, index: number) => {
+		set_order_answers(swapArrayElements(answers, index, up ? index - 1 : index + 1));
+	};
+
+	for (let i = 0; i < answers.length; i++) {
+		answers[i] = {
+			answer: answers[i].answer,
+			color: answers[i].color ?? undefined,
+			id: i
 		};
 	}
 	const default_colors = ['#D6EDC9', '#B07156', '#7F7057', '#4E6E58'];
 	const set_colors_if_unset = () => {
-		for (let i = 0; i < data.questions[selected_question].answers.length; i++) {
-			if (!data.questions[selected_question].answers[i].color) {
-				data.questions[selected_question].answers[i].color = default_colors[i];
+		for (let i = 0; i < answers.length; i++) {
+			if (!answers[i].color) {
+				answers[i].color = default_colors[i];
 			}
 		}
 	};
@@ -75,19 +77,18 @@ SPDX-License-Identifier: MPL-2.0
 
 <div class="w-full">
 	<div class="flex flex-col w-full px-8" bind:this={parent_el}>
-		{#each data.questions[selected_question].answers as answer, i (answer.id)}
+		{#each answers as answer, i (answer.id)}
 			<div
 				animate:flip={{ duration: 200 }}
 				out:fade={{ duration: 150 }}
-				class="p-4 rounded-lg flex justify-center w-full transition relative border border-gray-600 flex-row gap-4 m-2"
+				class="cq-surface p-4 rounded-lg flex justify-center w-full transition relative flex-row gap-4 m-2"
 			>
 				<button
 					class="rounded-full absolute -top-2 -right-2 opacity-70 hover:opacity-100 transition"
 					type="button"
 					onclick={() => {
-						data.questions[selected_question].answers.splice(i, 1);
-						data.questions[selected_question].answers =
-							data.questions[selected_question].answers;
+						answers.splice(i, 1);
+						set_order_answers(answers);
 					}}
 				>
 					<svg
@@ -137,7 +138,7 @@ SPDX-License-Identifier: MPL-2.0
 						}}
 						class="disabled:opacity-50 transition"
 						type="button"
-						disabled={i === data.questions[selected_question].answers.length - 1}
+						disabled={i === answers.length - 1}
 					>
 						<svg
 							class="w-8 h-8"
@@ -167,7 +168,7 @@ SPDX-License-Identifier: MPL-2.0
 					placeholder={$t('editor.empty')}
 				/>
 				<input
-					class="rounded-lg p-1 border-black border"
+					class="rounded-lg p-1 border-cq-border border"
 					type="color"
 					bind:value={answer.color}
 					oncontextmenu={(e) => {
@@ -180,22 +181,20 @@ SPDX-License-Identifier: MPL-2.0
 	</div>
 
 	<div class="px-8 flex w-full">
-		{#if data.questions[selected_question].answers.length < 4}
+		{#if answers.length < 4}
 			<button
-				class="p-4 rounded-lg bg-transparent border-gray-500 border-2 hover:bg-gray-300 transition dark:hover:bg-gray-600 m-2 w-full"
+				class="cq-surface cq-card-interactive p-4 rounded-lg transition m-2 w-full"
 				type="button"
 				in:fade={{ duration: 150 }}
 				onclick={() => {
-					data.questions[selected_question].answers = [
-						...data.questions[selected_question].answers,
+					set_order_answers([
+						...answers,
 						{
-							...{
-								answer: '',
-								color: undefined,
-								id: data.questions[selected_question].answers.length
-							}
+							answer: '',
+							color: undefined,
+							id: answers.length
 						}
-					];
+					]);
 				}}
 			>
 				<span class="italic text-center">{$t('editor_page.add_an_answer')}</span>

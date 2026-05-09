@@ -21,7 +21,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	const { t } = getLocalization();
 
-	const fetch_images = async (): Promise<PrivateImageData> => {
+	const fetch_images = async (): Promise<PrivateImageData[]> => {
 		const response = await fetch('/api/v1/storage/list/last?count=50');
 		return await response.json();
 	};
@@ -44,16 +44,16 @@ SPDX-License-Identifier: MPL-2.0
 {:then images}
 	<div class="flex w-screen p-8 h-screen">
 		<div
-			class="flex flex-col w-1/3 m-auto overflow-scroll h-full rounded-sm p-4 gap-4 bg-white dark:bg-gray-700"
+			class="cq-card flex flex-col w-1/3 m-auto overflow-scroll h-full p-4 gap-4"
 		>
 			{#each images as image}
-				<div class="rounded-sm border-2 border-[#B07156] p-2 flex-col flex gap-2">
+				<div class="cq-card p-2 flex-col flex gap-2">
 					<div>
 						<img
 							src="/api/v1/storage/download/{image.id}"
 							loading="lazy"
 							alt={image.alt_text}
-							class="object-contain w-full h-full max-h-full rounded-sm"
+							class="object-contain w-full h-full max-h-full rounded-lg"
 						/>
 					</div>
 					<p class="text-center">{image.filename ?? 'No name available'}</p>

@@ -52,7 +52,7 @@ SPDX-License-Identifier: MPL-2.0
 			data.questions[selected_question].time = '';
 			time = '';
 		}
-		if (data.questions[selected_question].time > 3) {
+		if (data.questions[selected_question].time.length > 3) {
 			data.questions[selected_question].time = data.questions[selected_question].time
 				.toString()
 				.slice(0, 3);
@@ -103,29 +103,29 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="w-full max-h-full pb-10 px-10 h-full">
-	<div class="rounded-lg bg-white w-full h-full border-gray-500 dark:bg-gray-700 shadow-2xl">
-		<div class="h-12 bg-gray-300 rounded-t-lg dark:bg-gray-500">
+	<div class="cq-card w-full h-full">
+		<div class="cq-surface-muted h-12">
 			<div class="flex align-middle p-4 gap-3">
 				<span
-					class="inline-block bg-gray-600 w-4 h-4 rounded-full hover:bg-red-400 transition"
+					class="inline-block bg-cq-muted w-4 h-4 rounded-full hover:bg-cq-brand transition"
 				></span>
 				<span
-					class="inline-block bg-gray-600 w-4 h-4 rounded-full hover:bg-yellow-400 transition"
+					class="inline-block bg-cq-muted w-4 h-4 rounded-full hover:bg-cq-brand transition"
 				></span>
 				<span
-					class="inline-block bg-gray-600 w-4 h-4 rounded-full hover:bg-green-400 transition"
+					class="inline-block bg-cq-muted w-4 h-4 rounded-full hover:bg-cq-brand transition"
 				></span>
 				<button
-					class="ml-auto"
+					class="ml-auto text-cq-muted transition hover:text-cq-text"
 					type="button"
 					use:tippy={{ content: $t('editor.advanced_settings') }}
 					onclick={() => (advanced_options_open = true)}
 				>
 					<svg
-						class="text-white w-5 h-5"
+						class="w-5 h-5"
 						aria-hidden="true"
 						fill="none"
-						stroke="white"
+						stroke="currentColor"
 						stroke-width="2"
 						viewBox="0 0 24 24"
 						xmlns="http://www.w3.org/2000/svg"
@@ -159,7 +159,7 @@ SPDX-License-Identifier: MPL-2.0
 							<Spinner my_20={false} />
 						{:then c}
 							<div
-								class="rounded-lg placeholder:italic placeholder:font-normal dark:bg-gray-500"
+								class="cq-surface rounded-lg placeholder:italic placeholder:font-normal"
 								class:bg-yellow-500={!reach(
 									dataSchema,
 									'questions[].question'
@@ -231,14 +231,14 @@ SPDX-License-Identifier: MPL-2.0
 							type="number"
 							max="999"
 							min="1"
-							class="w-20 bg-transparent rounded-lg text-lg border-2 border-gray-500 p-1 outline-hidden focus:shadow-2xl"
+							class="w-20 bg-transparent rounded-lg text-lg border-2 border-cq-border p-1 outline-hidden focus:shadow-2xl"
 							bind:value={data.questions[selected_question].time}
 						/>
 						<p class="inline-block">s</p>
 						<input
 							type="number"
 							min="0"
-							class="w-24 bg-transparent rounded-lg text-lg border-2 border-gray-500 p-1 outline-hidden focus:shadow-2xl"
+							class="w-24 bg-transparent rounded-lg text-lg border-2 border-cq-border p-1 outline-hidden focus:shadow-2xl"
 							bind:value={data.questions[selected_question].points}
 						/>
 						<p class="inline-block">pts</p>
@@ -291,7 +291,7 @@ SPDX-License-Identifier: MPL-2.0
 		transition:fade|global={{ duration: 150 }}
 	>
 		<div
-			class="w-1/4 h-1/3 m-auto bg-white dark:bg-gray-700 rounded-lg flex flex-col p-2 gap-2"
+			class="cq-card w-1/4 h-1/3 m-auto flex flex-col p-2 gap-2"
 		>
 			<h1 class="text-3xl mx-auto">{$t('editor.advanced_settings')}</h1>
 			<label class="flex justify-around text-lg">

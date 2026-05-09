@@ -9,7 +9,6 @@ SPDX-License-Identifier: MPL-2.0
 	import DropTarget from '@uppy/drop-target';
 	import XHRUpload from '@uppy/xhr-upload';
 	import ImageEditor from '@uppy/image-editor';
-	import Dashboard from '@uppy/dashboard';
 	import Compressor from '@uppy/compressor';
 	import { fade } from 'svelte/transition';
 	import BrownButton from '$lib/components/buttons/brown.svelte';
@@ -28,16 +27,18 @@ SPDX-License-Identifier: MPL-2.0
 	const { t } = getLocalization();
 	let {
 		modalOpen = $bindable(),
-		data,
-		selected_question,
+		data = $bindable(),
+		selected_question = $bindable(),
 		video_upload = false,
-		library_enabled = true
+		library_enabled = true,
+		edit_id = $bindable()
 	}: {
 		modalOpen: boolean;
 		data: EditorData;
 		selected_question?: number;
 		video_upload: boolean;
 		library_enabled?: boolean;
+		edit_id?: string;
 	} = $props();
 
 	// eslint-disable-next-line no-undef
@@ -61,9 +62,8 @@ SPDX-License-Identifier: MPL-2.0
 		.use(DropTarget, {
 			target: document.body
 		})
-		.use(Dashboard)
 		.use(ImageEditor, {
-			target: Dashboard,
+			target: 'Dashboard',
 			quality: 0.8
 		})
 		.use(Compressor, {
@@ -138,7 +138,7 @@ SPDX-License-Identifier: MPL-2.0
 
 {#if modalOpen}
 	<div
-		class="w-screen h-screen fixed top-0 left-0 bg-black/50 z-20 flex justify-center"
+		class="w-screen h-screen fixed top-0 left-0 bg-cq-text/50 z-20 flex justify-center"
 		onclick={handle_on_click}
 		tabindex="0"
 		role="button"
@@ -147,7 +147,7 @@ SPDX-License-Identifier: MPL-2.0
 		transition:fade={{ duration: 100 }}
 	>
 		{#if selected_type === null}
-			<div class="m-auto w-1/3 h-auto bg-white dark:bg-gray-700 p-4 rounded-sm">
+			<div class="cq-card m-auto w-1/3 h-auto p-4">
 				<h1 class="text-3xl text-center mb-4">{$t('uploader.select_upload_type')}</h1>
 				<div class="flex flex-row gap-4">
 					<div class="w-full">
@@ -190,12 +190,12 @@ SPDX-License-Identifier: MPL-2.0
 		{:else if selected_type === AvailableUploadTypes.Image}
 			<div class="m-auto w-1/3 h-5/6" transition:fade={{ duration: 100 }}>
 				<div>
-					<SvelteDashboard {uppy} width="100%" {properties} />
+					<SvelteDashboard {uppy} props={properties} />
 				</div>
 			</div>
 		{:else if selected_type === AvailableUploadTypes.Video}
 			<div
-				class="m-auto w-1/3 h-auto bg-white dark:bg-gray-700 p-4 rounded-sm"
+				class="cq-card m-auto w-1/3 h-auto p-4"
 				transition:fade={{ duration: 100 }}
 			>
 				<h1 class="text-3xl text-center mb-4">{$t('uploader.upload_a_video')}</h1>
@@ -222,7 +222,7 @@ SPDX-License-Identifier: MPL-2.0
 {/if}
 <div class="flex justify-center w-full pt-10" transition:fade>
 	<button
-		class="rounded-lg p-4 flex justify-center bg-transparent border-gray-500 border-2 w-1/2 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+		class="action-button flex w-1/2 justify-center"
 		type="button"
 		onclick={() => {
 			modalOpen = true;

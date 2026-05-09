@@ -74,22 +74,22 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div
-	class="bg-white m-auto rounded-lg shadow-lg p-4 flex flex-col dark:bg-gray-600 h-fit"
+	class="cq-card m-auto p-4 flex flex-col h-fit"
 	transition:fade|global={{ duration: 100 }}
 >
 	<ul>
 		{#each element_list as el}
 			<li
-				class="flex flex-row mt-4 w-full bg-gray-200 shadow-xl rounded-lg p-2 hover:bg-gray-300 hover:shadow-2xl hover:cursor-pointer transition dark:bg-gray-800"
+				class="cq-surface-muted cq-card-interactive flex flex-row mt-4 w-full p-2 hover:cursor-pointer"
 				onclick={() => {
 					selected_element = el.type;
 				}}
 			>
 				<div class="flex flex-col">
-					<h3 class="text-xl">{el.name}</h3>
-					<p>{el.description}</p>
+					<h3 class="text-xl text-cq-text">{el.name}</h3>
+					<p class="text-cq-muted">{el.description}</p>
 				</div>
-				<kbd class="my-auto ml-auto">{el.shortcut}</kbd>
+				<kbd class="my-auto ml-auto text-cq-muted">{el.shortcut}</kbd>
 			</li>
 		{/each}
 	</ul>

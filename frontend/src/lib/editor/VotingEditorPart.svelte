@@ -7,7 +7,8 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import { run } from 'svelte/legacy';
 
-	import type { EditorData } from '../quiz_types';
+	import type { EditorData, VotingAnswer } from '../quiz_types';
+	import { QuizQuestionType } from '../quiz_types';
 	import { fade } from 'svelte/transition';
 	import { reach } from 'yup';
 	import { getLocalization } from '$lib/i18n';
@@ -22,22 +23,31 @@ SPDX-License-Identifier: MPL-2.0
 		data: EditorData;
 	}
 
-	let { selected_question, data = $bindable() }: Props = $props();
+	let { selected_question = $bindable(), data = $bindable() }: Props = $props();
 
-	if (!Array.isArray(data.questions[selected_question].answers)) {
-		data.questions[selected_question].answers = [];
+	const set_voting_answers = (new_answers: VotingAnswer[]) => {
+		answers = new_answers;
+		data.questions[selected_question] = {
+			...data.questions[selected_question],
+			type: QuizQuestionType.VOTING,
+			answers
+		};
+	};
+
+	let answers = $state<VotingAnswer[]>(
+		Array.isArray(data.questions[selected_question].answers)
+			? (data.questions[selected_question].answers as VotingAnswer[])
+			: []
+	);
+	if (typeof answers[0]?.right === 'boolean') {
+		answers = [];
 	}
-	try {
-		if (typeof data.questions[selected_question].answers[0].right === 'boolean') {
-			data.questions[selected_question].answers = [];
-		}
-		// eslint-disable-next-line no-empty
-	} catch {}
+	set_voting_answers(answers);
 
 	const set_colors_if_unset = () => {
-		for (let i = 0; i < data.questions[selected_question].answers.length; i++) {
-			if (!data.questions[selected_question].answers[i].color) {
-				data.questions[selected_question].answers[i].color = default_colors[i];
+		for (let i = 0; i < answers.length; i++) {
+			if (!answers[i].color) {
+				answers[i].color = default_colors[i];
 			}
 		}
 	};
@@ -56,24 +66,22 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-4 w-full px-10">
-	{#if Array.isArray(data.questions[selected_question].answers)}
-		{#each data.questions[selected_question].answers as answer, index}
+	{#if Array.isArray(answers)}
+		{#each answers as answer, index}
 			<div
 				out:fade={{ duration: 150 }}
 				class="p-4 rounded-lg flex justify-center w-full transition relative"
 				class:bg-yellow-500={!reach(VotingQuestionSchema, 'answer').isValidSync(
 					answer.answer
 				)}
-				class:dark:bg-gray-500={answer.answer}
-				class:bg-gray-300={answer.answer}
+								class:cq-surface-muted={answer.answer}
 			>
 				<button
 					class="rounded-full absolute -top-2 -right-2 opacity-70 hover:opacity-100 transition"
 					type="button"
 					onclick={() => {
-						data.questions[selected_question].answers.splice(index, 1);
-						data.questions[selected_question].answers =
-							data.questions[selected_question].answers;
+						answers.splice(index, 1);
+						set_voting_answers(answers);
 					}}
 				>
 					<svg
@@ -100,7 +108,7 @@ SPDX-License-Identifier: MPL-2.0
 					placeholder={$t('editor.empty')}
 				/>
 				<input
-					class="rounded-lg p-1 border-black border"
+					class="rounded-lg p-1 border-cq-border border"
 					type="color"
 					bind:value={answer.color}
 					oncontextmenu={(e) => {
@@ -111,22 +119,20 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 		{/each}
 	{/if}
-	{#if data.questions[selected_question].answers.length < 4}
+	{#if answers.length < 4}
 		<button
-			class="p-4 rounded-lg bg-transparent border-gray-500 border-2 hover:bg-gray-300 transition dark:hover:bg-gray-600"
+			class="cq-surface cq-card-interactive p-4 rounded-lg transition"
 			type="button"
 			in:fade={{ duration: 150 }}
 			onclick={() => {
-				data.questions[selected_question].answers = [
-					...data.questions[selected_question].answers,
+				set_voting_answers([
+					...answers,
 					{
-						...{
-							answer: '',
-							image: undefined,
-							color: default_colors[data.questions[selected_question].answers.length]
-						}
+						answer: '',
+						image: undefined,
+						color: default_colors[answers.length]
 					}
-				];
+				]);
 			}}
 		>
 			<span class="italic text-center">{$t('editor_page.add_an_answer')}</span>
