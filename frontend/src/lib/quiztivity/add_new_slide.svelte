@@ -45,22 +45,22 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div
-	class="fixed top-0 left-0 z-50 bg-black/50 flex w-screen h-screen"
+	class="fixed top-0 left-0 z-50 bg-cq-text/50 flex w-screen h-screen"
 	transition:fade|global={{ duration: 100 }}
 >
 	<div class="m-auto w-5/6 h-5/6">
-		<div class="rounded-sm bg-white p-6 dark:bg-gray-600">
-			<h1 class="text-center text-3xl mb-6">{$t('quiztivity.editor.select_page_type')}</h1>
+		<div class="cq-card p-6">
+			<h1 class="text-center text-3xl mb-6 text-cq-text">{$t('quiztivity.editor.select_page_type')}</h1>
 			<div class="grid grid-cols-4 gap-4 overflow-y-scroll">
 				{#each PageTypes as pt}
-					<div class="rounded-sm p-6 border-[#B07156] border">
+					<div class="cq-surface-muted cq-card-interactive p-6">
 						<button
-							class="text-xl text-black dark:text-white"
+							class="text-xl text-cq-text link-hover"
 							onclick={() => {
 								type = pt.type;
 							}}>{pt.name}</button
 						>
-						<p class="text-sm">{pt.description}</p>
+						<p class="text-sm text-cq-muted">{pt.description}</p>
 					</div>
 				{/each}
 			</div>

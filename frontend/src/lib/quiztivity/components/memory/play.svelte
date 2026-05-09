@@ -81,18 +81,18 @@ SPDX-License-Identifier: MPL-2.0
 	};
 </script>
 
-<div>
-	<p class="text-center">{$t('quiztivity.play.memory.try_count', { try_count })}</p>
+<div class="p-4 text-cq-text">
+	<p class="cq-surface mx-auto w-fit px-4 py-2 text-center text-cq-muted">{$t('quiztivity.play.memory.try_count', { try_count })}</p>
 	<div class="grid lg:grid-cols-6 grid-cols-2 gap-2 m-4">
 		{#each random_card_order as card}
 			<button
-				class="aspect-square flex border-[#B07156] border-2 rounded-sm"
+				class="cq-card cq-card-interactive aspect-square flex"
 				onclick={() => {
 					flip_card(card.id);
 				}}
 			>
 				{#if card_opened[card.id]}
-					<p class="m-auto transition-all">{card.text}</p>
+					<p class="m-auto text-cq-text transition-all">{card.text}</p>
 				{:else}
 					<img
 						src="/android-chrome-512x512.png"

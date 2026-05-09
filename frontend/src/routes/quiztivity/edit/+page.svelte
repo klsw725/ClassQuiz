@@ -42,7 +42,7 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="h-full">
-	<Editor bind:data={quiztivity} on:save={save_quiztivity} bind:saving />
+	<Editor bind:data={quiztivity} on:save={save_quiztivity} {saving} />
 </div>
 
 {#if shares_menu_open}

@@ -43,12 +43,32 @@ export interface Abcd {
 	answers: AbcdAnswer[];
 }
 
-export interface QuizTivityPage {
+interface QuizTivityPageBase {
 	title?: string;
-	type: QuizTivityTypes;
-	data: Pdf | Memory | Markdown;
 	id?: string;
 }
+
+export type QuizTivityPage =
+	| (QuizTivityPageBase & {
+			type: QuizTivityTypes.SLIDE;
+			data?: undefined;
+	  })
+	| (QuizTivityPageBase & {
+			type: QuizTivityTypes.PDF;
+			data?: Pdf;
+	  })
+	| (QuizTivityPageBase & {
+			type: QuizTivityTypes.MEMORY;
+			data?: Memory;
+	  })
+	| (QuizTivityPageBase & {
+			type: QuizTivityTypes.MARKDOWN;
+			data?: Markdown;
+	  })
+	| (QuizTivityPageBase & {
+			type: QuizTivityTypes.ABCD;
+			data?: Abcd;
+	  });
 
 export interface Data {
 	id?: string;

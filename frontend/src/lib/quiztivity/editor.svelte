@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { Data } from './types';
+	import type { Data, QuizTivityPage } from './types';
 	import { getLocalization } from '$lib/i18n';
 	import BrownButton from '$lib/components/buttons/brown.svelte';
 	import AddNewSlide from './add_new_slide.svelte';
@@ -26,7 +26,7 @@ SPDX-License-Identifier: MPL-2.0
 		saving: boolean;
 	}
 
-	let { data = $bindable(), saving }: Props = $props();
+	let { data = $bindable() }: Props = $props();
 
 	let selected_slide = $state(null);
 	let opened_slide = $state(null);
@@ -35,15 +35,30 @@ SPDX-License-Identifier: MPL-2.0
 
 	for (let i = 0; i < data.pages.length; i++) {
 		const id = (Math.random() + 1).toString(36).substring(7);
-		const type: QuizTivityTypes = data.pages[i].type as QuizTivityTypes;
-		data.pages[i] = { ...data.pages[i], id, type };
+		data.pages[i] = { ...data.pages[i], id };
 	}
+	const create_page = (type: QuizTivityTypes, id: string): QuizTivityPage => {
+		if (type === QuizTivityTypes.MEMORY) {
+			return { title: undefined, data: { cards: [] }, type, id };
+		}
+		if (type === QuizTivityTypes.MARKDOWN) {
+			return { title: undefined, data: { markdown: '' }, type, id };
+		}
+		if (type === QuizTivityTypes.ABCD) {
+			return { title: undefined, data: { question: '', answers: [] }, type, id };
+		}
+		if (type === QuizTivityTypes.PDF) {
+			return { title: undefined, data: undefined, type, id };
+		}
+		return { title: undefined, data: undefined, type, id };
+	};
+
 	const handle_slide_add = (type: QuizTivityTypes | undefined | null) => {
 		if (!type) {
 			return;
 		}
 		const id = (Math.random() + 1).toString(36).substring(7);
-		data.pages.push({ title: undefined, data: undefined, type, id });
+		data.pages.push(create_page(type, id));
 		opened_slide = data.pages.length - 1;
 	};
 	$effect(() => {
@@ -53,11 +68,11 @@ SPDX-License-Identifier: MPL-2.0
 	const delete_slide = () => {
 		console.log(selected_slide);
 		data.pages.splice(selected_slide, 1);
-		data.pages = data.pages;
+		data.pages = [...data.pages];
 		selected_slide = null;
 	};
 
-	const arraymove = (arr: any[], fromI: number, toI: number) => {
+	const arraymove = <T,>(arr: T[], fromI: number, toI: number) => {
 		const el = arr[fromI];
 		arr.splice(fromI, 1);
 		arr.splice(toI, 0, el);
@@ -65,13 +80,13 @@ SPDX-License-Identifier: MPL-2.0
 	const move_slide_left = () => {
 		arraymove(data.pages, selected_slide, selected_slide - 1);
 		selected_slide -= 1;
-		data.pages = data.pages;
+		data.pages = [...data.pages];
 	};
 
 	const move_slide_right = () => {
 		arraymove(data.pages, selected_slide, selected_slide + 1);
 		selected_slide += 1;
-		data.pages = data.pages;
+		data.pages = [...data.pages];
 	};
 </script>
 
@@ -90,7 +105,7 @@ SPDX-License-Identifier: MPL-2.0
 				<span></span>
 			{/if}
 			<input
-				class="bg-transparent outline-hidden text-center mx-auto"
+				class="bg-transparent outline-hidden text-center mx-auto text-cq-text placeholder:text-cq-muted"
 				placeholder={$t('quiztivity.editor.title_placeholder')}
 				bind:value={data.title}
 			/>
@@ -129,10 +144,10 @@ SPDX-License-Identifier: MPL-2.0
 			<div class="grid grid-cols-6 gap-6 w-11/12">
 				{#each data.pages as page, i (page.id)}
 					<div
-						class="border-[#B07156] border-2 rounded-sm aspect-square flex flex-col group"
+						class="cq-card cq-card-interactive aspect-square flex flex-col group"
 						animate:flip={{ duration: 200 }}
 					>
-						<p class="m-auto">{page.type}</p>
+						<p class="m-auto text-cq-muted">{page.type}</p>
 						<div
 							class="grid grid-cols-2 gap-2 p-2 group-hover:opacity-100 transition-all"
 							class:opacity-0={selected_slide !== i}
@@ -158,7 +173,7 @@ SPDX-License-Identifier: MPL-2.0
 		</div>
 	</div>
 {:else}
-	{@const sel_t = data.pages[opened_slide].type}
+	{@const opened_page = data.pages[opened_slide]}
 	<div class="h-full">
 		<div class="mb-2">
 			<BrownButton
@@ -167,14 +182,14 @@ SPDX-License-Identifier: MPL-2.0
 				}}>{$t('words.back')}</BrownButton
 			>
 		</div>
-		{#if sel_t === QuizTivityTypes.PDF}
+		{#if opened_page.type === QuizTivityTypes.PDF}
 			<PdfEdit />
-		{:else if sel_t === QuizTivityTypes.MEMORY}
-			<MemoryEdit bind:data={data.pages[opened_slide].data} />
-		{:else if sel_t === QuizTivityTypes.MARKDOWN}
-			<MarkdownEdit bind:data={data.pages[opened_slide].data} />
-		{:else if sel_t === QuizTivityTypes.ABCD}
-			<AbcdEdit bind:data={data.pages[opened_slide].data} />
+		{:else if opened_page.type === QuizTivityTypes.MEMORY}
+			<MemoryEdit bind:data={opened_page.data} />
+		{:else if opened_page.type === QuizTivityTypes.MARKDOWN}
+			<MarkdownEdit bind:data={opened_page.data} />
+		{:else if opened_page.type === QuizTivityTypes.ABCD}
+			<AbcdEdit bind:data={opened_page.data} />
 		{:else}
 			<h1 class="text-8xl">ERROR!</h1>
 		{/if}

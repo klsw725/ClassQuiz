@@ -17,10 +17,12 @@ SPDX-License-Identifier: MPL-2.0
 	let { data }: Props = $props();
 
 	let rendered_html = $derived(
-		browser ? DOMPurify.sanitize(marked.parse(data.markdown ?? '')) : ''
+		browser ? DOMPurify.sanitize(marked.parse(data?.markdown ?? '', { async: false })) : ''
 	);
 </script>
 
-<div class="prose dark:prose-invert">
-	{@html rendered_html}
+<div class="p-4 text-cq-text">
+	<div class="cq-card prose dark:prose-invert max-w-none p-6 text-cq-text">
+		{@html rendered_html}
+	</div>
 </div>

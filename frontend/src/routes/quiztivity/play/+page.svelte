@@ -18,8 +18,7 @@ SPDX-License-Identifier: MPL-2.0
 	let quiztivity = $state(data.quiztivity);
 	for (let i = 0; i < quiztivity.pages.length; i++) {
 		const id = (Math.random() + 1).toString(36).substring(7);
-		const type: QuizTivityTypes = quiztivity.pages[i].type as QuizTivityTypes;
-		quiztivity.pages[i] = { ...quiztivity.pages[i], id, type };
+		quiztivity.pages[i] = { ...quiztivity.pages[i], id };
 	}
 
 	let current_slide_index = $state(0);
