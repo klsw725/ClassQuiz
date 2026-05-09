@@ -5,7 +5,6 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	// import AudioPlayer from '$lib/play/audio_player.svelte';
 	import ControllerCodeDisplay from '$lib/components/controller/code.svelte';
 	import { getLocalization } from '$lib/i18n';
 	import GrayButton from '$lib/components/buttons/gray.svelte';
@@ -29,15 +28,13 @@ SPDX-License-Identifier: MPL-2.0
 
 	let fullscreen_open = $state(false);
 	const { t } = getLocalization();
-	let play_music = $state(false);
 
 	if (cqc_code === 'null') {
 		cqc_code = null;
 	}
 </script>
 
-<div class="w-full h-full">
-	<!-- <AudioPlayer bind:play={play_music} /> -->
+<div class="w-full h-full text-cq-text">
 	<div class="grid grid-cols-3 pt-12">
 		<!--mt-12 -->
 		<div class="flex justify-center">
@@ -55,7 +52,7 @@ SPDX-License-Identifier: MPL-2.0
 			onclick={() => (fullscreen_open = true)}
 			alt="QR code to join the game"
 			src="/api/v1/utils/qr/{game_pin}"
-			class="block mx-auto w-1/2 dark:bg-white shadow-2xl rounded-sm hover:cursor-pointer"
+			class="cq-card block mx-auto w-1/2 bg-white p-2 hover:cursor-pointer dark:bg-white"
 		/>
 		{#if cqc_code}
 			<div class="m-auto">
@@ -110,9 +107,9 @@ SPDX-License-Identifier: MPL-2.0
 	<div class="flex flex-row w-full mt-4 px-10 flex-wrap">
 		{#if game_state.players.length > 0}
 			{#each game_state.players as player}
-				<div class="p-2 m-2 border-2 border-[#B07156] rounded-sm hover:cursor-pointer">
+				<div class="cq-surface-muted p-2 m-2 hover:cursor-pointer">
 					<span
-						class="hover:line-through text-lg"
+						class="link-hover hover:line-through text-lg"
 						onclick={() => {
 							socket_game_controls.kick_player(player.username, game_state.players);
 						}}>{player.username}</span
@@ -126,7 +123,7 @@ SPDX-License-Identifier: MPL-2.0
 
 {#if fullscreen_open}
 	<div
-		class="fixed top-0 left-0 z-50 w-screen h-screen bg-black/50 flex p-2"
+		class="fixed top-0 left-0 z-50 w-screen h-screen bg-cq-text/50 flex p-2"
 		transition:fade|global={{ duration: 80 }}
 		onclick={() => (fullscreen_open = false)}
 		tabindex="0"
@@ -142,7 +139,7 @@ SPDX-License-Identifier: MPL-2.0
 		<img
 			alt="QR code to join the game"
 			src="/api/v1/utils/qr/{game_pin}"
-			class="object-contain rounded-sm m-auto h-full bg-white"
+			class="cq-card object-contain m-auto h-full bg-white p-2"
 		/>
 	</div>
 {/if}

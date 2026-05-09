@@ -206,36 +206,35 @@ SPDX-License-Identifier: MPL-2.0
 </svelte:head>
 
 {#if game_pin === '' || game_pin.length < 6}
-	<div class="flex flex-col justify-center align-center w-screen h-screen">
-		<form class="flex-col flex justify-center align-center mx-auto">
-			<h1 class="text-lg text-center">{$t('words.game_pin')}</h1>
+	<div class="flex min-h-screen w-screen items-center justify-center px-4 text-cq-text">
+		<form class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center">
+			<h1 class="text-lg font-semibold text-cq-text">{$t('words.game_pin')}</h1>
 			<input
-				class="border border-gray-400 self-center text-center text-black ring-0 outline-hidden p-2 rounded-lg focus:shadow-2xl transition-all"
+				class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-2xl tracking-widest text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
 				bind:value={game_pin}
 				maxlength="6"
 				inputmode="numeric"
 			/>
 			<!--				use:tippy={{content: "Please enter the game pin", sticky: true, placement: 'top'}}-->
 
-			<br />
 			<div class="mt-2">
 				<BrownButton disabled={game_pin.length < 6}>{$t('words.submit')}</BrownButton>
 			</div>
 		</form>
 	</div>
 {:else}
-	<div class="flex flex-col justify-center align-center w-screen h-screen">
-		<form onsubmit={setUsername} class="flex-col flex justify-center align-center mx-auto">
-			<h1 class="text-lg text-center">{$t('words.username')}</h1>
+	<div class="flex min-h-screen w-screen items-center justify-center px-4 text-cq-text">
+		<form onsubmit={setUsername} class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center">
+			<h1 class="text-lg font-semibold text-cq-text">{$t('words.username')}</h1>
 			<input
-				class="border border-gray-400 self-center text-center text-black ring-0 outline-hidden p-2 rounded-lg focus:shadow-2xl transition-all"
+				class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
 				bind:value={username}
 				maxlength="17"
 			/>
 			{#if custom_field}
-				<h1 class="text-lg text-center">{custom_field}</h1>
+				<h1 class="text-lg font-semibold text-cq-text">{custom_field}</h1>
 				<input
-					class="border border-gray-400 self-center text-center text-black ring-0 outline-hidden p-2 rounded-lg focus:shadow-2xl transition-all"
+					class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
 					bind:value={custom_field_value}
 				/>
 			{/if}

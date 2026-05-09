@@ -14,18 +14,18 @@ SPDX-License-Identifier: MPL-2.0
 	let { title, description, cover_image }: Props = $props();
 </script>
 
-<div class="flex flex-col justify-center w-screen h-screen">
-	<h1 class="text-7xl text-center">{@html title}</h1>
-	<p class="text-3xl pt-8 text-center">{@html description}</p>
-	{#if cover_image}
-		<div class="flex justify-center align-middle items-center">
-			<div class="h-[30vh] m-auto w-auto mt-12">
+<div class="flex min-h-screen w-screen items-center justify-center p-6 text-cq-text">
+	<div class="cq-card flex w-full max-w-5xl flex-col items-center p-8 text-center lg:p-10">
+		<h1 class="text-5xl font-bold text-cq-text lg:text-7xl">{@html title}</h1>
+		<p class="pt-6 text-2xl text-cq-muted lg:text-3xl">{@html description}</p>
+		{#if cover_image}
+			<div class="cq-surface-muted mt-10 flex max-h-[32vh] w-fit items-center justify-center p-3">
 				<img
-					class="max-h-full max-w-full block"
+					class="block max-h-[30vh] max-w-full"
 					src="/api/v1/storage/download/{cover_image}"
 					alt="Not provided"
 				/>
 			</div>
-		</div>
-	{/if}
+		{/if}
+	</div>
 </div>

@@ -18,31 +18,25 @@ SPDX-License-Identifier: MPL-2.0
 	in:fly|global={{ x: 100 }}
 	out:fly|global={{ x: -100 }}
 >
-	<div class="rounded-lg bg-white w-full h-full border-gray-500 dark:bg-gray-700">
-		<div class="h-fit bg-gray-300 rounded-t-lg dark:bg-gray-500">
+	<div class="cq-card h-full w-full overflow-hidden">
+		<div class="cq-surface-muted h-fit rounded-none border-x-0 border-t-0">
 			<div class="flex align-middle p-4 gap-3">
-				<span
-					class="inline-block bg-gray-600 w-4 h-4 rounded-full hover:bg-red-400 transition"
-				></span>
-				<span
-					class="inline-block bg-gray-600 w-4 h-4 rounded-full hover:bg-yellow-400 transition"
-				></span>
-				<span
-					class="inline-block bg-gray-600 w-4 h-4 rounded-full hover:bg-green-400 transition"
-				></span>
+				<span class="inline-block bg-cq-muted w-4 h-4 rounded-full hover:bg-red-400 transition"></span>
+				<span class="inline-block bg-cq-muted w-4 h-4 rounded-full hover:bg-yellow-400 transition"></span>
+				<span class="inline-block bg-cq-muted w-4 h-4 rounded-full hover:bg-green-400 transition"></span>
 			</div>
 		</div>
-		<div class="dark:bg-gray-700">
+		<div>
 			<div class="flex justify-center pt-10 w-full">
 				<p
-					class="p-3 rounded-lg border-gray-500 border text-center w-11/12 lg:w-1/3 text-lg font-semibold dark:bg-gray-500"
+					class="cq-surface-muted p-3 text-center w-11/12 lg:w-1/3 text-lg font-semibold text-cq-text"
 				>
 					{@html data.title}
 				</p>
 			</div>
 			<div class="flex justify-center pt-10 w-full max-h-32">
 				<p
-					class="p-3 rounded-lg border-gray-500 border text-center w-11/12 lg:w-1/3 h-20 resize-none dark:bg-gray-500"
+					class="cq-surface-muted p-3 text-center w-11/12 lg:w-1/3 h-20 resize-none text-cq-muted"
 				>
 					{@html data.description}
 				</p>
@@ -61,7 +55,7 @@ SPDX-License-Identifier: MPL-2.0
 					/>
 				</div>
 			{/if}
-			<div class="pt-10 w-full flex justify-center">
+			<div class="pt-10 w-full flex justify-center text-cq-muted">
 				{#if data.public}
 					<svg
 						class="w-8 h-8 inline-block"

@@ -43,13 +43,11 @@ SPDX-License-Identifier: MPL-2.0
 	let sorted_scores = $derived(sortObjectbyValue(scores));
 </script>
 
-<div>
-	<div class="flex justify-center h-screen">
-		<div class="m-auto flex flex-col">
-			<p class="p-4 bg-black/40 rounded-lg text-2xl">
-				+{score_by_username[username] ?? '0'}
-			</p>
-			<p>Total score: {sorted_scores[username] ?? '0'}</p>
-		</div>
+<div class="flex min-h-screen items-center justify-center px-4 text-cq-text">
+	<div class="cq-card flex w-full max-w-sm flex-col gap-4 p-6 text-center">
+		<p class="cq-surface-muted p-4 text-3xl font-bold text-cq-text">
+			+{score_by_username[username] ?? '0'}
+		</p>
+		<p class="text-cq-muted">Total score: {sorted_scores[username] ?? '0'}</p>
 	</div>
 </div>

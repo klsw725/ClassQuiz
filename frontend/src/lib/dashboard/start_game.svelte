@@ -94,13 +94,13 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div
-	class="fixed top-0 left-0 flex justify-center w-screen h-screen bg-black/60 z-50 text-black"
+	class="fixed top-0 left-0 flex justify-center w-screen h-screen bg-black/60 z-50 text-cq-text"
 	transition:fade|global={{ duration: 100 }}
 	onclick={on_parent_click}
 >
 	<div
-		class="w-5/6 h-5/6 bg-black m-auto rounded-lg shadow-lg p-4 flex flex-col"
-		style="background-image: url({StartGameBackground}); background-color: #DFDBE5;"
+		class="cq-card w-5/6 h-5/6 m-auto p-4 flex flex-col"
+		style="background-image: url({StartGameBackground});"
 	>
 		<div class="flex justify-center w-full">
 			<label
@@ -116,9 +116,9 @@ SPDX-License-Identifier: MPL-2.0
 					class="sr-only peer"
 				/>
 				<span
-					class="w-14 h-7 bg-gray-200 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+					class="w-14 h-7 cq-surface-muted peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-cq-brand rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cq-surface after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-cq-surface after:border-cq-border after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-cq-border peer-checked:bg-cq-brand"
 				></span>
-				<span class="ml-3 text-sm font-medium text-gray-900"
+				<span class="ml-3 text-sm font-medium text-cq-text"
 					>Captcha {captcha_selected ? 'enabled' : 'disabled'}</span
 				>
 			</label>
@@ -134,7 +134,7 @@ SPDX-License-Identifier: MPL-2.0
 
 		<div class="grid grid-cols-2 gap-8 my-auto">
 			<div
-				class="rounded-lg bg-white shadow-lg cursor-pointer transition-all p-2"
+				class="cq-card cq-card-interactive cursor-pointer p-2"
 				class:opacity-50={selected_game_mode !== 'kahoot'}
 				onclick={() => {
 					selected_game_mode = 'kahoot';
@@ -146,7 +146,7 @@ SPDX-License-Identifier: MPL-2.0
 				</p>
 			</div>
 			<div
-				class="rounded-lg bg-white shadow-lg cursor-pointer transition-all p-2"
+				class="cq-card cq-card-interactive cursor-pointer p-2"
 				class:opacity-50={selected_game_mode !== 'normal'}
 				onclick={() => {
 					selected_game_mode = 'normal';
@@ -162,7 +162,7 @@ SPDX-License-Identifier: MPL-2.0
 			<label class="mr-4">{$t('result_page.custom_field')}</label>
 			<input
 				bind:value={custom_field}
-				class="rounded-lg p-2 outline-hidden placeholder:italic"
+				class="cq-surface p-2 outline-hidden placeholder:italic"
 				placeholder="Phone Number or Email"
 			/>
 		</div>
@@ -175,9 +175,9 @@ SPDX-License-Identifier: MPL-2.0
 					class="sr-only peer"
 				/>
 				<span
-					class="w-14 h-7 bg-gray-200 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+					class="w-14 h-7 cq-surface-muted peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-cq-brand rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cq-surface after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-cq-surface after:border-cq-border after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-cq-border peer-checked:bg-cq-brand"
 				></span>
-				<span class="ml-3 text-sm font-medium text-gray-900"
+				<span class="ml-3 text-sm font-medium text-cq-text"
 					><a
 						href="/controller"
 						target="_blank"
@@ -203,14 +203,14 @@ SPDX-License-Identifier: MPL-2.0
 					class="sr-only peer"
 				/>
 				<span
-					class="w-14 h-7 bg-gray-200 peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+					class="w-14 h-7 cq-surface-muted peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-cq-brand rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cq-surface after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-cq-surface after:border-cq-border after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-cq-border peer-checked:bg-cq-brand"
 				></span>
-				<span class="ml-3 text-sm font-medium text-gray-900"> Randomize answers</span>
+				<span class="ml-3 text-sm font-medium text-cq-text"> Randomize answers</span>
 			</label>
 		</div>
 
 		<button
-			class="mt-auto mx-auto bg-green-500 p-4 rounded-lg shadow-lg hover:bg-green-400 transition-all marck-script text-2xl"
+			class="accent-button mt-auto mx-auto w-fit marck-script text-2xl"
 			onclick={() => {
 				start_game(quiz_id);
 			}}

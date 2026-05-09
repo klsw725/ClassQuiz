@@ -30,7 +30,7 @@ SPDX-License-Identifier: MPL-2.0
 
 {#await get_quiz()}
 	<Spinner />
-{:then q}
+{:then _q}
 	<div class="h-full overflow-hidden">
 		{#if selected_question === -1}
 			<TitleScreen bind:data={quiz} />
@@ -40,16 +40,16 @@ SPDX-License-Identifier: MPL-2.0
 			{/key}
 		{/if}
 
-		<div class="grid grid-cols-2 h-fit px-20 mt-6 absolute bottom-0 w-full">
+		<div class="grid grid-cols-2 h-fit px-6 lg:px-20 mt-6 absolute bottom-0 w-full text-cq-text">
 			<button
-				class="flex justify-start transition-all disabled:opacity-60"
+				class="action-button flex w-fit justify-start transition-all disabled:opacity-60"
 				disabled={selected_question <= -1}
 				onclick={() => {
 					selected_question -= 1;
 				}}
 			>
 				<svg
-					class="w-16 h-16"
+						class="w-10 h-10"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -64,7 +64,7 @@ SPDX-License-Identifier: MPL-2.0
 				</svg>
 			</button>
 			<button
-				class="flex justify-end transition-all disabled:opacity-60"
+				class="action-button ml-auto flex w-fit justify-end transition-all disabled:opacity-60"
 				disabled={selected_question >= quiz.questions.length - 1}
 				onclick={() => {
 					reload_q();
@@ -72,7 +72,7 @@ SPDX-License-Identifier: MPL-2.0
 				}}
 			>
 				<svg
-					class="w-16 h-16"
+						class="w-10 h-10"
 					fill="none"
 					stroke="currentColor"
 					viewBox="0 0 24 24"
@@ -89,9 +89,13 @@ SPDX-License-Identifier: MPL-2.0
 		</div>
 	</div>
 {:catch e}
-	{#if e === 404 || e === 400}
-		<h1 class="text-center text-5xl">Quiz not found!</h1>
-	{:else}
-		<h1 class="text-center text-5xl">unknown error!</h1>
-	{/if}
+	<div class="flex min-h-screen items-center justify-center px-4 text-cq-text">
+		<div class="cq-card p-6 text-center">
+			{#if e === 404 || e === 400}
+				<h1 class="text-5xl font-bold text-cq-text">Quiz not found!</h1>
+			{:else}
+				<h1 class="text-5xl font-bold text-cq-text">unknown error!</h1>
+			{/if}
+		</div>
+	</div>
 {/await}

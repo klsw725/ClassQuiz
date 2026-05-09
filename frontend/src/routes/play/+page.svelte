@@ -8,9 +8,9 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import { socket } from '$lib/socket';
 	import JoinGame from '$lib/play/join.svelte';
-	import type { Answer, Question as QuestionType } from '$lib/quiz_types';
+	import type { Question as QuestionType } from '$lib/quiz_types';
 	import ShowTitle from '$lib/play/title.svelte';
-	import Question from '$lib/play/question.svelte';
+	import QuestionComponent from '$lib/play/question.svelte';
 	import { navbarVisible } from '$lib/stores.svelte.ts';
 	import ShowEndScreen from '$lib/play/admin/final_results.svelte';
 	import KahootResults from '$lib/play/results_kahoot.svelte';
@@ -20,7 +20,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	interface Props {
 		// Exports
-		data: any;
+		data: { game_pin: string };
 	}
 
 	let { data }: Props = $props();
@@ -31,7 +31,33 @@ SPDX-License-Identifier: MPL-2.0
 		started: boolean;
 	}
 
-	let game_mode = $state();
+	interface CheckCaptchaResponse {
+		game_mode: string;
+	}
+
+	interface GameData {
+		game_id: string;
+		started?: boolean;
+		title: string;
+		description: string;
+		cover_image?: string;
+		background_color?: string;
+	}
+
+	interface SetQuestionNumberPayload {
+		question: QuestionType;
+		question_index: string;
+	}
+
+	interface QuestionResult {
+		username: string;
+		answer: string;
+		right: boolean;
+		time_taken: number;
+		score: number;
+	}
+
+	let game_mode: string | undefined = $state();
 	let final_results: Array<null> | Array<Array<PlayerAnswer>> = $state([null]);
 
 	interface PlayerAnswer {
@@ -41,19 +67,19 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	// Variables init
-	let question_index = $state('');
-	let unique = $state({});
+	let question_index: string = $state('');
+	let unique: object = $state({});
 	navbarVisible.visible = false;
-	let answer_results: Array<Answer> = $state();
-	let gameData = $state();
-	let solution: QuestionType = $state();
+	let answer_results: QuestionResult[] | null | undefined = $state();
+	let gameData: GameData | undefined = $state();
+	let solution: QuestionType | undefined = $state();
 	let username = $state('');
-	let scores = $state({});
+	let scores: Record<string, number> = $state({});
 	let gameMeta: GameMeta = $state({
 		started: false
 	});
 
-	let question: Question = $state();
+	let question: QuestionType | undefined = $state();
 
 	let preventReload = true;
 
@@ -62,11 +88,9 @@ SPDX-License-Identifier: MPL-2.0
 		unique = {};
 	}
 
-	const confirmUnload = (event: Event) => {
+	const confirmUnload = (event: BeforeUnloadEvent) => {
 		if (preventReload) {
 			event.preventDefault();
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			event.returnValue = '';
 		}
 	};
@@ -88,12 +112,12 @@ SPDX-License-Identifier: MPL-2.0
 			game_pin: data.game_pin
 		});
 		const res = await fetch(`/api/v1/quiz/play/check_captcha/${game_pin}`);
-		const json = await res.json();
+		const json: CheckCaptchaResponse = await res.json();
 		game_mode = json.game_mode;
 	});
 
 	// Socket-events
-	socket.on('joined_game', (data) => {
+	socket.on('joined_game', (data: GameData) => {
 		gameData = data;
 		// eslint-disable-next-line no-undef
 		plausible('Joined Game', { props: { game_id: gameData.game_id } });
@@ -101,7 +125,7 @@ SPDX-License-Identifier: MPL-2.0
 			expires: 3600
 		});
 	});
-	socket.on('rejoined_game', (data) => {
+	socket.on('rejoined_game', (data: GameData) => {
 		gameData = data;
 		if (data.started) {
 			gameMeta.started = true;
@@ -117,7 +141,7 @@ SPDX-License-Identifier: MPL-2.0
 		}
 	});
 
-	socket.on('set_question_number', (data) => {
+	socket.on('set_question_number', (data: SetQuestionNumberPayload) => {
 		solution = undefined;
 		restart();
 		question = data.question;
@@ -129,7 +153,7 @@ SPDX-License-Identifier: MPL-2.0
 		gameMeta.started = true;
 	});
 
-	socket.on('question_results', (data) => {
+	socket.on('question_results', (data: QuestionResult[] | null) => {
 		restart();
 		answer_results = data;
 	});
@@ -146,12 +170,12 @@ SPDX-License-Identifier: MPL-2.0
 		Cookies.set('kicked', 'value', { expires: 1 });
 		window.location.reload();
 	});
-	socket.on('final_results', (data) => {
+	socket.on('final_results', (data: Array<Array<PlayerAnswer>>) => {
 		final_results = data;
 		Cookies.remove('joined_game');
 	});
 
-	socket.on('solutions', (data) => {
+	socket.on('solutions', (data: QuestionType) => {
 		solution = data;
 	});
 
@@ -167,7 +191,7 @@ SPDX-License-Identifier: MPL-2.0
 <div
 	class="min-h-screen min-w-full"
 	style="background: {bg_color ? bg_color : 'transparent'}"
-	class:text-black={bg_color}
+	class:text-cq-text={bg_color}
 >
 	<div>
 		{#if !gameMeta.started && gameData === undefined}
@@ -180,10 +204,10 @@ SPDX-License-Identifier: MPL-2.0
 				description={gameData.description}
 				cover_image={gameData.cover_image}
 			/>
-		{:else if gameMeta.started && gameData !== undefined && question_index !== '' && answer_results === undefined}
+		{:else if gameMeta.started && gameData !== undefined && question !== undefined && question_index !== '' && answer_results === undefined}
 			{#key unique}
-				<div class="text-black dark:text-black">
-					<Question bind:game_mode bind:question {question_index} {solution} />
+				<div class="text-cq-text">
+					<QuestionComponent bind:game_mode bind:question {question_index} {solution} />
 				</div>
 			{/key}
 		{:else if gameMeta.started && answer_results !== undefined}

@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { Question } from '$lib/quiz_types';
+	import type { OrderQuizAnswer, Question, RangeQuizAnswer } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { socket } from '$lib/socket';
 	import Spinner from '../Spinner.svelte';
@@ -93,7 +93,8 @@ SPDX-License-Identifier: MPL-2.0
 
 	let slider_value = $state([0]);
 	if (question.type === QuizQuestionType.RANGE) {
-		slider_value[0] = (question.answers.max - question.answers.min) / 2 + question.answers.min;
+		const range_answer = question.answers as RangeQuizAnswer;
+		slider_value[0] = (range_answer.max - range_answer.min) / 2 + range_answer.min;
 	}
 	const set_answer_if_not_set_range = (time) => {
 		if (question.type !== QuizQuestionType.RANGE) {
@@ -123,7 +124,7 @@ SPDX-License-Identifier: MPL-2.0
 	});
 	let circular_progress = $derived.by(() => {
 		try {
-			return 1 - ((100 / question.time) * parseInt(timer_res)) / 100;
+			return 1 - ((100 / parseInt(question.time)) * parseInt(timer_res)) / 100;
 		} catch {
 			return 0;
 		}
@@ -151,7 +152,7 @@ SPDX-License-Identifier: MPL-2.0
 			style="height: {question.image ? '33.333333' : '16.666667'}%"
 		>
 			<h1
-				class="lg:text-2xl text-lg text-center text-black dark:text-white mt-2 break-normal mb-2"
+				class="lg:text-2xl text-lg text-center text-cq-text mt-2 break-normal mb-2"
 			>
 				{@html question.question}
 			</h1>
@@ -169,7 +170,7 @@ SPDX-License-Identifier: MPL-2.0
 		{#if question.type === QuizQuestionType.ABCD || question.type === QuizQuestionType.VOTING}
 			<div class="w-full relative h-full" style="height: {get_div_height()}%">
 				<div
-					class="absolute top-0 bottom-0 left-0 right-0 m-auto rounded-full h-fit w-fit border-2 border-black shadow-2xl z-40"
+					class="cq-surface absolute top-0 bottom-0 left-0 right-0 m-auto h-fit w-fit rounded-full border-2 border-cq-border shadow-2xl z-40"
 				>
 					<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
 				</div>
@@ -177,7 +178,7 @@ SPDX-License-Identifier: MPL-2.0
 				<div class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-2 w-full p-4 h-full">
 					{#each question.answers as answer, i}
 						<button
-							class="rounded-lg h-full flex align-middle justify-center disabled:opacity-60 p-3 border-2 border-black"
+							class="rounded-lg h-full flex align-middle justify-center disabled:opacity-60 p-3 border-2 border-cq-border"
 							style="background-color: {answer.color ??
 								default_colors[i]}; color: {get_foreground_color(
 								answer.color ?? default_colors[i]
@@ -199,6 +200,7 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 			</div>
 		{:else if question.type === QuizQuestionType.RANGE}
+			{@const range_answer = question.answers as RangeQuizAnswer}
 			<span
 				class="fixed top-0 bg-red-500 h-8 transition-all"
 				style="width: {(100 / parseInt(question.time)) * parseInt(timer_res)}vw"
@@ -209,8 +211,8 @@ SPDX-License-Identifier: MPL-2.0
 				<div class:pointer-events-none={selected_answer !== undefined} class="mt-24">
 					<c.default
 						bind:values={slider_value}
-						bind:min={question.answers.min}
-						bind:max={question.answers.max}
+						bind:min={range_answer.min}
+						bind:max={range_answer.max}
 						id="pips-slider"
 						pips
 						float
@@ -219,7 +221,7 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 				<div class="flex justify-center">
 					<div class="w-1/2">
-						<BrownButton onclick={() => selectAnswer(slider_value[0])}
+						<BrownButton onclick={() => selectAnswer(String(slider_value[0]))}
 							>{$t('words.submit')}
 						</BrownButton>
 					</div>
@@ -232,14 +234,14 @@ SPDX-License-Identifier: MPL-2.0
 					style="width: {(100 / parseInt(question.time)) * parseInt(timer_res)}vw"
 				></span>
 				<div class="flex justify-center mt-10">
-					<p class="text-black dark:text-white">Enter your answer</p>
+					<p class="text-cq-text">Enter your answer</p>
 				</div>
 				<div class="flex justify-center m-2">
 					<input
 						type="text"
 						bind:value={text_input}
 						disabled={selected_answer !== undefined}
-						class="bg-gray-50 focus:ring text-gray-900 rounded-lg focus:ring-blue-500 block w-full p-2 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-500 outline-hidden transition text-center disabled:opacity-50 disabled:cursor-not-allowed"
+						class="cq-surface-muted block w-full p-2 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand disabled:cursor-not-allowed disabled:opacity-50"
 					/>
 				</div>
 
@@ -268,7 +270,7 @@ SPDX-License-Identifier: MPL-2.0
 			<div class="flex flex-col w-full h-full gap-4 px-4 py-6 mt-10">
 				{#each question.answers as answer, i (answer.id)}
 					<div
-						class="w-full h-fit flex-row rounded-lg p-2 align-middle"
+						class="cq-card w-full h-fit flex-row p-2 align-middle"
 						animate:flip={{ duration: 100 }}
 						style="background-color: {answer.color ?? '#b07156'}"
 					>
@@ -276,7 +278,7 @@ SPDX-License-Identifier: MPL-2.0
 							onclick={() => {
 								question.answers = swapArrayElements(question.answers, i, i - 1);
 							}}
-							class="disabled:opacity-50 shadow-lg bg-black/30 w-full flex justify-center rounded-lg p-2 hover:bg-black/20 transition"
+							class="action-button w-full flex justify-center p-2 disabled:opacity-50"
 							type="button"
 							aria-label="Move item up"
 							disabled={i === 0 || Boolean(selected_answer)}
@@ -298,13 +300,13 @@ SPDX-License-Identifier: MPL-2.0
 								/>
 							</svg>
 						</button>
-						<p class="w-full text-center p-2 text-2xl">{answer.answer}</p>
+						<p class="w-full text-center p-2 text-2xl text-cq-text">{answer.answer}</p>
 
 						<button
 							onclick={() => {
 								question.answers = swapArrayElements(question.answers, i, i + 1);
 							}}
-							class="disabled:opacity-50 shadow-lg bg-black/30 w-full flex justify-center rounded-lg p-2 hover:bg-black/20 transition"
+							class="action-button w-full flex justify-center p-2 disabled:opacity-50"
 							type="button"
 							aria-label="Move item down"
 							disabled={i === question.answers.length - 1 || Boolean(selected_answer)}
@@ -333,7 +335,7 @@ SPDX-License-Identifier: MPL-2.0
 						type="button"
 						disabled={Boolean(selected_answer)}
 						onclick={() => {
-							select_complex_answer(question.answers);
+							select_complex_answer(question.answers as OrderQuizAnswer[]);
 						}}>{$t('words.submit')}</BrownButton
 					>
 				</div>

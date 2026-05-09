@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { Question } from '$lib/quiz_types';
+	import type { Answer, Question } from '$lib/quiz_types';
 	import { get_foreground_color } from '$lib/helpers';
 	import { kahoot_icons } from '$lib/play/kahoot_mode_assets/kahoot_icons';
 	import CircularTimer from '$lib/play/circular_progress.svelte';
@@ -27,6 +27,7 @@ SPDX-License-Identifier: MPL-2.0
 		timer_res,
 		circular_progress
 	}: Props = $props();
+	let answers = question.answers as Answer[];
 	let _selected_answers = $state([false, false, false, false]);
 
 	const selectAnswer = (i: number) => {
@@ -37,7 +38,6 @@ SPDX-License-Identifier: MPL-2.0
 				selected_answer += String(i);
 			}
 		}
-		selected_answer = selected_answer;
 		console.log(_selected_answers, selected_answer);
 	};
 </script>
@@ -45,7 +45,7 @@ SPDX-License-Identifier: MPL-2.0
 <div class="w-full h-[95%]">
 	<!--
         <div
-            class="absolute top-0 bottom-0 left-0 right-0 m-auto rounded-full h-fit w-fit border-2 border-black shadow-2xl z-50"
+            class="cq-surface absolute top-0 bottom-0 left-0 right-0 m-auto h-fit w-fit rounded-full border-2 border-cq-border shadow-2xl z-50"
         >
             <CircularTimer
                 bind:text={timer_res}
@@ -55,15 +55,15 @@ SPDX-License-Identifier: MPL-2.0
         </div>
     -->
 	<div
-		class="absolute top-0 bottom-0 left-0 right-0 m-auto rounded-full h-fit w-fit border-2 border-black shadow-2xl z-40"
+		class="cq-surface absolute top-0 bottom-0 left-0 right-0 m-auto h-fit w-fit rounded-full border-2 border-cq-border shadow-2xl z-40"
 	>
 		<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
 	</div>
 
 	<div class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-2 w-full p-4 h-full">
-		{#each question.answers as answer, i}
+		{#each answers as answer, i}
 			<button
-				class="rounded-lg h-full flex align-middle justify-center disabled:opacity-60 p-3 border-2 border-black transition-all"
+				class="rounded-lg h-full flex align-middle justify-center disabled:opacity-60 p-3 border-2 border-cq-border transition-all"
 				style="background-color: {answer.color ??
 					default_colors[i]}; color: {get_foreground_color(
 					answer.color ?? default_colors[i]

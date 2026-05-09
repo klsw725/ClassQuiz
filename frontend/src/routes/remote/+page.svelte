@@ -7,7 +7,7 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import { page } from '$app/state';
 	import { socket } from '$lib/socket';
-	import type { QuizData } from '$lib/quiz_types';
+	import type { Answer, QuizData, VotingAnswer } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types.js';
 	import Spinner from '$lib/Spinner.svelte';
 	import CircularTimer from '$lib/play/circular_progress.svelte';
@@ -22,6 +22,8 @@ SPDX-License-Identifier: MPL-2.0
 	navbarVisible.visible = false;
 
 	const { t } = getLocalization();
+	const get_answer_options = (question: QuizData['questions'][number]): Array<Answer | VotingAnswer> =>
+		Array.isArray(question.answers) ? (question.answers as Array<Answer | VotingAnswer>) : [];
 	let timer_interval: NodeJS.Timeout;
 	let timer_res = $state(undefined);
 	let selected_question = $state(-1);
@@ -58,11 +60,9 @@ SPDX-License-Identifier: MPL-2.0
 		}, 1000);
 	};
 
-	const confirmUnload = (e: Event) => {
+	const confirmUnload = (e: BeforeUnloadEvent) => {
 		if (warnToLeave) {
 			e.preventDefault();
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			e.returnValue = '';
 		}
 	};
@@ -181,10 +181,10 @@ SPDX-License-Identifier: MPL-2.0
 {#if game_started}
 	{#if selected_question + 1 === game_data.questions.length && ((timer_res === '0' && question_results !== null) || game_data?.questions?.[selected_question]?.type === QuizQuestionType.SLIDE)}
 		{#if JSON.stringify(final_results) === JSON.stringify([null])}
-			<button onclick={get_final_results} class="admin-button">Get final results </button>
+			<button onclick={get_final_results} class="accent-button m-4 w-fit">Get final results </button>
 		{:else}
 			<div class="w-screen flex justify-center mt-16">
-				<button onclick={request_answer_export} class="admin-button"
+				<button onclick={request_answer_export} class="accent-button w-fit"
 					>{$t('admin_page.export_results')}</button
 				>
 			</div>
@@ -195,7 +195,7 @@ SPDX-License-Identifier: MPL-2.0
 				onclick={() => {
 					set_question_number(selected_question + 1);
 				}}
-				class="admin-button"
+				class="accent-button m-4 w-fit"
 				>Next Question ({selected_question + 2})
 			</button>
 		{/if}
@@ -205,11 +205,11 @@ SPDX-License-Identifier: MPL-2.0
 					onclick={() => {
 						set_question_number(selected_question + 1);
 					}}
-					class="admin-button"
+					class="accent-button m-4 w-fit"
 					>Next Question ({selected_question + 2})
 				</button>
 			{:else}
-				<button onclick={get_question_results} class="admin-button">Show results </button>
+				<button onclick={get_question_results} class="action-button m-4 w-fit">Show results </button>
 			{/if}
 		{/if}
 	{:else if selected_question !== -1}
@@ -218,18 +218,20 @@ SPDX-License-Identifier: MPL-2.0
 				onclick={() => {
 					set_question_number(selected_question + 1);
 				}}
-				class="admin-button"
+				class="accent-button m-4 w-fit"
 				>Next Question ({selected_question + 2})
 			</button>
 		{:else}
-			<button onclick={show_solutions} class="admin-button"
+			<button onclick={show_solutions} class="action-button m-4 w-fit"
 				>Stop time and show solutions
 			</button>
 		{/if}
 	{/if}
 	{#if selected_question === -1}
-		<h1>{game_data.title}</h1>
-		<p>{game_data.description}</p>
+		<div class="cq-card m-4 p-6 text-cq-text">
+			<h1 class="text-4xl font-bold">{game_data.title}</h1>
+			<p class="mt-2 text-cq-muted">{game_data.description}</p>
+		</div>
 	{:else if game_data.questions[selected_question].type === QuizQuestionType.SLIDE}
 		{#await import('$lib/play/admin/slide.svelte')}
 			<Spinner my_20={false} />
@@ -237,8 +239,8 @@ SPDX-License-Identifier: MPL-2.0
 			<c.default question={game_data.questions[selected_question]} />
 		{/await}
 	{:else}
-		<div class="flex flex-col justify-center w-screen h-1/6">
-			<h1 class="text-6xl text-center">
+		<div class="cq-card m-4 flex flex-col justify-center p-4 text-cq-text">
+			<h1 class="text-6xl text-center font-semibold">
 				{@html game_data.questions[selected_question].question}
 			</h1>
 			<!--			<span class='text-center py-2 text-lg'>{$t('admin_page.time_left')}: {timer_res}</span>-->
@@ -255,13 +257,15 @@ SPDX-License-Identifier: MPL-2.0
 					/>
 				</div>
 			{/if}
-			{#if game_data.questions[selected_question].type === QuizQuestionType.ABCD || game_data.questions[selected_question].type === QuizQuestionType.VOTING}
+			{#if (game_data.questions[selected_question].type === QuizQuestionType.ABCD || game_data.questions[selected_question].type === QuizQuestionType.VOTING) && Array.isArray(game_data.questions[selected_question].answers)}
+				{@const answer_options = get_answer_options(game_data.questions[selected_question])}
 				<div class="grid grid-cols-2 gap-2 w-full p-4">
-					{#each game_data.questions[selected_question].answers as answer, i}
+					{#each answer_options as answer, _i}
 						<div
-							class="rounded-lg h-fit flex"
+							class="cq-card h-fit flex"
 							style="background-color: {answer.color ?? '#B45309'}"
-							class:opacity-50={!answer.right &&
+							class:opacity-50={'right' in answer &&
+								!answer.right &&
 								game_data.questions[selected_question].type ===
 									QuizQuestionType.ABCD}
 						>
@@ -281,32 +285,34 @@ SPDX-License-Identifier: MPL-2.0
 			{#await import('$lib/play/admin/voting_results.svelte')}
 				<Spinner />
 			{:then c}
-				<c.default
-					bind:data={question_results}
-					bind:question={game_data.questions[selected_question]}
-				/>
+				<c.default data={question_results} question={game_data.questions[selected_question]} />
 			{/await}
 		{/if}
 	{/if}
 {:else}
-	<button onclick={start_game} class="admin-button">Start Game!</button>
+	<div class="flex min-h-screen items-center justify-center px-4 text-cq-text">
+		<div class="cq-card w-full max-w-md p-6 text-center">
+			<button onclick={start_game} class="accent-button w-fit">Start Game!</button>
 
-	<h2>Players:</h2>
-	{#await get_already_joined_players()}
-		<Spinner my_20={false} />
-	{:then _}
-		<div>
-			<ul>
-				{#each players as player}
-					<li>{player.username}</li>
-				{/each}
-			</ul>
+			<h2 class="mt-6 text-xl font-semibold text-cq-text">Players:</h2>
+			{#await get_already_joined_players()}
+				<Spinner my_20={false} />
+			{:then _}
+				<div class="cq-surface-muted mt-3 p-3 text-cq-muted">
+					<ul>
+						{#each players as player}
+							<li>{player.username}</li>
+						{/each}
+					</ul>
+				</div>
+			{/await}
 		</div>
-	{/await}
+	</div>
 {/if}
-<div class="fixed top-0 right-0">
+<div class="fixed top-0 right-0 p-3">
 	{#if control_visible}
 		<button
+			class="action-button w-fit"
 			onclick={() => {
 				socket.emit('set_control_visibility', { visible: false });
 			}}
@@ -314,6 +320,7 @@ SPDX-License-Identifier: MPL-2.0
 		</button>
 	{:else}
 		<button
+			class="action-button w-fit"
 			onclick={() => {
 				socket.emit('set_control_visibility', { visible: true });
 			}}

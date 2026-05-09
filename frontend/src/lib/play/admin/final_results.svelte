@@ -63,12 +63,12 @@ SPDX-License-Identifier: MPL-2.0
 		{/each}
 	</div>
 	{#if data[username]}
-		<div class="fixed bottom-0 left-0 flex justify-center w-full mb-6">
-			<div class="mx-auto p-2 border-[#B07156] border-4 rounded-sm">
-				<p class="text-center">{$t('play_page.your_score', { score: data[username] })}</p>
+		<div class="fixed bottom-0 left-0 flex justify-center w-full px-4 mb-6">
+			<div class="cq-card mx-auto p-4 text-cq-text">
+				<p class="text-center font-semibold">{$t('play_page.your_score', { score: data[username] })}</p>
 				{#each player_names as player, i}
 					{#if player === username}
-						<p class="text-center">{$t('play_page.your_place', { place: i + 1 })}</p>
+						<p class="text-center text-cq-muted">{$t('play_page.your_place', { place: i + 1 })}</p>
 					{/if}
 				{/each}
 			</div>

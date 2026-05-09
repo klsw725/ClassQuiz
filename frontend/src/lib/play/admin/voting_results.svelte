@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { Question } from '$lib/quiz_types';
+	import type { Answer, Question, VotingAnswer } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 
 	interface Props {
@@ -19,10 +19,13 @@ SPDX-License-Identifier: MPL-2.0
 	let quiz_colors = [];
 	let answer_correct: boolean[] = [];
 
-	for (const i of question.answers) {
+	const answer_options = Array.isArray(question.answers)
+		? (question.answers as Array<Answer | VotingAnswer>)
+		: [];
+	for (const i of answer_options) {
 		quiz_answers.push(i.answer);
 		quiz_colors.push(i.color);
-		answer_correct.push(i.right);
+		answer_correct.push(i.right ?? false);
 	}
 
 	let sorted_data = $state({});
@@ -49,7 +52,7 @@ SPDX-License-Identifier: MPL-2.0
 		<div class="flex gap-12">
 			{#each quiz_answers as answer, i}
 				<div
-					class="w-20 self-end flex justify-center border border-black shadow-xl rounded-sm"
+					class="cq-surface w-20 self-end flex justify-center shadow-xl"
 					class:shadow-blue-500={answer_correct[i] &&
 						question.type !== QuizQuestionType.VOTING}
 					class:shadow-yellow-500={!answer_correct[i] &&
@@ -59,7 +62,7 @@ SPDX-License-Identifier: MPL-2.0
 					style="height: {(sorted_data[answer] * 20) /
 						data.length}rem; background-color: {quiz_colors[i]
 						? quiz_colors[i]
-						: 'black'}"
+						: 'var(--cq-accent)'}"
 				></div>
 			{/each}
 		</div>

@@ -73,7 +73,7 @@ SPDX-License-Identifier: MPL-2.0
 	<div class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-2 w-full p-4">
 		{#each quiz_data.questions[selected_question].answers as answer, i}
 			<div
-				class="rounded-lg h-fit flex border-2 border-black"
+				class="rounded-lg h-fit flex border-2 border-cq-border"
 				style="background-color: {answer.color ?? default_colors[i]};"
 				class:opacity-50={!answer.right &&
 					timer_res === '0' &&
@@ -97,9 +97,9 @@ SPDX-License-Identifier: MPL-2.0
 {:else if quiz_data.questions[selected_question].type === QuizQuestionType.TEXT}
 	{#if timer_res === '0'}
 		<div class="grid grid-cols-2 gap-2 w-full p-4">
-			{#each quiz_data.questions[selected_question].answers as answer, i}
-				<div class="rounded-lg h-fit flex bg-[#B07156]">
-					<span class="text-center text-2xl px-2 py-4 w-full text-black"
+			{#each quiz_data.questions[selected_question].answers as answer, _i}
+				<div class="cq-surface-muted h-fit flex">
+					<span class="text-center text-2xl px-2 py-4 w-full text-cq-text"
 						>{answer.answer}</span
 					>
 					<span class="pl-4 w-10"></span>

@@ -15,14 +15,14 @@ SPDX-License-Identifier: MPL-2.0
 	let angle = $derived(360 * progress);
 
 	// Adapt the logic according to the approach
-	let background = $derived(`radial-gradient(white 50%, transparent 51%),
-	    conic-gradient(transparent 0deg ${angle}deg, gainsboro ${angle}deg 360deg),
+	let background = $derived(`radial-gradient(var(--cq-surface) 50%, transparent 51%),
+	    conic-gradient(transparent 0deg ${angle}deg, var(--cq-border) ${angle}deg 360deg),
 	    conic-gradient(${color} 0deg, ${color} 90deg, ${color} 180deg, ${color});`);
 
 	let cssVarStyles = $derived(`--background:${background}`);
 </script>
 
-<div id="progress-circle" style={cssVarStyles} class="transition-all text-4xl text-black">
+<div id="progress-circle" style={cssVarStyles} class="transition-all text-4xl text-cq-text">
 	{text}
 </div>
 

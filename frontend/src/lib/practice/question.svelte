@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { OrderQuizAnswer, Question } from '$lib/quiz_types';
+	import type { OrderQuizAnswer, Question, RangeQuizAnswer } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { fly } from 'svelte/transition';
 	import { getLocalization } from '$lib/i18n';
@@ -42,13 +42,12 @@ SPDX-License-Identifier: MPL-2.0
 		}, 1000);
 	};
 	let slider_value = $state([0]);
+	let slider_values = $state([0, 0]);
 	if (question.type === QuizQuestionType.RANGE) {
-		slider_value[0] = (question.answers.max - question.answers.min) / 2 + question.answers.min;
+		const range_answer = question.answers as RangeQuizAnswer;
+		slider_value[0] = (range_answer.max - range_answer.min) / 2 + range_answer.min;
+		slider_values = [range_answer.min_correct ?? 0, range_answer.max_correct ?? 0];
 	}
-	let slider_values = $state([
-		question.answers.min_correct ?? 0,
-		question.answers.max_correct ?? 0
-	]);
 
 	let text_input = $state();
 	timer(question.time);
@@ -103,7 +102,7 @@ SPDX-License-Identifier: MPL-2.0
 	in:fly|global={{ x: 100 }}
 	out:fly|global={{ x: -100 }}
 >
-	<h1 class="text-3xl text-center">{@html question.question}</h1>
+	<h1 class="text-3xl text-center font-semibold text-cq-text">{@html question.question}</h1>
 	{#if question.image !== null}
 		<div>
 			<MediaComponent
@@ -112,11 +111,11 @@ SPDX-License-Identifier: MPL-2.0
 			/>
 		</div>
 	{/if}
-	<p class="text-center">{timer_res}</p>
+	<p class="text-center text-cq-muted">{timer_res}</p>
 	{#if question.type === QuizQuestionType.ABCD}
 		{#if show_results}
 			<div>
-				{#each question.answers as answer, i}
+				{#each question.answers as answer, _i}
 					<button
 						disabled
 						class:bg-green-500={question.answers[i].right}
@@ -134,7 +133,7 @@ SPDX-License-Identifier: MPL-2.0
 					<button
 						disabled={selected_answer !== undefined || timer_res === '0'}
 						type="button"
-						class="p-2 rounded-lg flex justify-center w-full transition bg-amber-300 my-5 disabled:grayscale text-black"
+						class="cq-surface-muted cq-card-interactive p-2 flex justify-center w-full transition my-5 disabled:grayscale text-cq-text"
 						onclick={() => {
 							selected_answer = i;
 							timer_res = '0';
@@ -143,7 +142,7 @@ SPDX-License-Identifier: MPL-2.0
 				{/each}
 				{#if timer_res === '0'}
 					<button
-						class="bg-orange-500 p-2 rounded-lg flex justify-center w-full transition my-5 text-black"
+						class="action-button flex justify-center w-full my-5"
 						type="button"
 						onclick={() => {
 							show_results = true;
@@ -153,6 +152,7 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 		{/if}
 	{:else if question.type === QuizQuestionType.RANGE}
+		{@const range_answer = question.answers as RangeQuizAnswer}
 		{#if timer_res === '0'}
 			{#await import('svelte-range-slider-pips')}
 				<Spinner />
@@ -160,8 +160,8 @@ SPDX-License-Identifier: MPL-2.0
 				<div class="grayscale pointer-events-none w-full">
 					<c.default
 						bind:values={slider_values}
-						bind:min={question.answers.min}
-						bind:max={question.answers.max}
+						bind:min={range_answer.min}
+						bind:max={range_answer.max}
 						pips
 						float
 						all="label"
@@ -175,8 +175,8 @@ SPDX-License-Identifier: MPL-2.0
 				<div class:pointer-events-none={selected_answer !== undefined}>
 					<c.default
 						bind:values={slider_value}
-						bind:min={question.answers.min}
-						bind:max={question.answers.max}
+						bind:min={range_answer.min}
+						bind:max={range_answer.max}
 						pips
 						float
 						all="label"
@@ -185,7 +185,7 @@ SPDX-License-Identifier: MPL-2.0
 				<div class="flex justify-center">
 					<button
 						type="button"
-						class="w-1/3 text-3xl bg-[#B07156] my-2 disabled:opacity-60 rounded-lg p-1 transition"
+						class="accent-button my-2 w-1/3 text-3xl disabled:opacity-60"
 						disabled={selected_answer !== undefined}
 						onclick={() => {
 							selected_answer = slider_value[0];
@@ -201,7 +201,7 @@ SPDX-License-Identifier: MPL-2.0
 			<button
 				type="button"
 				disabled={selected_answer !== undefined || timer_res === '0'}
-				class="p-2 rounded-lg flex justify-center w-full transition bg-amber-300 my-5 disabled:grayscale text-black"
+				class="cq-surface-muted cq-card-interactive p-2 flex justify-center w-full transition my-5 disabled:grayscale text-cq-text"
 				onclick={() => {
 					selected_answer = i;
 					timer_res = '0';
@@ -213,17 +213,17 @@ SPDX-License-Identifier: MPL-2.0
 		{/if}
 	{:else if question.type === QuizQuestionType.SLIDE}
 		{#await import('$lib/play/admin/slide.svelte')}
-			<Spinner my={false} />
+			<Spinner my_20={false} />
 		{:then c}
 			<div class="max-h-[90%] max-w-[90%]">
-				<c.default bind:question />
+				<c.default {question} />
 			</div>
 		{/await}
 	{:else if question.type === QuizQuestionType.TEXT}
 		{#if timer_res === '0'}
-			{#each question.answers as answer, i}
+			{#each question.answers as answer, _i}
 				<div
-					class="p-2 rounded-lg flex justify-center w-full transition bg-gray-200 my-5 text-black"
+					class="cq-surface-muted p-2 flex justify-center w-full transition my-5 text-cq-text"
 				>
 					{answer.answer}
 				</div>
@@ -233,14 +233,14 @@ SPDX-License-Identifier: MPL-2.0
 				<input
 					type="text"
 					bind:value={text_input}
-					class="bg-gray-50 focus:ring text-gray-900 rounded-lg focus:ring-blue-500 block w-full p-2 dark:bg-gray-700 dark:text-white dark:focus:ring-blue-500 outline-hidden transition text-center"
+					class="cq-surface-muted block w-full p-2 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand"
 				/>
 			</div>
 			<div class="flex justify-center">
 				<button
 					type="button"
 					disabled={!text_input}
-					class="w-1/3 text-3xl bg-[#B07156] my-2 disabled:opacity-60 rounded-lg p-1 transition"
+					class="accent-button my-2 w-1/3 text-3xl disabled:opacity-60"
 					onclick={() => {
 						selected_answer = text_input;
 						timer_res = '0';
@@ -311,7 +311,7 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 			{/each}
 			<button
-				class="bg-[#B07156] hover:bg-amber-700 text-white font-bold py-2 px-4 rounded-lg mt-2 transition w-full"
+				class="accent-button mt-2 w-full font-bold"
 				type="button"
 				disabled={timer_res === '0'}
 				onclick={() => {
@@ -341,7 +341,7 @@ SPDX-License-Identifier: MPL-2.0
 					<button
 						type="button"
 						disabled={selected_answer !== undefined || timer_res === '0'}
-						class="p-2 rounded-lg flex justify-center w-full transition bg-amber-300 my-5 disabled:grayscale text-black opacity-50"
+						class="cq-surface-muted cq-card-interactive p-2 flex justify-center w-full transition my-5 disabled:grayscale text-cq-text opacity-50"
 						class:opacity-100={check_choice_selected[i]}
 						onclick={() => {
 							check_choice_selected[i] = !check_choice_selected[i];
@@ -357,7 +357,7 @@ SPDX-License-Identifier: MPL-2.0
 				{#if timer_res === '0'}
 					<button
 						type="button"
-						class="bg-orange-500 p-2 rounded-lg flex justify-center w-full transition my-5 text-black"
+						class="action-button flex justify-center w-full my-5"
 						onclick={() => {
 							show_results = true;
 						}}>{$t('admin_page.get_results')}</button
