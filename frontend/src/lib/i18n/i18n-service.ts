@@ -50,12 +50,11 @@ export class I18nService {
 				escapeValue: false
 			},
 			returnEmptyString: false,
-			simplifyPluralSuffix: true,
 			detection: {
 				order: ['querystring', 'cookie', 'localStorage', 'navigator'],
 				lookupQuerystring: 'lng',
 				lookupLocalStorage: 'language',
-				lookupSessionStorage: true
+				lookupSessionStorage: 'language'
 			}
 		});
 		this.i18n.addResourceBundle('en', 'translation', en);

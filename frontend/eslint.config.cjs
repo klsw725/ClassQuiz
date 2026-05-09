@@ -13,7 +13,7 @@ const svelte = require('eslint-plugin-svelte');
 module.exports = defineConfig([
 	js.configs.recommended,
 	svelte.configs.recommended,
-	globalIgnores(['**/*.cjs', 'src/app.html']),
+	globalIgnores(['**/*.cjs', 'src/app.html', '.svelte-kit/**', 'build/**']),
 	{
 		languageOptions: {
 			sourceType: 'module',
@@ -26,7 +26,18 @@ module.exports = defineConfig([
 		}
 	},
 	{
-		files: ['**/*.{ts,js}'],
+		files: ['**/*.js'],
+		rules: {
+			'no-unused-vars': [
+				'error',
+				{
+					argsIgnorePattern: '^_.*'
+				}
+			]
+		}
+	},
+	{
+		files: ['**/*.{ts,tsx}'],
 		languageOptions: {
 			parser: tsParser
 		},
@@ -36,12 +47,8 @@ module.exports = defineConfig([
 		},
 
 		rules: {
-			'no-unused-vars': [
-				'error',
-				{
-					argsIgnorePattern: '^_.*'
-				}
-			],
+			'no-undef': 'off',
+			'no-unused-vars': 'off',
 
 			'@typescript-eslint/no-unused-vars': [
 				'error',
@@ -52,19 +59,36 @@ module.exports = defineConfig([
 		}
 	},
 	{
+		files: ['**/*.d.ts'],
+		languageOptions: {
+			parser: tsParser
+		},
+
+		plugins: {
+			'@typescript-eslint': typescriptEslint
+		},
+
+		rules: {
+			'no-undef': 'off',
+			'no-unused-vars': 'off',
+			'@typescript-eslint/no-unused-vars': 'off'
+		}
+	},
+	{
 		files: ['**/*.svelte'],
 		languageOptions: {
 			parserOptions: {
 				parser: tsParser,
 				extraFileExtensions: ['.svelte']
 			}
-		}
-	},
-	{
-		files: ['**/*.svelte', '**/*.ts', '**/*.js'],
+		},
+
+		plugins: {
+			'@typescript-eslint': typescriptEslint
+		},
 
 		rules: {
-			'a11y-click-events-have-key-events': 'off',
+			'no-undef': 'off',
 			'no-unused-vars': [
 				'error',
 				{
@@ -77,12 +101,16 @@ module.exports = defineConfig([
 					argsIgnorePattern: '^_.*'
 				}
 			],
+			'svelte/no-navigation-without-resolve': 'warn',
 			'svelte/no-at-html-tags': 'warn',
 			'svelte/require-each-key': 'warn'
-		},
+		}
+	},
+	{
+		files: ['**/*.svelte', '**/*.ts', '**/*.js'],
 
-		plugins: {
-			'@typescript-eslint': typescriptEslint
+		rules: {
+			'a11y-click-events-have-key-events': 'off'
 		}
 	}
 ]);

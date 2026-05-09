@@ -21,6 +21,7 @@
 		"@ffmpeg/ffmpeg": "^0.12.15",
 		"@ffmpeg/util": "^0.12.2",
 		"@fontsource/marck-script": "^5.2.8",
+		"@opentelemetry/api": "^1.9.1",
 		"@sentry/browser": "^10.22.0",
 		"@sentry/tracing": "^7.120.4",
 		"@simplewebauthn/browser": "^13.2.2",

@@ -19,3 +19,10 @@ interface ImportMetaEnv {
 interface ImportMeta {
 	readonly env: ImportMetaEnv;
 }
+
+declare const plausible: (
+	eventName: string,
+	options?: {
+		props?: Record<string, string | number | boolean | null | undefined>;
+	}
+) => void;

@@ -11,6 +11,7 @@ export enum ElementTypes {
 }
 
 export interface QuizData {
+	id?: string;
 	title: string;
 	description: string;
 	quiz_id: string;
@@ -45,42 +46,59 @@ export interface RangeQuizAnswer {
 	max_correct: number;
 }
 
-export interface TextQuizAnswer {
+export interface GeneralQuizAnswer {
+	answer: string;
+	right?: boolean;
+	color?: string;
+	image?: string;
+	case_sensitive?: boolean;
+	id?: number;
+	width?: number;
+	height?: number;
+}
+
+export interface TextQuizAnswer extends GeneralQuizAnswer {
 	answer: string;
 	case_sensitive: boolean;
 }
 
-export interface OrderQuizAnswer {
+export interface OrderQuizAnswer extends GeneralQuizAnswer {
 	answer: string;
 	color?: string;
 	id?: number;
+	width?: number;
+	height?: number;
 }
 
-export interface Question {
+export interface BaseQuestion {
 	time: string;
 	points: number;
 	question: string;
-	type?: QuizQuestionType;
 	image?: string;
-	answers: Answers;
 	hide_results?: boolean;
 }
 
-export type Answers =
-	| Answer[]
-	| RangeQuizAnswer
-	| VotingAnswer[]
-	| string
-	| TextQuizAnswer[]
-	| OrderQuizAnswer[];
+export type Question =
+	| (BaseQuestion & { type: QuizQuestionType.RANGE; answers: RangeQuizAnswer })
+	| (BaseQuestion & { type: QuizQuestionType.SLIDE; answers: string })
+	| (BaseQuestion & { type: QuizQuestionType.TEXT; answers: TextQuizAnswer[] })
+	| (BaseQuestion & { type: QuizQuestionType.ORDER; answers: OrderQuizAnswer[] })
+	| (BaseQuestion & {
+			type: QuizQuestionType.ABCD | QuizQuestionType.CHECK;
+			answers: Answer[];
+	  })
+	| (BaseQuestion & { type: QuizQuestionType.VOTING; answers: VotingAnswer[] })
+	| (BaseQuestion & { type?: undefined; answers: Answer[] });
 
-export interface Answer {
+export type Answers = GeneralQuizAnswer[] | RangeQuizAnswer | string;
+
+export interface Answer extends GeneralQuizAnswer {
 	right: boolean;
 	answer: string;
 	color?: string;
 }
 
-export interface VotingAnswer {
+export interface VotingAnswer extends GeneralQuizAnswer {
 	answer: string;
 	image?: string;
 	color?: string;
