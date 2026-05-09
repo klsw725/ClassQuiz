@@ -8,8 +8,16 @@ const config = {
 	theme: {
 		extend: {
 			colors: {
+				cq: {
+					brand: 'var(--cq-brand)',
+					accent: 'var(--cq-accent)',
+					surface: 'var(--cq-surface)',
+					border: 'var(--cq-border)',
+					text: 'var(--cq-text)',
+					muted: 'var(--cq-text-muted)'
+				},
 				green: {
-					600: '#009444'
+					600: 'var(--cq-brand)'
 				}
 			},
 			typography: (theme) => ({
