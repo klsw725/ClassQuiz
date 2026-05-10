@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { OrderQuizAnswer, Question, RangeQuizAnswer } from '$lib/quiz_types';
+	import type { Answer, OrderQuizAnswer, Question, RangeQuizAnswer, TextQuizAnswer } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { socket } from '$lib/socket';
 	import Spinner from '../Spinner.svelte';
@@ -23,7 +23,7 @@ SPDX-License-Identifier: MPL-2.0
 		question: Question;
 		game_mode: any;
 		question_index: string | number;
-		solution: any;
+		solution: Question | undefined;
 	}
 
 	let {
@@ -141,20 +141,89 @@ SPDX-License-Identifier: MPL-2.0
 			return '100';
 		}
 	};
+
+	const get_question_area_height = (): string => {
+		if (solution !== undefined) {
+			return '50';
+		}
+		return question.image ? '33.333333' : '16.666667';
+	};
+
+	const revealed_answers = $derived.by((): string[] => {
+		if (solution === undefined) {
+			return [];
+		}
+
+		const solution_type = solution.type ?? QuizQuestionType.ABCD;
+
+		if (solution_type === QuizQuestionType.RANGE) {
+			const answer = solution.answers as RangeQuizAnswer;
+			return [`${answer.min_correct} - ${answer.max_correct}`];
+		}
+
+		if (solution_type === QuizQuestionType.TEXT) {
+			return (solution.answers as TextQuizAnswer[]).map((answer) => answer.answer);
+		}
+
+		if (solution_type === QuizQuestionType.ORDER) {
+			return (solution.answers as OrderQuizAnswer[]).map((answer) => answer.answer);
+		}
+
+		if (solution_type === QuizQuestionType.ABCD || solution_type === QuizQuestionType.CHECK) {
+			return (solution.answers as Answer[])
+				.filter((answer) => answer.right)
+				.map((answer) => answer.answer);
+		}
+
+		return [];
+	});
+
+	const is_voting_reveal = $derived(
+		solution !== undefined && (solution.type ?? QuizQuestionType.ABCD) === QuizQuestionType.VOTING
+	);
+
 	const default_colors = ['#D6EDC9', '#B07156', '#7F7057', '#4E6E58'];
 </script>
 
 <div class="h-screen w-screen">
-	{#if game_mode === 'normal' || (game_mode === 'kahoot' && question.image)}
+	{#if solution !== undefined || game_mode === 'normal' || (game_mode === 'kahoot' && question.image)}
 		<div
 			class="flex flex-col justify-start"
-			class:mt-10={[QuizQuestionType.RANGE, QuizQuestionType.ORDER, QuizQuestionType.TEXT]}
-			style="height: {question.image ? '33.333333' : '16.666667'}%"
+			class:mt-10={solution === undefined &&
+				[QuizQuestionType.RANGE, QuizQuestionType.ORDER, QuizQuestionType.TEXT].includes(
+					question.type
+				)}
+			style="height: {get_question_area_height()}%"
 		>
 			<h1 class="lg:text-2xl text-lg text-center text-cq-text mt-2 break-normal mb-2">
 				{@html question.question}
 			</h1>
-			{#if question.image}
+			{#if solution !== undefined}
+				<section class="mx-auto flex w-full max-w-3xl flex-col gap-3 px-4 text-center">
+					<p class="text-sm font-semibold tracking-wide text-cq-muted uppercase">
+						{#if is_voting_reveal}
+							{$t('words.voting')} {$t('words.result')}
+						{:else}
+							{$t('words.correct')} {$t('words.answer')}
+						{/if}
+					</p>
+					{#if is_voting_reveal}
+						<div class="cq-card cq-surface-muted border-2 border-cq-border p-5 text-cq-text">
+							<p class="text-2xl font-semibold">{$t('words.voting')}</p>
+						</div>
+					{:else}
+						<ul class="flex flex-col gap-2" aria-label="{$t('words.correct')} {$t('words.answer')}">
+							{#each revealed_answers as answer, i (i)}
+								<li
+									class="cq-card cq-surface-muted border-2 border-cq-border px-4 py-3 text-xl font-semibold text-cq-text"
+								>
+									{answer}
+								</li>
+							{/each}
+						</ul>
+					{/if}
+				</section>
+			{:else if question.image}
 				<div class="max-h-full">
 					<MediaComponent
 						src={question.image}
@@ -369,5 +438,16 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 			{/await}
 		{/if}
+	{:else if solution !== undefined}
+		<section class="flex h-1/2 items-center justify-center px-4 text-cq-text" aria-live="polite">
+			<div class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center shadow-2xl md:p-8">
+				<p
+					class="cq-surface-muted rounded-lg border-2 border-cq-border px-5 py-4 text-2xl font-semibold text-cq-brand md:text-3xl"
+				>
+					{$t('words.score')} {$t('words.public')}
+				</p>
+				<p class="text-cq-muted">{$t('words.result')} {$t('words.public')}</p>
+			</div>
+		</section>
 	{/if}
 </div>
