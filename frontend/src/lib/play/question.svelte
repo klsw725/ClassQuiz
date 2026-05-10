@@ -41,6 +41,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	let timer_res = $state(question.time);
 	let selected_answer: string = $state();
+	let answer_submitted = $state(false);
 
 	// Stop the timer if the question is answered
 	const timer = (time: string) => {
@@ -70,6 +71,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	const selectAnswer = (answer: string) => {
 		selected_answer = answer;
+		answer_submitted = true;
 		socket.emit('submit_answer', {
 			question_index: question_index,
 			answer: answer
@@ -78,6 +80,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	const select_complex_answer = (data) => {
 		selected_answer = 'a';
+		answer_submitted = true;
 		const new_array = [];
 		for (let i = 0; i < data.length; i++) {
 			new_array.push({ answer: data[i].answer });
@@ -233,7 +236,26 @@ SPDX-License-Identifier: MPL-2.0
 			{/if}
 		</div>
 	{/if}
-	{#if timer_res !== '0'}
+	{#if solution === undefined && (answer_submitted || timer_res === '0')}
+		<section
+			class="flex h-1/2 items-center justify-center px-4 text-cq-text"
+			role="status"
+			aria-live="polite"
+		>
+			<div class="cq-card flex w-full max-w-md flex-col gap-3 p-6 text-center shadow-2xl md:p-8">
+				<p class="text-2xl font-semibold text-cq-text md:text-3xl">
+					{#if answer_submitted}
+						{$t('play_page.answer_submitted')}
+					{:else}
+						{$t('play_page.please_wait')}
+					{/if}
+				</p>
+				<p class="cq-surface-muted rounded-lg border-2 border-cq-border px-5 py-4 text-cq-muted">
+					{$t('play_page.waiting_for_results')}
+				</p>
+			</div>
+		</section>
+	{:else if timer_res !== '0'}
 		{#if question.type === QuizQuestionType.ABCD || question.type === QuizQuestionType.VOTING}
 			<div class="w-full relative h-full" style="height: {get_div_height()}%">
 				<div

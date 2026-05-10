@@ -304,7 +304,10 @@
         "latest_question_correct": "최근 문제: 정답",
         "latest_question_incorrect": "최근 문제: 오답",
         "players_waiting": "{{count}}명의 플레이어가 기다리고 있습니다",
-        "players_waiting_plural": "{{count}}명의 플레이어가 기다리고 있습니다"
+        "players_waiting_plural": "{{count}}명의 플레이어가 기다리고 있습니다",
+        "answer_submitted": "답변이 제출되었습니다",
+        "please_wait": "잠시 기다려 주세요",
+        "waiting_for_results": "다른 플레이어와 결과를 기다리는 중입니다..."
     },
     "editor_page": {
         "add_an_answer": "답변 추가",
