@@ -52,11 +52,13 @@ async def calculate_hash(ctx, file_id_as_str: str):
     async for chunk in file_bytes:
         file.write(chunk)
     try:
-        if 0 < file_data.size < 20_970_000:  # greater than 0 but smaller than 20mbytes
+        file.seek(0)
+        if 0 < file_data.size < 20_970_000 and file_data.mime_type.startswith("image/"):
             file_data.thumbhash = image_to_thumbhash(file)
     # skipcq: PYL-W0703
     except Exception:
         pass
+    file.seek(0)
     hash_obj = xxhash.xxh3_128()
 
     # skipcq: PY-W0069

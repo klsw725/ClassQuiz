@@ -433,6 +433,18 @@ class TestStorage:
         assert resp.status_code == 200
         data = resp.json()
         ValueStorage.file_id = data["id"]
+        resp = test_client.post(
+            "/api/v1/storage/",
+            cookies=ValueStorage.cookies,
+            files={"file": ("song.mp3", b"mp3_content", "audio/mpeg")},
+        )
+        assert resp.status_code == 200
+        resp = test_client.post(
+            "/api/v1/storage/",
+            cookies=ValueStorage.cookies,
+            files={"file": ("note.txt", b"text_content", "text/plain")},
+        )
+        assert resp.status_code == 422
 
     @pytest.mark.asyncio
     async def test_upload_raw_file(self, test_client: TestClient):  # noqa : F811
