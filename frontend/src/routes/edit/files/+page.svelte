@@ -7,7 +7,7 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { fade } from 'svelte/transition';
-	// import MediaComponent from '$lib/editor/MediaComponent.svelte';
+	import MediaComponent from '$lib/editor/MediaComponent.svelte';
 	import BrownButton from '$lib/components/buttons/brown.svelte';
 	import { onMount } from 'svelte';
 	import Uploader from './uploader.svelte';
@@ -69,11 +69,9 @@ SPDX-License-Identifier: MPL-2.0
 				class="cq-card p-2 grid grid-cols-2 hover:opacity-100 transition-all"
 				class:opacity-40={image.quiztivities.length === 0 && image.quizzes.length === 0}
 			>
-				<img
-					src="/api/v1/storage/download/{image.id}"
-					class="m-auto h-auto w-auto max-h-[30vh]"
-					loading="lazy"
-					alt={image.alt_text || $t('file_dashboard.not_available')}
+				<MediaComponent
+					src={image.id}
+					css_classes="m-auto h-auto w-auto max-h-[30vh]"
 				/>
 				<div class="flex flex-col my-auto ml-4">
 					<p>

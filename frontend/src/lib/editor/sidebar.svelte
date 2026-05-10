@@ -13,6 +13,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { getLocalization } from '$lib/i18n';
 	import AddNewQuestionPopup from '$lib/editor/AddNewQuestionPopup.svelte';
 	import BrownButton from '$lib/components/buttons/brown.svelte';
+	import MediaComponent from '$lib/editor/MediaComponent.svelte';
 	import { fade } from 'svelte/transition';
 
 	const { t } = getLocalization();
@@ -293,14 +294,10 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 				{#if question.image}
 					<div class="flex justify-center align-middle pb-0.5">
-						<img
-							src="/api/v1/storage/download/{question.image}"
-							class="h-10 border rounded-lg"
-							alt="Not available"
-							use:tippy={{
-								content: `<img src="/api/v1/storage/download/${question.image}" alt="Not available" class="rounded-lg">`,
-								allowHTML: true
-							}}
+						<MediaComponent
+							src={question.image}
+							css_classes="h-10 border rounded-lg"
+							allow_fullscreen={false}
 						/>
 					</div>
 				{/if}

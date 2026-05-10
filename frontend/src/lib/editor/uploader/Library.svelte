@@ -10,6 +10,7 @@ SPDX-License-Identifier: MPL-2.0
 	import type { EditorData } from '$lib/quiz_types';
 	import BrownButton from '$lib/components/buttons/brown.svelte';
 	import { getLocalization } from '$lib/i18n';
+	import MediaComponent from '$lib/editor/MediaComponent.svelte';
 
 	interface Props {
 		data: EditorData;
@@ -37,6 +38,13 @@ SPDX-License-Identifier: MPL-2.0
 		}
 		modalOpen = false;
 	};
+
+	const filter_library_images = (images: PrivateImageData[]) => {
+		if (selected_question !== undefined && selected_question !== -1) {
+			return images;
+		}
+		return images.filter((image) => image.mime_type.startsWith('image/'));
+	};
 </script>
 
 {#await image_fetch}
@@ -46,14 +54,12 @@ SPDX-License-Identifier: MPL-2.0
 		<div
 			class="cq-card flex flex-col w-1/3 m-auto overflow-scroll h-full p-4 gap-4"
 		>
-			{#each images as image}
+			{#each filter_library_images(images) as image}
 				<div class="cq-card p-2 flex-col flex gap-2">
 					<div>
-						<img
-							src="/api/v1/storage/download/{image.id}"
-							loading="lazy"
-							alt={image.alt_text}
-							class="object-contain w-full h-full max-h-full rounded-lg"
+						<MediaComponent
+							src={image.id}
+							css_classes="object-contain w-full h-full max-h-full rounded-lg"
 						/>
 					</div>
 					<p class="text-center">{image.filename ?? 'No name available'}</p>
