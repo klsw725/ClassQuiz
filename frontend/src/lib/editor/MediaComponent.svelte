@@ -24,7 +24,12 @@ SPDX-License-Identifier: MPL-2.0
 		muted = true,
 		allow_fullscreen = true
 	}: Props = $props();
-	let type: 'img' | 'video' | undefined = $state(undefined);
+	let type: 'img' | 'video' | 'audio' | 'youtube' | undefined = $state(undefined);
+	const youtube_marker_pattern = /^youtube:([A-Za-z0-9_-]{11})$/;
+	const youtube_video_id = $derived(src.match(youtube_marker_pattern)?.[1]);
+	const youtube_embed_src = $derived(
+		youtube_video_id ? `https://www.youtube.com/embed/${youtube_video_id}` : undefined
+	);
 
 	interface ImageData {
 		data: string;
@@ -41,6 +46,10 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	const get_media = async (_: string): Promise<void> => {
+		if (youtube_video_id) {
+			type = 'youtube';
+			return;
+		}
 		if (!browser) {
 			return;
 		}
@@ -48,13 +57,19 @@ SPDX-License-Identifier: MPL-2.0
 		const fileType = res.headers.get('Content-Type');
 		if (fileType?.includes('video')) {
 			type = 'video';
+		} else if (fileType?.includes('audio')) {
+			type = 'audio';
 		} else {
 			type = 'img';
-			thumbhash_data = thumbHashToDataURL(base64ToBytes(res.headers.get('x-thumbhash') ?? ''));
+			thumbhash_data = thumbHashToDataURL(
+				base64ToBytes(res.headers.get('x-thumbhash') ?? '')
+			);
 			const data = await fetch(`/api/v1/storage/download/${src}`);
 			img_data = {
 				data: URL.createObjectURL(await data.blob()),
-				alt_text: new TextDecoder().decode(base64ToBytes(res.headers.get('X-Alt-Text') ?? ''))
+				alt_text: new TextDecoder().decode(
+					base64ToBytes(res.headers.get('X-Alt-Text') ?? '')
+				)
 			};
 			thumbhash_data = undefined;
 		}
@@ -99,6 +114,29 @@ SPDX-License-Identifier: MPL-2.0
 		>
 			<source src="/api/v1/storage/download/{src}" />
 		</video>
+	{:else if type === 'audio'}
+		<audio class={css_classes} controls preload="metadata">
+			<source src="/api/v1/storage/download/{src}" />
+		</audio>
+	{:else if type === 'youtube' && youtube_video_id && youtube_embed_src}
+		{#if allow_fullscreen}
+			<iframe
+				src={youtube_embed_src}
+				title="YouTube video player"
+				class={`aspect-video min-h-[200px] min-w-[200px] ${css_classes}`}
+				allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+				allowfullscreen
+				loading="lazy"
+				referrerpolicy="strict-origin-when-cross-origin"
+			></iframe>
+		{:else}
+			<div
+				class={`cq-surface-muted flex items-center justify-center text-cq-muted ${css_classes}`}
+				aria-label="YouTube video"
+			>
+				YouTube
+			</div>
+		{/if}
 	{:else}
 		<p>Unknown media type</p>
 	{/if}
