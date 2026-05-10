@@ -189,6 +189,8 @@
         "1st_place": "第一名",
         "end_sentence": "完成！本次測驗結束。",
         "your_score": "你的分數：{{score}}",
+        "latest_question_correct": "最新題目：正確",
+        "latest_question_incorrect": "最新題目：錯誤",
         "join_description": "前往 {{url}} 並輸入 {{pin}} 加入。",
         "points_added": "已加分",
         "final_result_rank": "第 {{place}} 名：{{username}}，得到 {{points}} 分",

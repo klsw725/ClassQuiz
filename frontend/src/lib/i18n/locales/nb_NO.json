@@ -330,6 +330,8 @@
         "points_added": "Poeng tillagt",
         "final_result_rank": "{{place}}: {{username}} med {{points}} poeng",
         "your_score": "Din poengsum: {{score}}",
+        "latest_question_correct": "Siste spørsmål: riktig",
+        "latest_question_incorrect": "Siste spørsmål: feil",
         "join_by_entering_code": "Ta del ved å skrive inn følgende kode"
     },
     "result_page": {

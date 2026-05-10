@@ -274,6 +274,8 @@
         "points_added": "Pontos adicionados",
         "final_result_rank": "{{place}}: {{username}} com {{points}} pontos",
         "your_score": "A sua pontuação: {{score}}",
+        "latest_question_correct": "Última pergunta: correta",
+        "latest_question_incorrect": "Última pergunta: incorreta",
         "end_sentence": "Acabou! Este foi o quiz.",
         "with_out_of": "com {{correct_questions}} de {{total_question_count}}",
         "3rd place": "3º lugar",

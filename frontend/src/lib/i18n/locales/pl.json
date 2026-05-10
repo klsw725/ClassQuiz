@@ -320,6 +320,8 @@
         "with_out_of": "z {{correct_questions}} na {{total_question_count}}",
         "end_sentence": "To jest to! To był quiz.",
         "your_score": "Twój wynik: {{score}}",
+        "latest_question_correct": "Ostatnie pytanie: poprawnie",
+        "latest_question_incorrect": "Ostatnie pytanie: niepoprawnie",
         "join_description": "Dołącz na {{url}} i wpisz {{pin}}.",
         "join_by_entering_code": "Dołącz do nas wpisując następujący kod",
         "points_added": "Dodane punkty",

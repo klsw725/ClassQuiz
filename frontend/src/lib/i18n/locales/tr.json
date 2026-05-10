@@ -304,6 +304,8 @@
         "join_description": "{{url}} adresinden katılın ve {{pin}} kodunu girin.",
         "points_added": "Puanlar eklendi",
         "your_score": "Skorunuz: {{score}}",
+        "latest_question_correct": "Son soru: doğru",
+        "latest_question_incorrect": "Son soru: yanlış",
         "join_by_entering_code": "Aşağıdaki kodu girerek katılın",
         "players_waiting_plural": "{{count}} oyuncu bekliyor",
         "your_place": "{{place}} yerindesiniz!",

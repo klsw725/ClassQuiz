@@ -57,6 +57,8 @@
         "with_out_of": "{{correct_questions}} fout {{total_question_count}}} உடன்",
         "final_result_rank": "{{place}} புள்ளிகளுடன் {{{{username}}",
         "your_score": "உங்கள் மதிப்பெண்: {{score}}",
+        "latest_question_correct": "சமீபத்திய கேள்வி: சரி",
+        "latest_question_incorrect": "சமீபத்திய கேள்வி: தவறு",
         "join_by_entering_code": "பின்வரும் குறியீட்டை உள்ளிட்டு சேரவும்",
         "points_added": "புள்ளிகள் சேர்க்கப்பட்டன",
         "your_place": "நீங்கள் இடத்தில் {{place}}!",

@@ -244,6 +244,8 @@
         "with_out_of": "con {{correct_questions}} de {{total_question_count}}",
         "final_result_rank": "{{place}}: {{username}} con {{points}} puntos",
         "your_score": "Tu puntuación: {{score}}",
+        "latest_question_correct": "Última pregunta: correcta",
+        "latest_question_incorrect": "Última pregunta: incorrecta",
         "join_description": "Únete en {{url}} e ingresa {{pin}}.",
         "join_by_entering_code": "Únete introduciendo el siguiente código",
         "points_added": "Puntos añadidos",

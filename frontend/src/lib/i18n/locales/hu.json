@@ -295,6 +295,8 @@
         "with_out_of": "helyes {{correct_questions}} a {{total_question_count}} kérdésből",
         "final_result_rank": "{{place}}: {{username}} összesen {{points}} ponttal",
         "your_score": "Az Ön pontszáma: {{score}}",
+        "latest_question_correct": "Legutóbbi kérdés: helyes",
+        "latest_question_incorrect": "Legutóbbi kérdés: helytelen",
         "2nd_place": "2. helyezett",
         "3rd place": "3. helyezett",
         "join_description": "Csatlakozzon a(z) {{url}} címen, és írja be a következőt PIN-t: {{pin}}.",

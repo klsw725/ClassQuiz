@@ -309,6 +309,8 @@
         "with_out_of": "mit {{correct_questions}} von insgesamt {{total_question_count}}",
         "final_result_rank": "{{place}}. Platz: {{username}} mit {{points}} Punkten",
         "your_score": "Deine Punktzahl: {{score}}",
+        "latest_question_correct": "Letzte Frage: richtig",
+        "latest_question_incorrect": "Letzte Frage: falsch",
         "join_description": "Tritt bei unter {{url}} und gib {{pin}} ein.",
         "join_by_entering_code": "Tritt bei, indem du folgenden Code eingibst",
         "points_added": "Hinzugefügte Punkte",

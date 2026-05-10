@@ -130,6 +130,8 @@
         "3rd place": "第3位",
         "with_out_of": "{{total_question_count}}問中 {{correct_questions}} 問",
         "your_score": "あなたのスコア: {{score}}",
+        "latest_question_correct": "直近の問題: 正解",
+        "latest_question_incorrect": "直近の問題: 不正解",
         "your_place": "あなたは第 {{place}}位!",
         "join_by_entering_code": "以下のコードを入力してください",
         "points_added": "ポイント追加",

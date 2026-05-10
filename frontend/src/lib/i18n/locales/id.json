@@ -300,6 +300,8 @@
         "points_added": "Poin ditambahkan",
         "final_result_rank": "{{place}}: {{username}} dengan {{points}} poin",
         "your_score": "Skor Anda: {{score}}",
+        "latest_question_correct": "Pertanyaan terakhir: benar",
+        "latest_question_incorrect": "Pertanyaan terakhir: salah",
         "end_sentence": "Itu dia! Itu adalah kuisnya.",
         "with_out_of": "dengan {{correct_questions}} dari {{total_question_count}}",
         "3rd place": "Juara 3",

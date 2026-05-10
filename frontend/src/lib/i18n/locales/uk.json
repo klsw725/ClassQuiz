@@ -204,6 +204,8 @@
         "points_added": "Додано бали",
         "final_result_rank": "{{place}}: {{username}} з {{points}} балів",
         "your_score": "Ваша оцінка: {{score}}",
+        "latest_question_correct": "Останнє запитання: правильно",
+        "latest_question_incorrect": "Останнє запитання: неправильно",
         "end_sentence": "Ось і все! Це була вікторина.",
         "with_out_of": "з {{correct_questions}} із {{total_question_count}}",
         "3rd place": "3 місце",

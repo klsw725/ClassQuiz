@@ -198,6 +198,8 @@
         "points_added": "Điểm cộng",
         "final_result_rank": "{{place}}: {{username}} với {{points}} điểm",
         "your_score": "Điểm của bạn: {{score}}",
+        "latest_question_correct": "Câu hỏi gần nhất: đúng",
+        "latest_question_incorrect": "Câu hỏi gần nhất: sai",
         "end_sentence": "Đó là nó! Đây là bài kiểm tra.",
         "with_out_of": "Với {{correct_questions}} câu trả lời đúng trong tổng số {{total_question_count}} câu hỏi",
         "3rd place": "Hạng ba",

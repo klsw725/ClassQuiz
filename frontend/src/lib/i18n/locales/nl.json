@@ -303,6 +303,8 @@
         "final_result_rank": "{{place}}: {{username}} met {{points}} punten",
         "points_added": "Punten toegevoegd",
         "your_score": "Jouw score: {{score}}",
+        "latest_question_correct": "Laatste vraag: goed",
+        "latest_question_incorrect": "Laatste vraag: fout",
         "join_by_entering_code": "Neem deel door de volgende code in te voeren",
         "join_description": "Neem deel via {{url}} en voer {{pin}} in.",
         "players_waiting": "{{count}} speler aan het wachten",
