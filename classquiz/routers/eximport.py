@@ -21,6 +21,8 @@ import gzip
 import urllib.parse
 import magic
 
+from classquiz.helpers import check_youtube_media_string
+
 router = APIRouter()
 settings = settings()
 quiz_delimiter = b"\xc7\xc7\xc7\x00"
@@ -45,6 +47,8 @@ async def export_quiz(quiz_id: uuid.UUID, _: User = Depends(get_current_user)):
     image_urls = {}
     for i, question in enumerate(quiz.questions):
         if question["image"] is None:
+            continue
+        if check_youtube_media_string(question["image"]):
             continue
         else:
             image_urls[i] = question["image"]
@@ -126,7 +130,7 @@ async def import_quiz(file: UploadFile = File(), user: User = Depends(get_curren
     quiz_dict["id"] = quiz_id
     quiz_dict.setdefault("time_based_scoring", True)
     for question in quiz_dict["questions"]:
-        if question["image"] is not None:
+        if isinstance(question["image"], int):
             question["image"] = image_urls[question["image"]]
     if quiz_dict["cover_image"] is not None:
         quiz_dict["cover_image"] = image_urls[-1]

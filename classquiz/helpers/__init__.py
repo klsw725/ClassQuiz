@@ -4,6 +4,7 @@
 
 
 import asyncio
+import re
 import uuid
 from datetime import datetime
 from typing import BinaryIO, Any
@@ -21,6 +22,7 @@ from classquiz.config import meilisearch, settings, LOGGER
 from classquiz.helpers.hashcash import check as hc_check
 
 settings = settings()
+YOUTUBE_MEDIA_RE = re.compile(r"^youtube:[A-Za-z0-9_-]{11}$")
 
 
 async def get_meili_data(quiz: Quiz) -> dict[str, Any]:
@@ -72,20 +74,21 @@ async def generate_spreadsheet(
         _ = worksheet.write(i + 1, 0, question["question"])
         _ = worksheet.write(i + 1, 1, question["time"])
 
-        try:
-            async with (
-                ClientSession() as session,
-                session.get(f"{settings.root_address}/api/v1/storage/download/{question['image']}") as response,
-            ):
-                content_type = response.headers.get("Content-Type")
-                if content_type is not None and "image" in content_type:
-                    img_data = BytesIO(await response.read())
-                    _ = worksheet.insert_image(i + 1, 2, question["image"], {"image_data": img_data})
-                    image = Image.open(img_data)
-                    _ = worksheet.set_row(i + 1, image.height)
-                    _ = worksheet.set_column(2, 2, image.width)
-        except TypeError:
-            pass
+        if question.get("image") and not check_youtube_media_string(question["image"]):
+            try:
+                async with (
+                    ClientSession() as session,
+                    session.get(f"{settings.root_address}/api/v1/storage/download/{question['image']}") as response,
+                ):
+                    content_type = response.headers.get("Content-Type")
+                    if content_type is not None and "image" in content_type:
+                        img_data = BytesIO(await response.read())
+                        _ = worksheet.insert_image(i + 1, 2, question["image"], {"image_data": img_data})
+                        image = Image.open(img_data)
+                        _ = worksheet.set_row(i + 1, image.height)
+                        _ = worksheet.set_column(2, 2, image.width)
+            except TypeError:
+                pass
         answer_amount = len(answer_data)
         correct_answers = 0
         wrong_answers = 0
@@ -276,14 +279,24 @@ def check_image_string(image: str) -> (bool, uuid.UUID | None):
         return False, None
 
 
+def check_youtube_media_string(media: str) -> bool:
+    return bool(YOUTUBE_MEDIA_RE.fullmatch(media))
+
+
+def check_question_media_string(media: str) -> bool:
+    return check_image_string(media)[0] or check_youtube_media_string(media)
+
+
 def extract_image_ids_from_quiz(quiz: Quiz) -> list[str | uuid.UUID]:
     quiz_images = []
-    if quiz.background_image is not None:
+    if quiz.background_image is not None and not check_youtube_media_string(quiz.background_image):
         quiz_images.append(quiz.background_image)
-    if quiz.cover_image is not None:
+    if quiz.cover_image is not None and not check_youtube_media_string(quiz.cover_image):
         quiz_images.append(quiz.cover_image)
     for question in quiz.questions:
         if question["image"] is None:
+            continue
+        if check_youtube_media_string(question["image"]):
             continue
         quiz_images.append(question["image"])
     return quiz_images

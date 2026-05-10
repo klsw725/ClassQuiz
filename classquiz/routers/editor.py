@@ -30,6 +30,7 @@ from uuid import UUID
 from classquiz.helpers import (
     get_meili_data,
     check_image_string,
+    check_question_media_string,
     extract_image_ids_from_quiz,
 )
 from classquiz.storage.errors import DeletionFailedError
@@ -115,7 +116,7 @@ async def finish_edit(edit_id: str, quiz_input: QuizInput):
         )
         if image == "":
             question.image = None
-        if image is not None and not check_image_string(image)[0]:
+        if image is not None and not check_question_media_string(image):
             raise HTTPException(status_code=400, detail="Image URL(s) aren't valid!")
 
     if quiz_input.cover_image == "":
