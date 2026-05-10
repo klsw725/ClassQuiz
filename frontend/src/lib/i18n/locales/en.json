@@ -178,7 +178,9 @@
         "quiztivity": "Quiztivity",
         "next": "Next",
         "check_choice": "Check Choice",
+        "audio": "Audio",
         "video": "Video",
+        "youtube": "YouTube",
         "library": "Library",
         "progress": "Progress",
         "speed": "Speed",
@@ -334,7 +336,10 @@
         "images_by_pixabay": "Images provided by Pixabay",
         "search_english_only": "The search works in English only",
         "next_page": "Next page",
-        "previous_page": "Previous page"
+        "previous_page": "Previous page",
+        "add_youtube_video": "Add a YouTube Video",
+        "youtube_url_label": "Paste a YouTube URL or 11-character video ID",
+        "youtube_invalid": "Enter a valid YouTube URL or 11-character video ID."
     },
     "avatar_settings": {
         "skin_color": "Skin color",

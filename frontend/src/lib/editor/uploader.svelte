@@ -53,17 +53,31 @@ SPDX-License-Identifier: MPL-2.0
 		// eslint-disable-next-line no-unused-vars
 		Video,
 		// eslint-disable-next-line no-unused-vars
+		Audio,
+		// eslint-disable-next-line no-unused-vars
 		Library,
 		// eslint-disable-next-line no-unused-vars
-		Pixabay
+		Pixabay,
+		// eslint-disable-next-line no-unused-vars
+		YouTube
 	}
+
+	const image_restrictions = {
+		maxFileSize: 10_490_000,
+		maxNumberOfFiles: 1,
+		allowedFileTypes: ['image/*']
+	};
+	const audio_restrictions = {
+		maxFileSize: 10_490_000,
+		maxNumberOfFiles: 1,
+		allowedFileTypes: ['audio/mpeg']
+	};
 
 	const uppy = new Uppy()
 		.use(DropTarget, {
 			target: document.body
 		})
 		.use(ImageEditor, {
-			target: 'Dashboard',
 			quality: 0.8
 		})
 		.use(Compressor, {
@@ -74,15 +88,85 @@ SPDX-License-Identifier: MPL-2.0
 		});
 	const properties = {
 		inline: true,
-		restrictions: {
-			maxFileSize: 10_490_000,
-			maxNumberOfFiles: 1,
-			allowedFileTypes: ['image/*']
-			// allowedFileTypes: ['.gif', '.jpg', '.jpeg', '.png', '.svg', '.webp']
-		}
+		restrictions: image_restrictions
+	};
+	const audio_properties = {
+		inline: true,
+		restrictions: audio_restrictions
+	};
+
+	const select_file_upload_type = (
+		upload_type: AvailableUploadTypes.Image | AvailableUploadTypes.Audio
+	) => {
+		uppy.setOptions({
+			restrictions:
+				upload_type === AvailableUploadTypes.Audio ? audio_restrictions : image_restrictions
+		});
+		selected_type = upload_type;
 	};
 	let image_id: string;
-	uppy.on('upload-success', (file, response) => {
+	let youtube_url = $state('');
+	let youtube_error = $state(false);
+
+	const youtube_id_pattern = /^[A-Za-z0-9_-]{11}$/;
+	const youtube_path_pattern = /^\/(?:embed|shorts)\/([A-Za-z0-9_-]{11})(?:\/|$)/;
+	const youtube_upload_enabled = $derived(
+		selected_question !== undefined && selected_question !== -1
+	);
+
+	const reset_youtube_form = () => {
+		youtube_url = '';
+		youtube_error = false;
+	};
+
+	const reset_selection = () => {
+		selected_type = null;
+		reset_youtube_form();
+	};
+
+	const extract_youtube_id = (input: string): string | undefined => {
+		const value = input.trim();
+		if (youtube_id_pattern.test(value)) {
+			return value;
+		}
+
+		try {
+			const url = new URL(value);
+			const hostname = url.hostname.replace(/^www\./, '');
+			if (hostname === 'youtu.be') {
+				const id = url.pathname.split('/').filter(Boolean)[0];
+				return id && youtube_id_pattern.test(id) ? id : undefined;
+			}
+			if (hostname === 'youtube.com' || hostname === 'm.youtube.com') {
+				const watch_id = url.searchParams.get('v');
+				if (watch_id && youtube_id_pattern.test(watch_id)) {
+					return watch_id;
+				}
+				return url.pathname.match(youtube_path_pattern)?.[1];
+			}
+		} catch {
+			return undefined;
+		}
+
+		return undefined;
+	};
+
+	const set_youtube_video = () => {
+		if (selected_question === undefined || selected_question === -1) {
+			return;
+		}
+
+		const youtube_id = extract_youtube_id(youtube_url);
+		if (!youtube_id) {
+			youtube_error = true;
+			return;
+		}
+
+		data.questions[selected_question].image = `youtube:${youtube_id}`;
+		modalOpen = false;
+		reset_selection();
+	};
+	uppy.on('upload-success', (_file, response) => {
 		image_id = response.body.id;
 	});
 	uppy.on('complete', (_) => {
@@ -95,7 +179,7 @@ SPDX-License-Identifier: MPL-2.0
 		}
 
 		modalOpen = false;
-		selected_type = null;
+		reset_selection();
 	});
 
 	onMount(() => {
@@ -105,7 +189,7 @@ SPDX-License-Identifier: MPL-2.0
 			}
 			localStorage.removeItem('video_upload_id');
 			data.questions[selected_question].image = e.newValue;
-			selected_type = null;
+			reset_selection();
 		});
 	});
 
@@ -123,14 +207,14 @@ SPDX-License-Identifier: MPL-2.0
 	const handle_on_click = (e: Event) => {
 		if (e.target === e.currentTarget) {
 			modalOpen = false;
-			selected_type = null;
+			reset_selection();
 		}
 	};
 	onMount(() => {
 		window.addEventListener('keydown', (e: KeyboardEvent) => {
 			if (e.key === 'Escape') {
 				modalOpen = false;
-				selected_type = null;
+				reset_selection();
 			}
 		});
 	});
@@ -153,7 +237,7 @@ SPDX-License-Identifier: MPL-2.0
 					<div class="w-full">
 						<BrownButton
 							onclick={() => {
-								selected_type = AvailableUploadTypes.Image;
+								select_file_upload_type(AvailableUploadTypes.Image);
 							}}
 							>{$t('words.image')}
 						</BrownButton>
@@ -167,6 +251,26 @@ SPDX-License-Identifier: MPL-2.0
 							>{$t('words.video')}
 						</BrownButton>
 					</div>
+					{#if video_upload}
+						<div class="w-full">
+							<BrownButton
+								onclick={() => {
+									select_file_upload_type(AvailableUploadTypes.Audio);
+								}}
+								>{$t('words.audio')}
+							</BrownButton>
+						</div>
+					{/if}
+					{#if youtube_upload_enabled}
+						<div class="w-full">
+							<BrownButton
+								onclick={() => {
+									selected_type = AvailableUploadTypes.YouTube;
+								}}
+								>{$t('words.youtube')}
+							</BrownButton>
+						</div>
+					{/if}
 					{#if library_enabled}
 						<div class="w-full">
 							<BrownButton
@@ -193,11 +297,14 @@ SPDX-License-Identifier: MPL-2.0
 					<SvelteDashboard {uppy} props={properties} />
 				</div>
 			</div>
+		{:else if selected_type === AvailableUploadTypes.Audio}
+			<div class="m-auto w-1/3 h-5/6" transition:fade={{ duration: 100 }}>
+				<div>
+					<SvelteDashboard {uppy} props={audio_properties} />
+				</div>
+			</div>
 		{:else if selected_type === AvailableUploadTypes.Video}
-			<div
-				class="cq-card m-auto w-1/3 h-auto p-4"
-				transition:fade={{ duration: 100 }}
-			>
+			<div class="cq-card m-auto w-1/3 h-auto p-4" transition:fade={{ duration: 100 }}>
 				<h1 class="text-3xl text-center mb-4">{$t('uploader.upload_a_video')}</h1>
 				{#if video_popup}
 					<p class="text-center">
@@ -209,6 +316,36 @@ SPDX-License-Identifier: MPL-2.0
 					>
 				{/if}
 			</div>
+		{:else if selected_type === AvailableUploadTypes.YouTube}
+			<form
+				class="cq-card m-auto flex w-1/3 flex-col gap-3 p-4"
+				transition:fade={{ duration: 100 }}
+				onsubmit={(e) => {
+					e.preventDefault();
+					set_youtube_video();
+				}}
+			>
+				<h1 class="text-3xl text-center">{$t('uploader.add_youtube_video')}</h1>
+				<div class="cq-surface-muted flex flex-col gap-2 p-3">
+					<label for="youtube-url" class="text-sm text-cq-muted">
+						{$t('uploader.youtube_url_label')}
+					</label>
+					<input
+						id="youtube-url"
+						type="text"
+						class="cq-surface w-full p-2 outline-hidden ring-2 ring-cq-border focus:ring-cq-brand"
+						bind:value={youtube_url}
+						placeholder="https://youtu.be/dQw4w9WgXcQ"
+						oninput={() => (youtube_error = false)}
+					/>
+					{#if youtube_error}
+						<p class="text-sm text-cq-muted" aria-live="polite">
+							{$t('uploader.youtube_invalid')}
+						</p>
+					{/if}
+				</div>
+				<BrownButton type="submit">{$t('words.save')}</BrownButton>
+			</form>
 		{:else if selected_type === AvailableUploadTypes.Library}
 			<div>
 				<Library bind:data {selected_question} bind:modalOpen />
