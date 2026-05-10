@@ -34,7 +34,8 @@ SPDX-License-Identifier: MPL-2.0
 	}
 	let start_language = 'en';
 	if (browser) {
-		start_language = localStorage.getItem('language') ?? 'en';
+		const saved_language = localStorage.getItem('language');
+		start_language = saved_language ?? (window.location.pathname === '/play' ? 'ko' : 'en');
 	}
 	initLocalizationContext(start_language);
 </script>
