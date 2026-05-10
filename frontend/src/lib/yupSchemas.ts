@@ -10,7 +10,8 @@ export const ABCDQuestionSchema = yup
 	.of(
 		yup.object({
 			right: yup.boolean().required(),
-			answer: yup.string().required('You need an answer')
+			answer: yup.string().required('You need an answer'),
+			emoji: yup.string().optional().nullable()
 		})
 	)
 	.min(2, 'You need at least 2 answers')

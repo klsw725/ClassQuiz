@@ -131,7 +131,7 @@ SPDX-License-Identifier: MPL-2.0
 	});
 
 	const get_div_height = (): string => {
-		if (game_mode === 'normal') {
+		if (game_mode === 'normal' || (game_mode === 'kahoot' && question.image)) {
 			if (question.image) {
 				return '66.666667';
 			} else {
@@ -145,18 +145,16 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="h-screen w-screen">
-	{#if game_mode === 'normal'}
+	{#if game_mode === 'normal' || (game_mode === 'kahoot' && question.image)}
 		<div
 			class="flex flex-col justify-start"
 			class:mt-10={[QuizQuestionType.RANGE, QuizQuestionType.ORDER, QuizQuestionType.TEXT]}
 			style="height: {question.image ? '33.333333' : '16.666667'}%"
 		>
-			<h1
-				class="lg:text-2xl text-lg text-center text-cq-text mt-2 break-normal mb-2"
-			>
+			<h1 class="lg:text-2xl text-lg text-center text-cq-text mt-2 break-normal mb-2">
 				{@html question.question}
 			</h1>
-			{#if question.image !== null && game_mode !== 'kahoot'}
+			{#if question.image}
 				<div class="max-h-full">
 					<MediaComponent
 						src={question.image}
@@ -187,11 +185,18 @@ SPDX-License-Identifier: MPL-2.0
 							onclick={() => selectAnswer(answer.answer)}
 						>
 							{#if game_mode === 'kahoot'}
-								<img
-									class="h-2/3 inline-block m-auto"
-									alt="Icon"
-									src={kahoot_icons[i]}
-								/>
+								{#if answer.emoji}
+									<span
+										class="m-auto text-6xl leading-none"
+										aria-label="Answer emoji">{answer.emoji}</span
+									>
+								{:else}
+									<img
+										class="h-2/3 inline-block m-auto"
+										alt="Icon"
+										src={kahoot_icons[i]}
+									/>
+								{/if}
 							{:else}
 								<p class="m-auto">{answer.answer}</p>
 							{/if}

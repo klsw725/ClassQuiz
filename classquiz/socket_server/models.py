@@ -27,6 +27,7 @@ class RegisterAsAdminData(BaseModel):
 class ABCDQuizAnswerWithoutSolution(BaseModel):
     answer: str
     color: str | None = None
+    emoji: str | None = None
 
 
 class RangeQuizAnswerWithoutSolution(BaseModel):

@@ -50,6 +50,7 @@ export interface GeneralQuizAnswer {
 	answer: string;
 	right?: boolean;
 	color?: string;
+	emoji?: string;
 	image?: string;
 	case_sensitive?: boolean;
 	id?: number;
@@ -96,6 +97,7 @@ export interface Answer extends GeneralQuizAnswer {
 	right: boolean;
 	answer: string;
 	color?: string;
+	emoji?: string;
 }
 
 export interface VotingAnswer extends GeneralQuizAnswer {

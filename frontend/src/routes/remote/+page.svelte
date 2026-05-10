@@ -13,6 +13,7 @@ SPDX-License-Identifier: MPL-2.0
 	import CircularTimer from '$lib/play/circular_progress.svelte';
 	import { getLocalization } from '$lib/i18n';
 	import { navbarVisible } from '$lib/stores.svelte.ts';
+	import MediaComponent from '$lib/editor/MediaComponent.svelte';
 
 	const data = {
 		game_pin: page.url.searchParams.get('game_pin'),
@@ -22,7 +23,9 @@ SPDX-License-Identifier: MPL-2.0
 	navbarVisible.visible = false;
 
 	const { t } = getLocalization();
-	const get_answer_options = (question: QuizData['questions'][number]): Array<Answer | VotingAnswer> =>
+	const get_answer_options = (
+		question: QuizData['questions'][number]
+	): Array<Answer | VotingAnswer> =>
 		Array.isArray(question.answers) ? (question.answers as Array<Answer | VotingAnswer>) : [];
 	let timer_interval: NodeJS.Timeout;
 	let timer_res = $state(undefined);
@@ -181,7 +184,9 @@ SPDX-License-Identifier: MPL-2.0
 {#if game_started}
 	{#if selected_question + 1 === game_data.questions.length && ((timer_res === '0' && question_results !== null) || game_data?.questions?.[selected_question]?.type === QuizQuestionType.SLIDE)}
 		{#if JSON.stringify(final_results) === JSON.stringify([null])}
-			<button onclick={get_final_results} class="accent-button m-4 w-fit">Get final results </button>
+			<button onclick={get_final_results} class="accent-button m-4 w-fit"
+				>Get final results
+			</button>
 		{:else}
 			<div class="w-screen flex justify-center mt-16">
 				<button onclick={request_answer_export} class="accent-button w-fit"
@@ -209,7 +214,9 @@ SPDX-License-Identifier: MPL-2.0
 					>Next Question ({selected_question + 2})
 				</button>
 			{:else}
-				<button onclick={get_question_results} class="action-button m-4 w-fit">Show results </button>
+				<button onclick={get_question_results} class="action-button m-4 w-fit"
+					>Show results
+				</button>
 			{/if}
 		{/if}
 	{:else if selected_question !== -1}
@@ -247,17 +254,16 @@ SPDX-License-Identifier: MPL-2.0
 			<div class="mx-auto my-2">
 				<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
 			</div>
-			{#if game_data.questions[selected_question].image !== null}
+			{#if game_data.questions[selected_question].image}
 				<div>
-					<img
-						src="/api/v1/storage/download/{game_data.questions[selected_question]
-							.image}"
-						class="max-h-[20vh] object-cover mx-auto mb-8 w-auto"
-						alt="Content for Question"
+					<MediaComponent
+						src={game_data.questions[selected_question].image}
+						muted={false}
+						css_classes="max-h-[20vh] object-cover mx-auto mb-8 w-auto"
 					/>
 				</div>
 			{/if}
-			{#if (game_data.questions[selected_question].type === QuizQuestionType.ABCD || game_data.questions[selected_question].type === QuizQuestionType.VOTING) && Array.isArray(game_data.questions[selected_question].answers)}
+			{#if (game_data.questions[selected_question].type === QuizQuestionType.ABCD || game_data.questions[selected_question].type === QuizQuestionType.VOTING || game_data.questions[selected_question].type === QuizQuestionType.CHECK) && Array.isArray(game_data.questions[selected_question].answers)}
 				{@const answer_options = get_answer_options(game_data.questions[selected_question])}
 				<div class="grid grid-cols-2 gap-2 w-full p-4">
 					{#each answer_options as answer, _i}
@@ -269,9 +275,14 @@ SPDX-License-Identifier: MPL-2.0
 								game_data.questions[selected_question].type ===
 									QuizQuestionType.ABCD}
 						>
-							<span class="text-center text-2xl px-2 py-4 w-full text-black"
-								>{answer.answer}</span
-							>
+							<span class="text-center text-2xl px-2 py-4 w-full text-black">
+								{#if answer.emoji}
+									<span class="mr-2" aria-label="Answer emoji"
+										>{answer.emoji}</span
+									>
+								{/if}
+								{answer.answer}
+							</span>
 							<span class="pl-4 w-10"></span>
 						</div>
 					{/each}
@@ -285,7 +296,10 @@ SPDX-License-Identifier: MPL-2.0
 			{#await import('$lib/play/admin/voting_results.svelte')}
 				<Spinner />
 			{:then c}
-				<c.default data={question_results} question={game_data.questions[selected_question]} />
+				<c.default
+					data={question_results}
+					question={game_data.questions[selected_question]}
+				/>
 			{/await}
 		{/if}
 	{/if}

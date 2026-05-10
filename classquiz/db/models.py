@@ -114,6 +114,7 @@ class ABCDQuizAnswer(BaseModel):
     right: bool
     answer: str
     color: str | None = None
+    emoji: str | None = None
 
 
 class RangeQuizAnswer(BaseModel):

@@ -18,6 +18,66 @@ SPDX-License-Identifier: MPL-2.0
 	const { t } = getLocalization();
 
 	const default_colors = ['#D6EDC9', '#B07156', '#7F7057', '#4E6E58'];
+	const answer_emojis = [
+		'😀',
+		'😄',
+		'😂',
+		'😍',
+		'😎',
+		'😮',
+		'🤔',
+		'🥳',
+		'🙌',
+		'👀',
+		'💡',
+		'💭',
+		'⭐',
+		'✨',
+		'🔥',
+		'💯',
+		'🎯',
+		'❓',
+		'❗',
+		'⭕',
+		'🚀',
+		'🌈',
+		'✅',
+		'❌',
+		'⚡',
+		'🧠',
+		'📚',
+		'📖',
+		'✏️',
+		'📝',
+		'🔬',
+		'🧮',
+		'🌍',
+		'🧩',
+		'🎨',
+		'🔑',
+		'🛠️',
+		'⏰',
+		'📌',
+		'💎',
+		'🎲',
+		'🐝',
+		'🐶',
+		'🐱',
+		'🦊',
+		'🐢',
+		'🦉',
+		'🐠',
+		'🍎',
+		'🍕',
+		'🍪',
+		'🍓',
+		'🥕',
+		'🎉',
+		'🎊',
+		'🎈',
+		'🏆',
+		'🥇'
+	];
 
 	interface Props {
 		selected_question: number;
@@ -25,7 +85,11 @@ SPDX-License-Identifier: MPL-2.0
 		data: EditorData;
 	}
 
-	let { selected_question = $bindable(), check_choice = false, data = $bindable() }: Props = $props();
+	let {
+		selected_question = $bindable(),
+		check_choice = false,
+		data = $bindable()
+	}: Props = $props();
 
 	const set_answer_options = (new_answers: Answer[]) => {
 		answers = new_answers;
@@ -41,14 +105,26 @@ SPDX-License-Identifier: MPL-2.0
 			? (data.questions[selected_question].answers as Answer[])
 			: []
 	);
+	let emoji_picker_open_for = $state<number | undefined>();
 	set_answer_options(answers);
+
+	const normalize_answer_emoji = (answer: Answer) => {
+		answer.emoji = answer.emoji?.trim() || undefined;
+	};
+
+	const set_answer_emoji = (answer: Answer, emoji?: string) => {
+		answer.emoji = emoji;
+		emoji_picker_open_for = undefined;
+	};
+
+	const toggle_emoji_picker = (index: number) => {
+		emoji_picker_open_for = emoji_picker_open_for === index ? undefined : index;
+	};
+
 	const save_colors = (data_local: EditorData) => {
 		if (selected_question === 0) {
 			for (let i = 0; i < answers.length; i++) {
-				localStorage.setItem(
-					`quiz_color:${i}:${data_local.title}`,
-					answers[i].color
-				);
+				localStorage.setItem(`quiz_color:${i}:${data_local.title}`, answers[i].color);
 			}
 		}
 	};
@@ -92,7 +168,9 @@ SPDX-License-Identifier: MPL-2.0
 				<button
 					class="rounded-full absolute -top-2 -right-2 opacity-70 hover:opacity-100 transition"
 					type="button"
+					aria-label="Remove answer"
 					onclick={() => {
+						emoji_picker_open_for = undefined;
 						answers.splice(index, 1);
 						set_answer_options(answers);
 					}}
@@ -115,14 +193,82 @@ SPDX-License-Identifier: MPL-2.0
 				<input
 					bind:value={answer.answer}
 					type="text"
-					class="border-b-2 border-dotted w-5/6 text-center rounded-lg bg-transparent outline-hidden focus:shadow-2xl transition-all"
+					class="border-b-2 border-dotted w-4/6 text-center rounded-lg bg-transparent outline-hidden focus:shadow-2xl transition-all"
 					style="background-color: {answer.color}; color: {get_foreground_color(
 						answer.color
 					)}"
 					placeholder={$t('editor.enter_answer')}
 				/>
+				<div class="relative mx-2">
+					<button
+						type="button"
+						class="cq-surface cq-card-interactive flex h-10 w-11 items-center justify-center rounded-2xl border border-cq-border text-lg shadow-lg transition hover:scale-105 focus:outline-hidden focus:ring-2 focus:ring-cq-brand"
+						aria-label="Choose answer emoji"
+						aria-expanded={emoji_picker_open_for === index}
+						onclick={() => {
+							toggle_emoji_picker(index);
+						}}
+					>
+						<span class:text-cq-muted={!answer.emoji}>{answer.emoji || '🙂'}</span>
+					</button>
+
+					{#if emoji_picker_open_for === index}
+						<div
+							class="cq-card absolute left-1/2 top-12 z-40 w-56 -translate-x-1/2 rounded-3xl border border-cq-border p-3 shadow-2xl"
+							role="dialog"
+							aria-label="Answer emoji picker"
+						>
+							<div class="mb-2 flex items-center justify-between gap-2">
+								<span class="text-xs font-semibold uppercase tracking-wide text-cq-text">Emoji</span>
+								<button
+									type="button"
+									class="cq-surface-muted rounded-full px-2 py-1 text-xs text-cq-muted transition hover:text-cq-text focus:outline-hidden focus:ring-2 focus:ring-cq-brand"
+									onclick={() => {
+										set_answer_emoji(answer);
+									}}
+								>
+									Clear
+								</button>
+							</div>
+
+							<div class="grid grid-cols-6 gap-1.5">
+								{#each answer_emojis as emoji (emoji)}
+									<button
+										type="button"
+										class="flex h-8 w-8 items-center justify-center rounded-xl text-lg transition hover:bg-cq-brand/20 focus:outline-hidden focus:ring-2 focus:ring-cq-brand"
+										class:cq-surface-muted={answer.emoji === emoji}
+										aria-label="Use {emoji} emoji"
+										onclick={() => {
+											set_answer_emoji(answer, emoji);
+										}}
+									>
+										{emoji}
+									</button>
+								{/each}
+							</div>
+
+							<input
+								bind:value={answer.emoji}
+								type="text"
+								class="cq-surface-muted mt-3 w-full rounded-2xl border border-cq-border px-3 py-2 text-center text-cq-text outline-hidden transition-all placeholder:text-cq-muted focus:shadow-2xl focus:ring-2 focus:ring-cq-brand"
+								placeholder="Paste custom emoji"
+								aria-label="Custom answer emoji"
+								onchange={() => {
+									normalize_answer_emoji(answer);
+								}}
+								onkeydown={(event) => {
+									if (event.key === 'Enter') {
+										normalize_answer_emoji(answer);
+										emoji_picker_open_for = undefined;
+									}
+								}}
+							/>
+						</div>
+					{/if}
+				</div>
 				<button
 					type="button"
+					aria-label={answer.right ? 'Mark answer as incorrect' : 'Mark answer as correct'}
 					onclick={() => {
 						answer.right = !answer.right;
 					}}

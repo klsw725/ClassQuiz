@@ -91,10 +91,13 @@ async def finish_edit(edit_id: str, quiz_input: QuizInput):
         quiz_input.background_color = bleach.clean(quiz_input.background_color, tags=[], strip=True)
 
     for i, question in enumerate(quiz_input.questions):
-        if question.type == QuizQuestionType.ABCD or question.type == QuizQuestionType.VOTING:
+        if question.type in [QuizQuestionType.ABCD, QuizQuestionType.VOTING, QuizQuestionType.CHECK]:
             for i2, answer in enumerate(question.answers):
                 if answer.color is not None:
                     quiz_input.questions[i].answers[i2].color = bleach.clean(answer.color, tags=[], strip=True)
+                if question.type in [QuizQuestionType.ABCD, QuizQuestionType.CHECK] and answer.emoji is not None:
+                    emoji = bleach.clean(answer.emoji, tags=[], strip=True).strip()
+                    quiz_input.questions[i].answers[i2].emoji = emoji or None
                 if answer.answer == "":
                     quiz_input.questions[i].answers[i2].answer = None
                 if answer.answer is not None:

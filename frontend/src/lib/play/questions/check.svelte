@@ -73,7 +73,13 @@ SPDX-License-Identifier: MPL-2.0
 				class:opacity-50={!_selected_answers[i]}
 			>
 				{#if game_mode === 'kahoot'}
-					<img class="h-2/3 inline-block m-auto" alt="Icon" src={kahoot_icons[i]} />
+					{#if answer.emoji}
+						<span class="m-auto text-6xl leading-none" aria-label="Answer emoji"
+							>{answer.emoji}</span
+						>
+					{:else}
+						<img class="h-2/3 inline-block m-auto" alt="Icon" src={kahoot_icons[i]} />
+					{/if}
 				{:else}
 					<p class="m-auto">{answer.answer}</p>
 				{/if}
