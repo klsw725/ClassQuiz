@@ -63,27 +63,32 @@ SPDX-License-Identifier: MPL-2.0
 	});
 
 	const check_auto = (stp: number) => {
+		const update_step = (methods: LoginMethod[]) => {
+			if (browserSupportsWebAuthn()) {
+				return methods;
+			}
+
+			const filtered_methods = methods.filter((method) => method !== 'PASSKEY');
+			if (filtered_methods.length === methods.length) {
+				return methods;
+			}
+
+			return filtered_methods;
+		};
+
 		if (stp === 1) {
-			if (!browserSupportsWebAuthn()) {
-				for (let i = 0; i < session_data.step_1.length; i++) {
-					if (session_data.step_1[i] === 'PASSKEY') {
-						session_data.step_1.splice(i, 1);
-					}
-				}
-				session_data.step_1 = [...session_data.step_1];
+			const next_step_1 = update_step(session_data.step_1);
+			if (next_step_1 !== session_data.step_1) {
+				session_data.step_1 = next_step_1;
 			}
 			if (session_data.step_1.length === 1) {
 				selected_method = session_data.step_1[0];
 			}
 		}
 		if (stp === 2) {
-			if (!browserSupportsWebAuthn()) {
-				for (let i = 0; i < session_data.step_2.length; i++) {
-					if (session_data.step_2[i] === 'PASSKEY') {
-						session_data.step_2.splice(i, 1);
-					}
-				}
-				session_data.step_2 = [...session_data.step_2];
+			const next_step_2 = update_step(session_data.step_2);
+			if (next_step_2 !== session_data.step_2) {
+				session_data.step_2 = next_step_2;
 			}
 			if (session_data.step_2.length === 1) {
 				selected_method = session_data.step_2[0];
