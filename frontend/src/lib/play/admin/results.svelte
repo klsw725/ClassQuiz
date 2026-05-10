@@ -81,36 +81,36 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="h-full flex flex-col">
-	<div class="flex justify-center">
-		<div>
-			<table class="table-auto text-xl">
-				<thead>
+	<div class="flex justify-center overflow-x-auto px-2 py-2 md:py-4">
+		<div class="cq-card mx-auto min-w-fit overflow-hidden p-2 md:p-3">
+			<table class="mx-auto table-auto text-2xl md:text-3xl lg:text-4xl">
+				<thead class="cq-surface-muted">
 					<tr>
-						<th class="p-2 border-r border-r-black border-b-2 border-b-black"
+						<th class="p-3 md:p-5 border-r border-cq-border border-b-2 border-b-cq-border"
 							>{$t('words.name')}</th
 						>
-						<th class="p-2 border-b-2 border-b-black"
+						<th class="p-3 md:p-5 border-b-2 border-b-cq-border"
 							>{$t('words.point', { count: 2 })}</th
 						>
 						{#if show_new_score_clicked}
-							<th in:fly|global={{ x: 300 }} class="p-2 border-b-2 border-b-black"
+							<th in:fly|global={{ x: 300 }} class="p-3 md:p-5 border-b-2 border-b-cq-border"
 								>{$t('play_page.points_added')}
 							</th>
 						{/if}
 					</tr>
 				</thead>
-				<tbody>
+				<tbody class="divide-y divide-cq-border text-cq-text">
 					{#each player_names as player, i (player)}
-						<tr animate:flip>
-							<td class:hidden={i > 3} class="p-2 border-r border-r-black"
+						<tr animate:flip class="odd:bg-cq-surface even:bg-cq-surface-muted">
+							<td class:hidden={i > 3} class="p-3 md:p-5 border-r border-cq-border font-semibold"
 								>{player}</td
 							>
-							<td class:hidden={i > 3} class="p-2">{data[player]}</td>
+							<td class:hidden={i > 3} class="p-3 md:p-5 font-bold text-cq-brand">{data[player]}</td>
 							{#if show_new_score_clicked}
 								<td
 									in:fly|global={{ x: 300 }}
 									class:hidden={i > 3}
-									class="p-2"
+									class="p-3 md:p-5 font-bold text-cq-brand"
 									class:text-red-600={score_by_username[player] === 0 ||
 										score_by_username[player] === undefined}
 								>
@@ -124,7 +124,7 @@ SPDX-License-Identifier: MPL-2.0
 		</div>
 	</div>
 	{#if [QuizQuestionType.ABCD, QuizQuestionType.VOTING, QuizQuestionType.TEXT].includes(question.type)}
-		<div class="mt-12">
+		<div class="mt-14 md:mt-20">
 			<VotingResults data={new_data} {question} />
 		</div>
 	{/if}

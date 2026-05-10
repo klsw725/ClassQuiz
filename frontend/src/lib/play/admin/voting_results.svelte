@@ -37,40 +37,40 @@ SPDX-License-Identifier: MPL-2.0
 	}
 </script>
 
-<div class="flex justify-center w-full">
+<div class="flex justify-center w-full overflow-x-auto px-2 pb-12">
 	<div
-		class="m-auto w-fit gap-4 flex flex-col"
+		class="cq-card m-auto w-fit gap-6 p-6 md:gap-8 md:p-8 flex flex-col"
 		style="grid-template-columns: repeat({quiz_answers.length}, minmax(0, 1fr));"
 	>
-		<div class="flex gap-12">
+		<div class="flex gap-8 sm:gap-12 lg:gap-16">
 			{#each quiz_answers as answer}
-				<span class="text-center self-end mx-auto text-lg"
+				<span class="text-center self-end mx-auto text-2xl font-semibold md:text-4xl"
 					>{#if sorted_data[answer] > 0}{sorted_data[answer]}{/if}</span
 				>
 			{/each}
 		</div>
-		<div class="flex gap-12">
+		<div class="flex gap-8 sm:gap-12 lg:gap-16">
 			{#each quiz_answers as answer, i}
 				<div
-					class="cq-surface w-20 self-end flex justify-center shadow-xl"
+					class="cq-surface w-24 self-end flex justify-center rounded-t-lg border-2 border-cq-border shadow-2xl sm:w-28 lg:w-32"
 					class:shadow-blue-500={answer_correct[i] &&
 						question.type !== QuizQuestionType.VOTING}
 					class:shadow-yellow-500={!answer_correct[i] &&
 						question.type !== QuizQuestionType.VOTING}
 					class:opacity-70={!answer_correct[i] &&
 						question.type !== QuizQuestionType.VOTING}
-					style="height: {(sorted_data[answer] * 20) /
+					style="height: {(sorted_data[answer] * 24) /
 						data.length}rem; background-color: {quiz_colors[i]
 						? quiz_colors[i]
 						: 'var(--cq-accent)'}"
 				></div>
 			{/each}
 		</div>
-		<div class="flex gap-12">
+		<div class="flex gap-8 sm:gap-12 lg:gap-16">
 			{#each quiz_answers as answer, i}
-				<div class="w-20">
+				<div class="w-24 sm:w-28 lg:w-32">
 					<p
-						class="-rotate-45 text-xl text-str"
+						class="cq-surface-muted -rotate-45 rounded-lg px-3 py-2 text-2xl md:text-3xl text-str"
 						class:line-through={!answer_correct[i] &&
 							question.type !== QuizQuestionType.VOTING}
 					>
