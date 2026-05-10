@@ -36,14 +36,14 @@ SPDX-License-Identifier: MPL-2.0
 	});
 
 	const start_game = async (id: string) => {
-		let res;
+		let res: Response;
 		loading = true;
 		localStorage.setItem('custom_field', custom_field);
 		const cqcs_enabled_parsed = cqcs_enabled ? 'True' : 'False';
 		const randomized_answers_parsed = randomized_answers ? 'True' : 'False';
 		if (captcha_enabled && captcha_selected) {
 			res = await fetch(
-				`/api/v1/quiz/start/${id}?captcha_enabled=True&game_mode=${selected_game_mode}&custom_field=${custom_field}&cqcs_enabled=${cqcs_enabled_parsed}`,
+				`/api/v1/quiz/start/${id}?captcha_enabled=True&game_mode=${selected_game_mode}&custom_field=${custom_field}&cqcs_enabled=${cqcs_enabled_parsed}&randomize_answers=${randomized_answers_parsed}`,
 				{
 					method: 'POST'
 				}
