@@ -93,6 +93,7 @@ SPDX-License-Identifier: MPL-2.0
 			<PlayerOverview
 				custom_field={data.results.custom_field_data}
 				scores={data.results.player_scores}
+				player_zone_data={data.results.player_zone_data ?? {}}
 				answers={data.results.answers}
 			/>
 		</div>

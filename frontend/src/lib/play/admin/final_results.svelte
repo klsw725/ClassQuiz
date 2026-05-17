@@ -16,15 +16,19 @@ SPDX-License-Identifier: MPL-2.0
 		data: any;
 		username?: any;
 		show_final_results: boolean;
+		display_names?: Record<string, string>;
 	}
 
-	let { data = $bindable(), username, show_final_results }: Props = $props();
+	let { data = $bindable(), username, show_final_results, display_names = {} }: Props = $props();
+	const formatPlayerName = (player: string) => display_names[player] ?? player;
 
-	let player_names = $derived(Object.keys(data).sort((a, b) => {
-		const scoreA = parseFloat(data[a]) || 0;
-		const scoreB = parseFloat(data[b]) || 0;
-		return scoreB - scoreA;
-	}));
+	let player_names = $derived(
+		Object.keys(data).sort((a, b) => {
+			const scoreA = parseFloat(data[a]) || 0;
+			const scoreB = parseFloat(data[b]) || 0;
+			return scoreB - scoreA;
+		})
+	);
 
 	let player_count_or_five = $derived(player_names.length >= 5 ? 5 : player_names.length);
 
@@ -55,7 +59,7 @@ SPDX-License-Identifier: MPL-2.0
 				>
 					{$t('play_page.final_result_rank', {
 						place: i + 1,
-						username: player,
+						username: formatPlayerName(player),
 						points: data[player]
 					})}
 				</p>
@@ -64,8 +68,12 @@ SPDX-License-Identifier: MPL-2.0
 	</div>
 	{#if data[username]}
 		<div class="fixed bottom-0 left-0 flex justify-center w-full px-4 mb-6">
-			<div class="cq-card mx-auto w-full max-w-md p-6 text-cq-text shadow-2xl md:max-w-xl md:p-8">
-				<p class="cq-surface-muted rounded-lg border-2 border-cq-border p-4 text-center text-2xl font-semibold text-cq-brand md:text-4xl">
+			<div
+				class="cq-card mx-auto w-full max-w-md p-6 text-cq-text shadow-2xl md:max-w-xl md:p-8"
+			>
+				<p
+					class="cq-surface-muted rounded-lg border-2 border-cq-border p-4 text-center text-2xl font-semibold text-cq-brand md:text-4xl"
+				>
 					{$t('play_page.your_score', { score: data[username] })}
 				</p>
 				{#each player_names as player, i}

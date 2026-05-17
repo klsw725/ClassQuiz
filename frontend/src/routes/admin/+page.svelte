@@ -108,6 +108,16 @@ SPDX-License-Identifier: MPL-2.0
 
 	const socket_game_controls: SocketGameControls = new SocketGameControls(socket);
 	let game_state: GameState = $state(new GameState(game_token));
+	const getPlayerDisplayNames = (players: Player[]): Record<string, string> => {
+		const displayNames: Record<string, string> = {};
+		for (const player of players) {
+			if (player.zone) {
+				displayNames[player.username] = `${player.zone}-${player.username}`;
+			}
+		}
+		return displayNames;
+	};
+	let player_display_names = $derived(getPlayerDisplayNames(game_state.players));
 
 	const connect = async () => {
 		socket.emit('register_as_admin', {
@@ -187,7 +197,6 @@ SPDX-License-Identifier: MPL-2.0
 	const save_quiz = () => {
 		socket.emit('save_quiz');
 	};
-
 
 	let bg_color = $derived(
 		game_state.quiz_data ? game_state.quiz_data.background_color : undefined
@@ -282,7 +291,11 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 			</div>
 		{/if}
-		<FinalResults bind:data={game_state.player_scores} {show_final_results} />
+		<FinalResults
+			bind:data={game_state.player_scores}
+			{show_final_results}
+			display_names={player_display_names}
+		/>
 	{/if}
 	{#if !success}
 		{#if errorMessage !== ''}

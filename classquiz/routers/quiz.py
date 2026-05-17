@@ -235,9 +235,14 @@ async def export_quiz_answers(export_token: str, game_pin: str):
         raise HTTPException(status_code=404, detail="quiz not found")
 
     player_fields = await redis.hgetall(f"game:{game_pin}:players:custom_fields")
+    player_zones = await redis.hgetall(f"game:{game_pin}:players:zones")
     score_data = await redis.hgetall(f"game_session:{game_pin}:player_scores")
     spreadsheet = await generate_spreadsheet(
-        quiz=quiz, quiz_results=data, player_fields=player_fields, player_scores=score_data
+        quiz=quiz,
+        quiz_results=data,
+        player_fields=player_fields,
+        player_scores=score_data,
+        player_zones=player_zones,
     )
 
     def iter_file():

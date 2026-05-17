@@ -25,12 +25,29 @@ SPDX-License-Identifier: MPL-2.0
 			right: boolean;
 			time_taken: number;
 			score: number;
+			zone?: string;
 		}>;
 		username: any;
+		display_names?: Record<string, string>;
 	}
 
-	let { scores = $bindable(), question_results, username }: Props = $props();
+	let {
+		scores = $bindable(),
+		question_results,
+		username,
+		display_names = $bindable({})
+	}: Props = $props();
 	let score_by_username = $state({});
+	const addDisplayNames = () => {
+		const nextDisplayNames = { ...display_names };
+		for (const result of question_results) {
+			if (result.zone) {
+				nextDisplayNames[result.username] = `${result.zone}-${result.username}`;
+			}
+		}
+		display_names = nextDisplayNames;
+	};
+	addDisplayNames();
 	let currentPlayerResult = $derived(
 		question_results.find((result) => result.username === username)
 	);

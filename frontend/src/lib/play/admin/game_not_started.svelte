@@ -28,6 +28,8 @@ SPDX-License-Identifier: MPL-2.0
 
 	let fullscreen_open = $state(false);
 	const { t } = getLocalization();
+	const formatPlayerName = (player: { username: string; zone?: string }) =>
+		player.zone ? `${player.zone}-${player.username}` : player.username;
 
 	if (cqc_code === 'null') {
 		cqc_code = null;
@@ -112,7 +114,7 @@ SPDX-License-Identifier: MPL-2.0
 						class="link-hover hover:line-through text-lg"
 						onclick={() => {
 							socket_game_controls.kick_player(player.username, game_state.players);
-						}}>{player.username}</span
+						}}>{formatPlayerName(player)}</span
 					>
 					<!--					<button>{$t('words.kick')}</button>-->
 				</div>

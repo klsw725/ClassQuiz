@@ -6,11 +6,21 @@ from pydantic import BaseModel, field_validator, ValidationInfo
 from classquiz.db.models import QuizQuestion, QuizQuestionType, VotingQuizAnswer
 
 
+ALLOWED_ZONES = tuple(f"{zone}구역" for zone in range(1, 12))
+
+
 class JoinGameData(BaseModel):
     username: str
     game_pin: str
+    zone: str
     captcha: str | None = None
     custom_field: str | None = None
+
+    @field_validator("zone")
+    def zone_must_be_allowed(cls, v: str):
+        if v not in ALLOWED_ZONES:
+            raise ValueError("Zone must be between 1구역 and 11구역")
+        return v
 
 
 class RejoinGameData(BaseModel):

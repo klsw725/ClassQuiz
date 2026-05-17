@@ -328,6 +328,7 @@ class AnswerData(BaseModel):
     right: bool
     time_taken: float  # In milliseconds
     score: int
+    zone: str | None = None
 
 
 class AnswerDataList(RootModel):
@@ -379,6 +380,7 @@ class GameResults(ormar.Model):
     answers: Json[list[AnswerData]] = ormar.JSON(True)
     player_scores: Json[dict[str, str]] = ormar.JSON(nullable=True)
     custom_field_data: Json[dict[str, str]] | None = ormar.JSON(nullable=True)
+    player_zone_data: Json[dict[str, str]] | None = ormar.JSON(nullable=True)
     title: str = ormar.Text(nullable=False)
     description: str = ormar.Text(nullable=False)
     questions: Json[list[QuizQuestion]] = ormar.JSON(nullable=False)

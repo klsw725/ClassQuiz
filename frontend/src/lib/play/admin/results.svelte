@@ -24,10 +24,12 @@ SPDX-License-Identifier: MPL-2.0
 			right: boolean;
 			time_taken: number;
 			score: number;
+			zone?: string;
 		}>;
+		player_display_names?: Record<string, string>;
 	}
 
-	let { data = $bindable(), question, new_data }: Props = $props();
+	let { data = $bindable(), question, new_data, player_display_names = {} }: Props = $props();
 
 	// let data_by_username = {};
 
@@ -39,12 +41,23 @@ SPDX-License-Identifier: MPL-2.0
 		return ret_data;
 	};
 	let score_by_username = $derived(group_username_by_score(new_data));
+	let answer_display_names = $derived(
+		Object.fromEntries(
+			new_data
+				.filter((answer) => answer.zone)
+				.map((answer) => [answer.username, `${answer.zone}-${answer.username}`])
+		)
+	);
+	const formatPlayerName = (username: string) =>
+		answer_display_names[username] ?? player_display_names[username] ?? username;
 
-	let player_names = $derived(Object.keys(data).sort((a, b) => {
-		const scoreA = parseFloat(data[a]) || 0;
-		const scoreB = parseFloat(data[b]) || 0;
-		return scoreB - scoreA;
-	}));
+	let player_names = $derived(
+		Object.keys(data).sort((a, b) => {
+			const scoreA = parseFloat(data[a]) || 0;
+			const scoreB = parseFloat(data[b]) || 0;
+			return scoreB - scoreA;
+		})
+	);
 
 	if (JSON.stringify(data) === '{}') {
 		for (const i of new_data) {
@@ -86,14 +99,17 @@ SPDX-License-Identifier: MPL-2.0
 			<table class="mx-auto table-auto text-2xl md:text-3xl lg:text-4xl">
 				<thead class="cq-surface-muted">
 					<tr>
-						<th class="p-3 md:p-5 border-r border-cq-border border-b-2 border-b-cq-border"
+						<th
+							class="p-3 md:p-5 border-r border-cq-border border-b-2 border-b-cq-border"
 							>{$t('words.name')}</th
 						>
 						<th class="p-3 md:p-5 border-b-2 border-b-cq-border"
 							>{$t('words.point', { count: 2 })}</th
 						>
 						{#if show_new_score_clicked}
-							<th in:fly|global={{ x: 300 }} class="p-3 md:p-5 border-b-2 border-b-cq-border"
+							<th
+								in:fly|global={{ x: 300 }}
+								class="p-3 md:p-5 border-b-2 border-b-cq-border"
 								>{$t('play_page.points_added')}
 							</th>
 						{/if}
@@ -102,10 +118,14 @@ SPDX-License-Identifier: MPL-2.0
 				<tbody class="divide-y divide-cq-border text-cq-text">
 					{#each player_names as player, i (player)}
 						<tr animate:flip class="odd:bg-cq-surface even:bg-cq-surface-muted">
-							<td class:hidden={i > 3} class="p-3 md:p-5 border-r border-cq-border font-semibold"
-								>{player}</td
+							<td
+								class:hidden={i > 3}
+								class="p-3 md:p-5 border-r border-cq-border font-semibold"
+								>{formatPlayerName(player)}</td
 							>
-							<td class:hidden={i > 3} class="p-3 md:p-5 font-bold text-cq-brand">{data[player]}</td>
+							<td class:hidden={i > 3} class="p-3 md:p-5 font-bold text-cq-brand"
+								>{data[player]}</td
+							>
 							{#if show_new_score_clicked}
 								<td
 									in:fly|global={{ x: 300 }}

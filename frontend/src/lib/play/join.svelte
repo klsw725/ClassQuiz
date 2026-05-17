@@ -17,18 +17,21 @@ SPDX-License-Identifier: MPL-2.0
 
 	interface Props {
 		game_pin: string;
-		game_mode: any;
-		username: any;
+		game_mode: unknown;
+		username: string;
+		zone?: string;
 	}
 
 	let {
 		game_pin = $bindable(),
 		game_mode = $bindable(),
-		username = $bindable()
+		username = $bindable(),
+		zone = $bindable('1구역')
 	}: Props = $props();
 	let custom_field = $state();
 	let custom_field_value = $state();
 	let captcha_enabled = $state();
+	const zones = Array.from({ length: 11 }, (_, index) => `${index + 1}구역`);
 
 	let hcaptchaSitekey = import.meta.env.VITE_HCAPTCHA;
 
@@ -37,7 +40,7 @@ SPDX-License-Identifier: MPL-2.0
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 		render: (_a, _b) => {} // eslint-disable-line @typescript-eslint/no-unused-vars
 	};
-	let hcaptchaWidgetID;
+	let hcaptchaWidgetID: unknown;
 
 	onMount(() => {
 		if (browser) {
@@ -73,9 +76,9 @@ SPDX-License-Identifier: MPL-2.0
 	};
 
 	const set_game_pin = async () => {
-		let process_var;
+		let process_var: { env: { API_URL?: string } };
 		try {
-			process_var = process;
+			process_var = { env: { API_URL: process.env.API_URL } };
 		} catch {
 			process_var = { env: { API_URL: undefined } };
 		}
@@ -139,6 +142,7 @@ SPDX-License-Identifier: MPL-2.0
 					socket.emit('join_game', {
 						username: username,
 						game_pin: game_pin,
+						zone: zone,
 						captcha: captcha_resp,
 						custom_field: custom_field ? custom_field_value : undefined
 					});
@@ -164,6 +168,7 @@ SPDX-License-Identifier: MPL-2.0
 							socket.emit('join_game', {
 								username: username,
 								game_pin: game_pin,
+								zone: zone,
 								captcha: token,
 								custom_field: custom_field ? custom_field_value : undefined
 							});
@@ -174,6 +179,7 @@ SPDX-License-Identifier: MPL-2.0
 			socket.emit('join_game', {
 				username: username,
 				game_pin: game_pin,
+				zone: zone,
 				captcha: undefined,
 				custom_field: custom_field ? custom_field_value : undefined
 			});
@@ -224,13 +230,25 @@ SPDX-License-Identifier: MPL-2.0
 	</div>
 {:else}
 	<div class="flex min-h-screen w-screen items-center justify-center px-4 text-cq-text">
-		<form onsubmit={setUsername} class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center">
+		<form
+			onsubmit={setUsername}
+			class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center"
+		>
 			<h1 class="text-lg font-semibold text-cq-text">{$t('words.username')}</h1>
 			<input
 				class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
 				bind:value={username}
 				maxlength="17"
 			/>
+			<h1 class="text-lg font-semibold text-cq-text">구역</h1>
+			<select
+				class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
+				bind:value={zone}
+			>
+				{#each zones as zone_option (zone_option)}
+					<option value={zone_option}>{zone_option}</option>
+				{/each}
+			</select>
 			{#if custom_field}
 				<h1 class="text-lg font-semibold text-cq-text">{custom_field}</h1>
 				<input

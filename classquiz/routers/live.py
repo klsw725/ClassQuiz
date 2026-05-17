@@ -175,9 +175,14 @@ async def get_game_session(game_pin: str, api_key: str | None = None, game_id: u
             ga_1 = GameAnswer1(id=i, answers=[GameAnswer2.model_validate(i) for i in res])
             data.answers.append(ga_1)
     players = await redis.smembers(f"game_session:{game_pin}:players")
+    player_zones = await redis.hgetall(f"game:{game_pin}:players:zones")
     player_list = []
     for p in players:
-        player_list.append(GamePlayer.model_validate_json(p))
+        player = GamePlayer.model_validate_json(p).model_dump()
+        zone = player_zones.get(player["username"])
+        if zone is not None:
+            player["zone"] = zone
+        player_list.append(player)
     return player_list
 
 
@@ -217,9 +222,14 @@ async def get_live_player_scores(game_pin: str, api_key: str):
     if redis_res is None or user_id is None:
         raise HTTPException(status_code=404, detail="Game not found or API key not found")
     res = await redis.hgetall(f"game_session:{game_pin}:player_scores")
+    player_zones = await redis.hgetall(f"game:{game_pin}:players:zones")
     return_arr = []
     for username in res:
-        return_arr.append({"username": username, "score": int(res[username])})
+        player_score = {"username": username, "score": int(res[username])}
+        zone = player_zones.get(username)
+        if zone is not None:
+            player_score["zone"] = zone
+        return_arr.append(player_score)
     return_arr = sorted(return_arr, key=lambda d: d["score"], reverse=True)
     return return_arr
 

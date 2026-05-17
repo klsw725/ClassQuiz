@@ -41,7 +41,9 @@ async def generate_spreadsheet(
     quiz: Quiz,
     player_fields: dict[str, Any],
     player_scores: dict[str, Any],
+    player_zones: dict[str, Any] | None = None,
 ) -> BytesIO:
+    player_zones = player_zones or {}
     storage = BytesIO()
     workbook = xlsxwriter.Workbook(storage, {"in_memory": True})
     player_worksheet = workbook.add_worksheet()
@@ -49,13 +51,15 @@ async def generate_spreadsheet(
     _ = player_worksheet.write(0, 0, "Username")
     _ = player_worksheet.write(0, 1, "Score")
     _ = player_worksheet.write(0, 2, "Custom-Field")
+    if player_zones:
+        _ = player_worksheet.write(0, 3, "Zone")
     for i, player in enumerate(player_scores.keys()):
         player_worksheet.write(i + 1, 0, player)
         player_worksheet.write(i + 1, 1, player_scores[player])
-        try:
+        if player in player_fields:
             player_worksheet.write(i + 1, 2, player_fields[player])
-        except KeyError:
-            continue
+        if player_zones and player in player_zones:
+            player_worksheet.write(i + 1, 3, player_zones[player])
 
     worksheet = workbook.add_worksheet()
     worksheet.name = "Questions"

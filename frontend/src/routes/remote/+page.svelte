@@ -36,7 +36,9 @@ SPDX-License-Identifier: MPL-2.0
 	let warnToLeave = true;
 	let dataexport_download_a: HTMLAnchorElement = $state();
 
-	let players: Array<{ sid: string; username: string }> = $state([]);
+	let players: Array<{ sid: string; username: string; zone?: string }> = $state([]);
+	const formatPlayerName = (player: { username: string; zone?: string }) =>
+		player.zone ? `${player.zone}-${player.username}` : player.username;
 
 	let game_data: QuizData = $state();
 	let shown_question_now: number;
@@ -315,7 +317,7 @@ SPDX-License-Identifier: MPL-2.0
 				<div class="cq-surface-muted mt-3 p-3 text-cq-muted">
 					<ul>
 						{#each players as player}
-							<li>{player.username}</li>
+							<li>{formatPlayerName(player)}</li>
 						{/each}
 					</ul>
 				</div>

@@ -55,10 +55,12 @@ export const getWinnersSorted = (
 
 export interface Player {
 	username: string;
+	zone?: string;
 }
 
 export interface PlayerAnswer {
 	username: string;
 	answer: string;
 	right: string;
+	zone?: string;
 }

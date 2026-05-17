@@ -24,6 +24,10 @@ async def save_quiz_to_storage(game_pin: str):
             answers.append([])
     player_scores = await redis.hgetall(f"game_session:{game_pin}:player_scores")
     custom_field_data = await redis.hgetall(f"game:{game_pin}:players:custom_fields")
+    redis_player_zone_data = await redis.hgetall(f"game:{game_pin}:players:zones")
+    player_zone_data = {
+        player: redis_player_zone_data[player] for player in player_scores if player in redis_player_zone_data
+    }
     q_return = []
     for q in game.questions:
         q_return.append(q.model_dump())
@@ -36,6 +40,7 @@ async def save_quiz_to_storage(game_pin: str):
         answers=json.dumps(answers),
         player_scores=json.dumps(player_scores),
         custom_field_data=json.dumps(custom_field_data),
+        player_zone_data=json.dumps(player_zone_data),
         title=game.title,
         description=game.description,
         questions=json.dumps(q_return),

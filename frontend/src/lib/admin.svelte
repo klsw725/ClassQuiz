@@ -13,6 +13,7 @@ SPDX-License-Identifier: MPL-2.0
 	import Question from '$lib/play/admin/question.svelte';
 	import { SocketGameControls } from '$lib/play/admin/socket_game_controls.ts';
 	import type { IGameState } from '$lib/play/admin/game_state.ts';
+	import type { Player } from '$lib/admin';
 
 	const { t } = getLocalization();
 	const default_colors = ['#D6EDC9', '#B07156', '#7F7057', '#4E6E58'];
@@ -82,6 +83,16 @@ SPDX-License-Identifier: MPL-2.0
 	};
 
 	const socket_game_controls: SocketGameControls = new SocketGameControls(socket);
+	const getPlayerDisplayNames = (players: Player[]): Record<string, string> => {
+		const displayNames: Record<string, string> = {};
+		for (const player of players) {
+			if (player.zone) {
+				displayNames[player.username] = `${player.zone}-${player.username}`;
+			}
+		}
+		return displayNames;
+	};
+	let player_display_names = $derived(getPlayerDisplayNames(game_state.players));
 </script>
 
 {#if game_state.control_visible}
@@ -147,6 +158,7 @@ SPDX-License-Identifier: MPL-2.0
 					bind:data={game_state.player_scores}
 					question={game_state.quiz_data.questions[game_state.selected_question]}
 					new_data={game_state.question_results}
+					{player_display_names}
 				/>
 			{/await}
 		{/if}

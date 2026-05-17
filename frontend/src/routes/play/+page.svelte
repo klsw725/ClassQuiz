@@ -55,15 +55,24 @@ SPDX-License-Identifier: MPL-2.0
 		right: boolean;
 		time_taken: number;
 		score: number;
+		zone?: string;
 	}
 
 	let game_mode: string | undefined = $state();
-	let final_results: Array<null> | Array<Array<PlayerAnswer>> = $state([null]);
+	let final_results: Array<null> | Record<string, PlayerAnswer[]> = $state([null]);
 
 	interface PlayerAnswer {
 		username: string;
 		answer: string;
 		right: string;
+		zone?: string;
+	}
+
+	interface JoinedGameCookie {
+		sid: string;
+		username: string;
+		game_pin: string;
+		zone?: string;
 	}
 
 	// Variables init
@@ -74,7 +83,9 @@ SPDX-License-Identifier: MPL-2.0
 	let gameData: GameData | undefined = $state();
 	let solution: QuestionType | undefined = $state();
 	let username = $state('');
+	let zone = $state('1구역');
 	let scores: Record<string, number> = $state({});
+	let display_names: Record<string, string> = $state({});
 	let gameMeta: GameMeta = $state({
 		started: false
 	});
@@ -87,6 +98,16 @@ SPDX-License-Identifier: MPL-2.0
 	function restart() {
 		unique = {};
 	}
+
+	const rememberDisplayNames = (results: Array<PlayerAnswer | QuestionResult | null>) => {
+		const nextDisplayNames = { ...display_names };
+		for (const result of results) {
+			if (result?.zone) {
+				nextDisplayNames[result.username] = `${result.zone}-${result.username}`;
+			}
+		}
+		display_names = nextDisplayNames;
+	};
 
 	const confirmUnload = (event: BeforeUnloadEvent) => {
 		if (preventReload) {
@@ -105,7 +126,11 @@ SPDX-License-Identifier: MPL-2.0
 		if (!cookie_data) {
 			return;
 		}
-		const data = JSON.parse(cookie_data);
+		const data = JSON.parse(cookie_data) as JoinedGameCookie;
+		if (data.zone) {
+			zone = data.zone;
+			display_names = { ...display_names, [data.username]: `${data.zone}-${data.username}` };
+		}
 		socket.emit('rejoin_game', {
 			old_sid: data.sid,
 			username: data.username,
@@ -121,7 +146,8 @@ SPDX-License-Identifier: MPL-2.0
 		gameData = data;
 		// eslint-disable-next-line no-undef
 		plausible('Joined Game', { props: { game_id: gameData.game_id } });
-		Cookies.set('joined_game', JSON.stringify({ sid: socket.id, username, game_pin }), {
+		display_names = { ...display_names, [username]: `${zone}-${username}` };
+		Cookies.set('joined_game', JSON.stringify({ sid: socket.id, username, game_pin, zone }), {
 			expires: 3600
 		});
 	});
@@ -155,6 +181,9 @@ SPDX-License-Identifier: MPL-2.0
 
 	socket.on('question_results', (data: QuestionResult[] | null) => {
 		restart();
+		if (data) {
+			rememberDisplayNames(data);
+		}
 		answer_results = data;
 	});
 
@@ -170,7 +199,10 @@ SPDX-License-Identifier: MPL-2.0
 		Cookies.set('kicked', 'value', { expires: 1 });
 		window.location.reload();
 	});
-	socket.on('final_results', (data: Array<Array<PlayerAnswer>>) => {
+	socket.on('final_results', (data: Record<string, PlayerAnswer[]>) => {
+		for (const questionResults of Object.values(data)) {
+			rememberDisplayNames(questionResults);
+		}
 		final_results = data;
 		Cookies.remove('joined_game');
 	});
@@ -195,9 +227,14 @@ SPDX-License-Identifier: MPL-2.0
 >
 	<div>
 		{#if !gameMeta.started && gameData === undefined}
-			<JoinGame bind:game_pin bind:game_mode bind:username />
+			<JoinGame bind:game_pin bind:game_mode bind:username bind:zone />
 		{:else if JSON.stringify(final_results) !== JSON.stringify([null])}
-			<ShowEndScreen bind:data={scores} show_final_results={true} {username} />
+			<ShowEndScreen
+				bind:data={scores}
+				show_final_results={true}
+				{username}
+				{display_names}
+			/>
 		{:else if gameData !== undefined && question_index === ''}
 			<ShowTitle
 				title={gameData.title}
@@ -220,7 +257,12 @@ SPDX-License-Identifier: MPL-2.0
 					<h2 class="text-center text-3xl mb-8">{$t('words.result', { count: 2 })}</h2>
 				</div>
 				{#key unique}
-					<KahootResults {username} question_results={answer_results} bind:scores />
+					<KahootResults
+						{username}
+						question_results={answer_results}
+						bind:scores
+						bind:display_names
+					/>
 				{/key}
 			{/if}
 		{/if}

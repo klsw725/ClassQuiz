@@ -109,12 +109,15 @@ async def rejoin_game(sid: str, data: dict):
         GamePlayer(username=data.username, sid=sid).model_dump_json(),
     )
     game_data = PlayGame.model_validate_json(redis_res)
+    zone = await redis.hget(f"game:{data.game_pin}:players:zones", data.username)
     session = {
         "game_pin": data.game_pin,
         "username": data.username,
         "sid_custom": sid,
         "admin": False,
     }
+    if zone is not None:
+        session["zone"] = zone
     await save_session(sid, sio, session)
     await sio.enter_room(sid, data.game_pin)
     await sio.emit(
@@ -155,6 +158,7 @@ async def join_game(sid: str, data: dict):
         "username": data.username,
         "sid_custom": sid,
         "admin": False,
+        "zone": data.zone,
     }
     await save_session(sid, sio, session)
     await sio.emit(
@@ -164,6 +168,13 @@ async def join_game(sid: str, data: dict):
     )
     await redis.set(f"game_session:{data.game_pin}:players:{data.username}", sid, ex=7200)
     await GamePlayer(username=data.username, sid=sid).to_player_stack(data.game_pin)
+    player_zones_key = f"game:{data.game_pin}:players:zones"
+    await redis.hset(
+        player_zones_key,
+        data.username,
+        data.zone,
+    )
+    await redis.expire(player_zones_key, 7200)
 
     if data.custom_field == "":
         data.custom_field = None
@@ -176,7 +187,7 @@ async def join_game(sid: str, data: dict):
 
     await sio.emit(
         "player_joined",
-        {"username": data.username, "sid": sid},
+        {"username": data.username, "sid": sid, "zone": data.zone},
         room=f"admin:{data.game_pin}",
     )
     # +++ Time-Sync +++
@@ -315,6 +326,7 @@ async def submit_answer(sid: str, data: dict):
         right=answer_right,
         time_taken=abs(diff) - latency,
         score=score,
+        zone=session.get("zone"),
     )
     answers = await redis.get(f"game_session:{session['game_pin']}:{data.question_index}")
     answers = await set_answer(
