@@ -276,6 +276,11 @@ SPDX-License-Identifier: MPL-2.0
 					</GrayButton>
 				</div>
 			</div>
+			<div class="w-screen flex justify-center mt-2">
+				<div class="w-fit">
+					<GrayButton href="/dashboard">{$t('words.dashboard')}</GrayButton>
+				</div>
+			</div>
 		{/if}
 		<FinalResults bind:data={game_state.player_scores} {show_final_results} />
 	{/if}
