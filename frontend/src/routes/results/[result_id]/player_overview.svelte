@@ -9,6 +9,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	const { t } = getLocalization();
 	const zones = Array.from({ length: 11 }, (_, index) => `${index + 1}구역`);
+	const RESULT_TABLE_PAGE_SIZE = 100;
 
 	interface PlayerAnswer {
 		username: string;
@@ -36,6 +37,11 @@ SPDX-License-Identifier: MPL-2.0
 			const scoreB = parseFloat(String(scores[b])) || 0;
 			return scoreB - scoreA;
 		})
+	);
+	let visible_player_count = $state(RESULT_TABLE_PAGE_SIZE);
+	let visible_usernames = $derived(usernames.slice(0, visible_player_count));
+	let hidden_player_count = $derived(
+		Math.max(usernames.length - visible_usernames.length, 0)
 	);
 	let has_zone_data = $derived(Object.keys(player_zone_data).length !== 0);
 	let zone_totals = $derived(
@@ -84,6 +90,9 @@ SPDX-License-Identifier: MPL-2.0
 				</tbody>
 			</table>
 		{/if}
+		<div class="w-11/12 text-sm font-semibold text-cq-muted">
+			{visible_usernames.length}/{usernames.length}
+		</div>
 		<table class="cq-surface w-11/12 m-auto">
 			<thead>
 				<tr class="border-b-2 text-left border-cq-border">
@@ -102,7 +111,7 @@ SPDX-License-Identifier: MPL-2.0
 				</tr>
 			</thead>
 			<tbody>
-				{#each usernames as uname (uname)}
+				{#each visible_usernames as uname (uname)}
 					<tr class="text-left">
 						<td class="border-r p-1 border-cq-border">{uname}</td>
 						<td class="border-r p-1 border-cq-border">{correctCounts[uname]}</td>
@@ -114,5 +123,14 @@ SPDX-License-Identifier: MPL-2.0
 				{/each}
 			</tbody>
 		</table>
+		{#if hidden_player_count > 0}
+			<button
+				type="button"
+				class="cq-surface-muted w-11/12 m-auto p-2 font-semibold text-cq-muted hover:text-cq-text transition"
+				onclick={() => (visible_player_count += RESULT_TABLE_PAGE_SIZE)}
+			>
+				+{Math.min(RESULT_TABLE_PAGE_SIZE, hidden_player_count)}
+			</button>
+		{/if}
 	</div>
 </div>

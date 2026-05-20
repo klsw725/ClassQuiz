@@ -10,6 +10,7 @@ SPDX-License-Identifier: MPL-2.0
 	import type { Answer as QuizAnswer, GeneralQuizAnswer, Question } from '$lib/quiz_types';
 
 	const { t } = getLocalization();
+	const RESULT_TABLE_PAGE_SIZE = 100;
 
 	interface PlayerAnswer {
 		username: string;
@@ -25,6 +26,11 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	let { question, answers }: Props = $props();
+	let visible_answer_count = $state(RESULT_TABLE_PAGE_SIZE);
+	let visible_answers = $derived(answers.slice(0, visible_answer_count));
+	let hidden_answer_count = $derived(
+		Math.max(answers.length - visible_answers.length, 0)
+	);
 
 	const get_answer_for_comparison = (answer: string): string => {
 		if (question.type === QuizQuestionType.TEXT && question.ignore_whitespace) {
@@ -80,10 +86,10 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="flex justify-center">
-	<div class="cq-surface-muted p-2 -z-10 w-10/12">
+	<div class="cq-surface-muted p-2 w-10/12">
 		{#if question.type !== QuizQuestionType.ORDER && question.type !== QuizQuestionType.RANGE && question.type !== QuizQuestionType.SLIDE}
 			<div class="flex flex-col mb-4">
-				{#each question.answers as answer}
+				{#each question.answers as answer, i (i)}
 					<div class="grid grid-cols-4">
 						<p>{answer.answer}</p>
 						<div class="col-span-3 flex w-full border-l border-cq-border px-1">
@@ -107,6 +113,9 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 		{/if}
 		<div>
+			<div class="mb-2 text-sm font-semibold text-cq-muted">
+				{visible_answers.length}/{answers.length}
+			</div>
 			<table class="w-full text-left">
 				<thead>
 					<tr class="border-b-2 text-left border-cq-border">
@@ -130,7 +139,7 @@ SPDX-License-Identifier: MPL-2.0
 					</tr>
 				</thead>
 				<tbody>
-					{#each answers as answer}
+					{#each visible_answers as answer (answer.username)}
 						<tr>
 							<td class="border-r p-1 border-cq-border"
 								>{answer.username}</td
@@ -153,6 +162,15 @@ SPDX-License-Identifier: MPL-2.0
 					{/each}
 				</tbody>
 			</table>
+			{#if hidden_answer_count > 0}
+				<button
+					type="button"
+					class="cq-surface w-full p-2 font-semibold text-cq-muted hover:text-cq-text transition"
+					onclick={() => (visible_answer_count += RESULT_TABLE_PAGE_SIZE)}
+				>
+					+{Math.min(RESULT_TABLE_PAGE_SIZE, hidden_answer_count)}
+				</button>
+			{/if}
 		</div>
 	</div>
 </div>
