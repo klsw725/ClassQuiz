@@ -39,7 +39,7 @@ export const TextQuestionSchema = yup
 	.array()
 	.of(
 		yup.object({
-			case_sensitive: yup.boolean().required(),
+			case_sensitive: yup.boolean().default(false).required(),
 			answer: yup.string().required('You need an answer')
 		})
 	)
@@ -64,9 +64,15 @@ export const dataSchema = yup.object({
 		.array()
 		.of(
 			yup.object({
+				type: yup.string(),
 				question: yup.string().required('A question-title is required').max(299),
 				time: yup.number().required().positive('The time has to be positive'),
 				image: yup.string().nullable().lowercase(),
+				ignore_whitespace: yup.boolean().when('type', {
+					is: 'TEXT',
+					then: (schema) => schema.default(false).required(),
+					otherwise: (schema) => schema.optional()
+				}),
 				answers: yup.lazy((v) => {
 					if (Array.isArray(v)) {
 						if (typeof v[0].right === 'boolean') {

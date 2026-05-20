@@ -232,7 +232,11 @@
         "advanced_settings": "Advanced Settings",
         "hide_question_results": "Hide question resuluts?",
         "time_based_scoring": "Time-based scoring",
-        "time_based_scoring_description": "Faster correct answers earn more points. Turn this off to give every correct answer its full point value."
+        "time_based_scoring_description": "Faster correct answers earn more points. Turn this off to give every correct answer its full point value.",
+        "ignore_whitespace_toggle": "Toggle whitespace ignoring",
+        "ignore_whitespace_tooltip": "Ignore whitespace?",
+        "ignore_whitespace_on": "Ignore whitespace: On",
+        "ignore_whitespace_off": "Ignore whitespace: Off"
     },
     "import_page": {
         "need_help": "Need help?",

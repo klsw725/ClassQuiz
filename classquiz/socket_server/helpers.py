@@ -71,7 +71,11 @@ def check_answer(game_data: PlayGame, data: SubmitAnswerData) -> (bool, str):
         return check_order_question(data.complex_answer, q_answer, q_answers)
     elif q_type == QuizQuestionType.TEXT:
         return (
-            check_text_question(q_answer, q_answers),
+            check_text_question(
+                q_answer,
+                q_answers,
+                game_data.questions[q_i].ignore_whitespace,
+            ),
             q_answer,
         )
 
@@ -111,13 +115,25 @@ def check_order_question(
     return is_correct, answer_str
 
 
-def check_text_question(answer: str, answers: list[TextQuizAnswer]) -> bool:
+def normalize_text_answer(answer: str, ignore_whitespace: bool) -> str:
+    if ignore_whitespace:
+        return "".join(answer.split())
+    return answer
+
+
+def check_text_question(
+    answer: str,
+    answers: list[TextQuizAnswer],
+    ignore_whitespace: bool = False,
+) -> bool:
     for q in answers:
+        submitted_answer = normalize_text_answer(answer, ignore_whitespace)
+        correct_answer = normalize_text_answer(q.answer, ignore_whitespace)
         if q.case_sensitive:
-            if answer == q.answer:
+            if submitted_answer == correct_answer:
                 return True
         else:
-            if answer.lower() == q.answer.lower():
+            if submitted_answer.lower() == correct_answer.lower():
                 return True
     return False
 

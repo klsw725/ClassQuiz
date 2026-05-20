@@ -230,7 +230,11 @@
         "advanced_settings": "고급 설정",
         "hide_question_results": "문제 결과를 숨길까요?",
         "time_based_scoring": "시간 기반 점수",
-        "time_based_scoring_description": "정답을 더 빨리 맞힐수록 더 많은 점수를 받습니다. 끄면 모든 정답이 해당 문제의 전체 점수를 받습니다."
+        "time_based_scoring_description": "정답을 더 빨리 맞힐수록 더 많은 점수를 받습니다. 끄면 모든 정답이 해당 문제의 전체 점수를 받습니다.",
+        "ignore_whitespace_toggle": "공백 무시 전환",
+        "ignore_whitespace_tooltip": "공백을 무시할까요?",
+        "ignore_whitespace_on": "공백 무시: 켜짐",
+        "ignore_whitespace_off": "공백 무시: 꺼짐"
     },
     "import_page": {
         "need_help": "도움이 필요하신가요?",

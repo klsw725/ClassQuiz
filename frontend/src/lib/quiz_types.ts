@@ -77,6 +77,7 @@ export interface BaseQuestion {
 	question: string;
 	image?: string;
 	hide_results?: boolean;
+	ignore_whitespace?: boolean;
 }
 
 export type Question =

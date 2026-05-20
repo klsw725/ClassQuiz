@@ -7,7 +7,7 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { getLocalization } from '$lib/i18n';
-	import type { Answer as QuizAnswer, Question } from '$lib/quiz_types';
+	import type { Answer as QuizAnswer, GeneralQuizAnswer, Question } from '$lib/quiz_types';
 
 	const { t } = getLocalization();
 
@@ -26,13 +26,32 @@ SPDX-License-Identifier: MPL-2.0
 
 	let { question, answers }: Props = $props();
 
-	const get_answer_count_for_answer = (answer: string): number => {
+	const get_answer_for_comparison = (answer: string): string => {
+		if (question.type === QuizQuestionType.TEXT && question.ignore_whitespace) {
+			return answer.replace(/\s/g, '');
+		}
+		return answer;
+	};
+
+	const get_text_answer_for_comparison = (
+		answer: string,
+		case_sensitive: boolean | undefined
+	): string => {
+		const answer_for_comparison = get_answer_for_comparison(answer);
+		return case_sensitive ? answer_for_comparison : answer_for_comparison.toLowerCase();
+	};
+
+	const get_answer_count_for_answer = (answer: GeneralQuizAnswer): number => {
 		let count = 0;
 		let answer_id = 0;
+		const answer_for_comparison =
+			question.type === QuizQuestionType.TEXT
+				? get_text_answer_for_comparison(answer.answer, answer.case_sensitive)
+				: get_answer_for_comparison(answer.answer);
 		if (question.type === QuizQuestionType.CHECK) {
 			const answer_options = question.answers as QuizAnswer[];
 			for (let i = 0; i < answer_options.length; i++) {
-				if (answer === answer_options[i].answer) {
+				if (answer.answer === answer_options[i].answer) {
 					answer_id = i;
 					break;
 				}
@@ -45,7 +64,14 @@ SPDX-License-Identifier: MPL-2.0
 				if (a.answer.includes(String(answer_id))) {
 					count++;
 				}
-			} else if (a.answer === answer) {
+			} else if (question.type === QuizQuestionType.TEXT) {
+				if (
+					get_text_answer_for_comparison(a.answer, answer.case_sensitive) ===
+					answer_for_comparison
+				) {
+					count++;
+				}
+			} else if (get_answer_for_comparison(a.answer) === answer_for_comparison) {
 				count++;
 			}
 		}
@@ -64,12 +90,12 @@ SPDX-License-Identifier: MPL-2.0
 							<div class="my-auto w-full mr-1">
 								<span
 									class="h-1 block bg-cq-brand my-auto"
-									style="width: {(get_answer_count_for_answer(answer.answer) /
+									style="width: {(get_answer_count_for_answer(answer) /
 										answers.length) *
 										100}%"
 								></span>
 							</div>
-							<p>{get_answer_count_for_answer(answer.answer)}</p>
+							<p>{get_answer_count_for_answer(answer)}</p>
 							{#if question.type !== QuizQuestionType.VOTING && question.type !== QuizQuestionType.TEXT}
 								<p class="ml-1">
 									{#if answer.right}✅{:else}❌{/if}

@@ -31,19 +31,21 @@ SPDX-License-Identifier: MPL-2.0
 		};
 	};
 
+	const normalize_text_answers = (new_answers: TextQuizAnswer[]): TextQuizAnswer[] =>
+		new_answers.map((answer) => ({
+			answer: answer.answer,
+			case_sensitive: answer.case_sensitive ?? false
+		}));
+
 	let answers = $state<TextQuizAnswer[]>(
-		Array.isArray(data.questions[selected_question].answers)
-			? (data.questions[selected_question].answers as TextQuizAnswer[])
-			: []
+		normalize_text_answers(
+			Array.isArray(data.questions[selected_question].answers)
+				? (data.questions[selected_question].answers as TextQuizAnswer[])
+				: []
+		)
 	);
 	set_text_answers(answers);
-
-	for (let i = 0; i < answers.length; i++) {
-		answers[i] = {
-			answer: answers[i].answer,
-			case_sensitive: false
-		};
-	}
+	data.questions[selected_question].ignore_whitespace ??= false;
 
 	const tippy = createTippy({
 		arrow: true,
@@ -58,71 +60,78 @@ SPDX-License-Identifier: MPL-2.0
 	};
 </script>
 
-<div class="grid grid-cols-2 gap-4 w-full px-10">
-	{#if Array.isArray(answers)}
-		{#each answers as answer, index}
-			<div
-				out:fade={{ duration: 150 }}
-				class="p-4 rounded-lg flex justify-center w-full transition relative"
-								class:cq-surface-muted={answer.answer}
-				class:bg-yellow-500={!reach(TextQuestionSchema, 'answer').isValidSync(
-					answer.answer
-				)}
-			>
-				<button
-					class="rounded-full absolute -top-2 -right-2 opacity-70 hover:opacity-100 transition"
-					type="button"
-					onclick={() => {
-						answers.splice(index, 1);
-						set_text_answers(answers);
-					}}
+<div class="flex w-full flex-col gap-3">
+	<div class="flex justify-center px-10">
+		<button
+			class="cq-surface cq-card-interactive flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition"
+			type="button"
+			aria-label={$t('editor.ignore_whitespace_toggle')}
+			onclick={() => {
+				data.questions[selected_question].ignore_whitespace =
+					!data.questions[selected_question].ignore_whitespace;
+			}}
+			use:tippy={{ content: $t('editor.ignore_whitespace_tooltip'), placement: 'top' }}
+		>
+			{#if data.questions[selected_question].ignore_whitespace}
+				<svg
+					class="w-5 h-5 inline-block"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
 				>
-					<svg
-						class="w-6 h-6 bg-red-500 rounded-full"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-						xmlns="http://www.w3.org/2000/svg"
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 7h8M4 12h6M4 17h8m4-5l2 2 4-4"
+					/>
+				</svg>
+			{:else}
+				<svg
+					class="w-5 h-5 inline-block"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M4 7h16M4 12h10M4 17h16"
+					/>
+				</svg>
+			{/if}
+			<span>
+				{data.questions[selected_question].ignore_whitespace
+					? $t('editor.ignore_whitespace_on')
+					: $t('editor.ignore_whitespace_off')}
+			</span>
+		</button>
+	</div>
+
+	<div class="grid grid-cols-2 gap-4 w-full px-10">
+		{#if Array.isArray(answers)}
+			{#each answers as answer, index}
+				<div
+					out:fade={{ duration: 150 }}
+					class="p-4 rounded-lg flex justify-center w-full transition relative gap-2"
+					class:cq-surface-muted={answer.answer}
+					class:bg-yellow-500={!reach(TextQuestionSchema, 'answer').isValidSync(
+						answer.answer
+					)}
+				>
+					<button
+						class="rounded-full absolute -top-2 -right-2 opacity-70 hover:opacity-100 transition"
+						type="button"
+						onclick={() => {
+							answers.splice(index, 1);
+							set_text_answers(answers);
+						}}
 					>
-						<path
-							stroke-linecap="round"
-							stroke-linejoin="round"
-							stroke-width="2"
-							d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-						/>
-					</svg>
-				</button>
-				<input
-					bind:value={answer.answer}
-					type="text"
-					class="border-b-2 border-dotted w-5/6 text-center rounded-lg bg-transparent outline-hidden"
-					placeholder={$t('editor.enter_answer')}
-				/>
-				<button
-					type="button"
-					onclick={() => {
-						answer.case_sensitive = !answer.case_sensitive;
-					}}
-					use:tippy={{ content: 'Case sensitive?', placement: 'top' }}
-				>
-					{#if answer.case_sensitive}
 						<svg
-							class="w-6 h-6 inline-block"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							xmlns="http://www.w3.org/2000/svg"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
-					{:else}
-						<svg
-							class="w-6 h-6 inline-block"
+							class="w-6 h-6 bg-red-500 rounded-full"
 							fill="none"
 							stroke="currentColor"
 							viewBox="0 0 24 24"
@@ -135,21 +144,67 @@ SPDX-License-Identifier: MPL-2.0
 								d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
 							/>
 						</svg>
-					{/if}
-				</button>
-			</div>
-		{/each}
-	{/if}
-	{#if answers.length < 4}
-		<button
-			class="cq-surface cq-card-interactive p-4 rounded-lg transition"
-			type="button"
-			in:fade={{ duration: 150 }}
-			onclick={() => {
-				set_text_answers([...answers, { ...get_empty_answer() }]);
-			}}
-		>
-			<span class="italic text-center">{$t('editor_page.add_an_answer')}</span>
-		</button>
-	{/if}
+					</button>
+					<input
+						bind:value={answer.answer}
+						type="text"
+						class="border-b-2 border-dotted flex-1 text-center rounded-lg bg-transparent outline-hidden"
+						placeholder={$t('editor.enter_answer')}
+					/>
+					<button
+						type="button"
+						aria-label="Toggle case sensitivity"
+						onclick={() => {
+							answer.case_sensitive = !answer.case_sensitive;
+						}}
+						use:tippy={{ content: 'Case sensitive?', placement: 'top' }}
+					>
+						{#if answer.case_sensitive}
+							<svg
+								class="w-6 h-6 inline-block"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+						{:else}
+							<svg
+								class="w-6 h-6 inline-block"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+								/>
+							</svg>
+						{/if}
+					</button>
+				</div>
+			{/each}
+		{/if}
+		{#if answers.length < 4}
+			<button
+				class="cq-surface cq-card-interactive p-4 rounded-lg transition"
+				type="button"
+				in:fade={{ duration: 150 }}
+				onclick={() => {
+					set_text_answers([...answers, { ...get_empty_answer() }]);
+				}}
+			>
+				<span class="italic text-center">{$t('editor_page.add_an_answer')}</span>
+			</button>
+		{/if}
+	</div>
 </div>

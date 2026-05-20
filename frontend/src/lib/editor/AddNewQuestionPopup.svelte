@@ -97,6 +97,7 @@ SPDX-License-Identifier: MPL-2.0
 				points: 1000,
 				question: '',
 				image: undefined,
+				ignore_whitespace: false,
 				answers: []
 			}
 		},
