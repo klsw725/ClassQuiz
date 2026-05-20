@@ -232,7 +232,10 @@ SPDX-License-Identifier: MPL-2.0
 							max="999"
 							min="1"
 							class="w-20 bg-transparent rounded-lg text-lg border-2 border-cq-border p-1 outline-hidden focus:shadow-2xl"
-							bind:value={data.questions[selected_question].time}
+							value={data.questions[selected_question].time}
+							oninput={(event) =>
+								(data.questions[selected_question].time =
+									event.currentTarget.value)}
 						/>
 						<p class="inline-block">s</p>
 						<input

@@ -25,7 +25,8 @@ SPDX-License-Identifier: MPL-2.0
 	<label class="w-fit">
 		Time
 		<input
-			bind:value={time}
+			value={time}
+			oninput={(event) => (time = event.currentTarget.value)}
 			type="number"
 			class="w-20 bg-transparent rounded-lg text-lg border-2 border-cq-border p-1 outline-hidden text-cq-text"
 		/>
