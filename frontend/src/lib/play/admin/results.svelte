@@ -14,6 +14,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { QuizQuestionType } from '$lib/quiz_types';
 
 	const { t } = getLocalization();
+	const LIVE_SCORE_VISIBLE_PLAYER_LIMIT = 4;
 
 	interface Props {
 		data: any;
@@ -58,6 +59,9 @@ SPDX-License-Identifier: MPL-2.0
 			return scoreB - scoreA;
 		})
 	);
+	let visible_player_names = $derived(
+		player_names.slice(0, LIVE_SCORE_VISIBLE_PLAYER_LIMIT)
+	);
 
 	if (JSON.stringify(data) === '{}') {
 		for (const i of new_data) {
@@ -82,7 +86,7 @@ SPDX-License-Identifier: MPL-2.0
 		}
 		show_new_score_clicked = true;
 		setTimeout(() => {
-			data = data;
+			data = { ...data };
 		}, 800);
 	};
 
@@ -116,20 +120,17 @@ SPDX-License-Identifier: MPL-2.0
 					</tr>
 				</thead>
 				<tbody class="divide-y divide-cq-border text-cq-text">
-					{#each player_names as player, i (player)}
+					{#each visible_player_names as player (player)}
 						<tr animate:flip class="odd:bg-cq-surface even:bg-cq-surface-muted">
-							<td
-								class:hidden={i > 3}
-								class="p-3 md:p-5 border-r border-cq-border font-semibold"
+							<td class="p-3 md:p-5 border-r border-cq-border font-semibold"
 								>{formatPlayerName(player)}</td
 							>
-							<td class:hidden={i > 3} class="p-3 md:p-5 font-bold text-cq-brand"
+							<td class="p-3 md:p-5 font-bold text-cq-brand"
 								>{data[player]}</td
 							>
 							{#if show_new_score_clicked}
 								<td
 									in:fly|global={{ x: 300 }}
-									class:hidden={i > 3}
 									class="p-3 md:p-5 font-bold text-cq-brand"
 									class:text-red-600={score_by_username[player] === 0 ||
 										score_by_username[player] === undefined}

@@ -37,8 +37,14 @@ SPDX-License-Identifier: MPL-2.0
 	let dataexport_download_a: HTMLAnchorElement = $state();
 
 	let players: Array<{ sid: string; username: string; zone?: string }> = $state([]);
+	const LOBBY_VISIBLE_PLAYER_LIMIT = 80;
 	const formatPlayerName = (player: { username: string; zone?: string }) =>
 		player.zone ? `${player.zone}-${player.username}` : player.username;
+	let visible_lobby_player_count = $state(LOBBY_VISIBLE_PLAYER_LIMIT);
+	let visible_lobby_players = $derived(players.slice(0, visible_lobby_player_count));
+	let hidden_lobby_player_count = $derived(
+		Math.max(players.length - visible_lobby_players.length, 0)
+	);
 
 	let game_data: QuizData = $state();
 	let shown_question_now: number;
@@ -316,10 +322,19 @@ SPDX-License-Identifier: MPL-2.0
 			{:then _}
 				<div class="cq-surface-muted mt-3 p-3 text-cq-muted">
 					<ul>
-						{#each players as player}
+						{#each visible_lobby_players as player (player.username)}
 							<li>{formatPlayerName(player)}</li>
 						{/each}
 					</ul>
+					{#if hidden_lobby_player_count > 0}
+						<button
+							type="button"
+							class="cq-surface mt-3 w-full p-2 font-semibold text-cq-muted hover:text-cq-text transition"
+							onclick={() => (visible_lobby_player_count += LOBBY_VISIBLE_PLAYER_LIMIT)}
+						>
+							+{Math.min(LOBBY_VISIBLE_PLAYER_LIMIT, hidden_lobby_player_count)}
+						</button>
+					{/if}
 				</div>
 			{/await}
 		</div>

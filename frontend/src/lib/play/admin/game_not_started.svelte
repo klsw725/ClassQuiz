@@ -26,10 +26,19 @@ SPDX-License-Identifier: MPL-2.0
 		cqc_code = $bindable()
 	}: Props = $props();
 
+	const LOBBY_VISIBLE_PLAYER_LIMIT = 80;
+
 	let fullscreen_open = $state(false);
 	const { t } = getLocalization();
 	const formatPlayerName = (player: { username: string; zone?: string }) =>
 		player.zone ? `${player.zone}-${player.username}` : player.username;
+	let visible_lobby_player_count = $state(LOBBY_VISIBLE_PLAYER_LIMIT);
+	let visible_lobby_players = $derived(
+		game_state.players.slice(0, visible_lobby_player_count)
+	);
+	let hidden_lobby_player_count = $derived(
+		Math.max(game_state.players.length - visible_lobby_players.length, 0)
+	);
 
 	if (cqc_code === 'null') {
 		cqc_code = null;
@@ -108,7 +117,7 @@ SPDX-License-Identifier: MPL-2.0
 	</div>
 	<div class="flex flex-row w-full mt-4 px-10 flex-wrap">
 		{#if game_state.players.length > 0}
-			{#each game_state.players as player}
+			{#each visible_lobby_players as player (player.username)}
 				<div class="cq-surface-muted p-2 m-2 hover:cursor-pointer">
 					<span
 						class="link-hover hover:line-through text-lg"
@@ -119,6 +128,15 @@ SPDX-License-Identifier: MPL-2.0
 					<!--					<button>{$t('words.kick')}</button>-->
 				</div>
 			{/each}
+			{#if hidden_lobby_player_count > 0}
+				<button
+					type="button"
+					class="cq-surface-muted p-2 m-2 text-lg font-semibold text-cq-muted hover:text-cq-text transition"
+					onclick={() => (visible_lobby_player_count += LOBBY_VISIBLE_PLAYER_LIMIT)}
+				>
+					+{Math.min(LOBBY_VISIBLE_PLAYER_LIMIT, hidden_lobby_player_count)}
+				</button>
+			{/if}
 		{/if}
 	</div>
 </div>
