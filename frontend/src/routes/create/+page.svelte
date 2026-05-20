@@ -28,32 +28,39 @@ SPDX-License-Identifier: MPL-2.0
 		open: false
 	};
 
+	const create_empty_data = (title: string): Data => ({
+		description: '',
+		public: false,
+		time_based_scoring: true,
+		title,
+		questions: [
+			/*					{
+				type: QuizQuestionType.ABCD,
+				question: '',
+				time: '20',
+				points: 1000,
+				answers: [{ right: false, answer: '' }]
+			}*/
+		]
+	});
+
 	let data: Data = $state();
 	let quiz_id = $state(null);
 	onMount(() => {
 		const from_localstorage = localStorage.getItem('create_game');
+		let title = page.url.searchParams.get('title');
+		title ??= '';
 		if (from_localstorage === null) {
-			let title = page.url.searchParams.get('title');
-			title ??= '';
-			data = {
-				description: '',
-				public: false,
-				time_based_scoring: true,
-				title,
-				questions: [
-					/*					{
-						type: QuizQuestionType.ABCD,
-						question: '',
-						time: '20',
-						points: 1000,
-						answers: [{ right: false, answer: '' }]
-					}*/
-				]
-			};
+			data = create_empty_data(title);
 		} else {
-			data = JSON.parse(from_localstorage);
-			data.time_based_scoring ??= true;
-			for (const question of data.questions) question.points ??= 1000;
+			try {
+				data = JSON.parse(from_localstorage);
+				data.time_based_scoring ??= true;
+				for (const question of data.questions) question.points ??= 1000;
+			} catch {
+				localStorage.removeItem('create_game');
+				data = create_empty_data(title);
+			}
 		}
 	});
 </script>

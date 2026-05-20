@@ -5,6 +5,14 @@
 import type { Handle } from '@sveltejs/kit';
 import * as jose from 'jose';
 
+const authCookies = ['access_token', 'rememberme_token', 'expiry', 'rememberme'];
+
+const clearAuthCookies = (event: Parameters<Handle>[0]['event']) => {
+	for (const cookie of authCookies) {
+		event.cookies.delete(cookie, { path: '/' });
+	}
+};
+
 /** @type {import('@sveltejs/kit').Handle} */
 export const handle: Handle = async ({ event, resolve }) => {
 	const access_token = event.cookies.get('access_token');
@@ -12,7 +20,14 @@ export const handle: Handle = async ({ event, resolve }) => {
 		event.locals.email = null;
 		return resolve(event);
 	}
-	const jwt = jose.decodeJwt(access_token.replace('Bearer ', ''));
+	let jwt: jose.JWTPayload;
+	try {
+		jwt = jose.decodeJwt(access_token.replace('Bearer ', ''));
+	} catch {
+		event.locals.email = null;
+		clearAuthCookies(event);
+		return resolve(event);
+	}
 	if (!jwt) {
 		event.locals.email = null;
 		return resolve(event);
@@ -36,6 +51,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 			}
 			return resp;
 		}
+		event.locals.email = null;
+		clearAuthCookies(event);
+		return resolve(event);
 	}
 	event.locals.email = jwt.sub;
 	return resolve(event);
