@@ -31,6 +31,10 @@ class ValueStorage:
     imported_quizzes = []
     game_pin = None
     game_id = None
+    solo_game_pin = None
+    solo_token = None
+    solo_attempt_id = None
+    solo_results_count = None
     exported_quiz_data = None
     edit_id = None
     image_id = None

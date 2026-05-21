@@ -30,6 +30,38 @@ settings = settings()
 router = APIRouter()
 
 
+def _reject_solo_game(game: PlayGame):
+    if game.game_mode == "solo":
+        raise HTTPException(status_code=404, detail="Game not found or API key not found")
+
+
+async def _resolve_game_pin_and_game(game_pin: str, user_id: uuid.UUID | None) -> tuple[str, PlayGame]:
+    redis_res = await redis.get(f"game:{game_pin}")
+    if redis_res is None and user_id is not None:
+        game_pin = await redis.get(f"game_pin:{user_id}:{game_pin}")
+        redis_res = await redis.get(f"game:{game_pin}")
+    if redis_res is None:
+        raise HTTPException(status_code=404, detail="Game not found or API key not found")
+    game = PlayGame.model_validate_json(redis_res)
+    _reject_solo_game(game)
+    return game_pin, game
+
+
+async def _resolve_owned_live_game(game_pin: str, user_id: uuid.UUID | None) -> tuple[str, PlayGame]:
+    if user_id is None:
+        raise HTTPException(status_code=404, detail="Game not found or API key not found")
+    game_pin, game = await _resolve_game_pin_and_game(game_pin, user_id)
+    if game.user_id != user_id:
+        raise HTTPException(status_code=404, detail="Game not found or API key not found")
+    return game_pin, game
+
+
+async def _resolve_api_key_live_game(game_pin: str, user_id: uuid.UUID | None) -> tuple[str, PlayGame]:
+    if user_id is None:
+        raise HTTPException(status_code=404, detail="Game not found or API key not found")
+    return await _resolve_game_pin_and_game(game_pin, user_id)
+
+
 class _GetLiveDataPlayers(BaseModel):
     count: int | str
 
@@ -77,15 +109,8 @@ async def get_live_game_data(
     in_human_count: bool = False,
 ):
     user_id = await check_api_key(api_key)
-    redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None:
-        game_pin = await redis.get(f"game_pin:{user_id}:{game_pin}")
-        redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None or user_id is None:
-        raise HTTPException(status_code=404, detail="Game not found or API key not found")
-    game = _PlayGame.model_validate_json(redis_res)
-    if game.user_id != user_id:
-        raise HTTPException(status_code=404, detail="Game not found or API key not found")
+    game_pin, game_data = await _resolve_owned_live_game(game_pin, user_id)
+    game = _PlayGame.model_validate(game_data.model_dump())
     for i, question in enumerate(game.questions):
         if question.type == QuizQuestionType.ABCD:
             for o, answer in enumerate(question.answers):
@@ -135,9 +160,7 @@ async def get_live_game_data(
 @router.get("/user_count")
 async def get_game_user_count(game_pin: str, api_key: str, as_string: bool = False, as_array: bool = False):
     user_id = await check_api_key(api_key)
-    redis_res = await redis.get(f"game_session:{game_pin}")
-    if redis_res is None:
-        game_pin = await redis.get(f"game_pin:{user_id}:{game_pin}")
+    game_pin, _ = await _resolve_game_pin_and_game(game_pin, user_id)
     player_count = await redis.scard(f"game_session:{game_pin}:players")
     if as_string:
         player_count = str(player_count)
@@ -153,17 +176,14 @@ async def get_game_user_count(game_pin: str, api_key: str, as_string: bool = Fal
 async def get_game_session(game_pin: str, api_key: str | None = None, game_id: uuid.UUID | None = None):
     if game_id is None and api_key is None:
         raise HTTPException(status_code=401, detail="API-Key and Quiz-ID are missing")
-    user_id = await check_api_key(api_key)
+    user_id = await check_api_key(api_key) if api_key is not None else None
+    game_pin, game = await _resolve_game_pin_and_game(game_pin, user_id)
     redis_res = await redis.get(f"game_session:{game_pin}")
-    if redis_res is None:
-        game_pin = await redis.get(f"game_pin:{user_id}:{game_pin}")
-        redis_res = await redis.get(f"game_session:{game_pin}")
     if redis_res is None:
         raise HTTPException(status_code=404, detail="Game not found or API key not found")
     data = GameSession.model_validate_json(redis_res)
     if user_id is None and data.game_id != str(game_id):
         raise HTTPException(status_code=401, detail="Game not found or API key not found")
-    game = PlayGame.model_validate_json(await redis.get(f"game:{game_pin}"))
     if game.user_id != user_id and data.game_id != str(game_id):
         raise HTTPException(status_code=404, detail="Game not found or API key not found")
     for i in range(0, len(game.questions)):
@@ -189,15 +209,7 @@ async def get_game_session(game_pin: str, api_key: str | None = None, game_id: u
 @router.post("/set_question")
 async def set_next_question(game_pin: str, question_number: int, api_key: str):
     user_id = await check_api_key(api_key)
-    redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None:
-        game_pin = await redis.get(f"game_pin:{user_id}:{game_pin}")
-        redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None or user_id is None:
-        raise HTTPException(status_code=404, detail="Game not found or API key not found")
-    game_data = PlayGame.model_validate_json(redis_res)
-    if game_data.user_id != user_id:
-        raise HTTPException(status_code=404, detail="Game not found or API key not found")
+    game_pin, game_data = await _resolve_owned_live_game(game_pin, user_id)
     game_data.current_question = question_number
     await redis.set(f"game:{game_pin}", game_data.model_dump_json(), ex=18000)
     await sio.emit(
@@ -215,12 +227,7 @@ async def set_next_question(game_pin: str, question_number: int, api_key: str):
 @router.get("/scores")
 async def get_live_player_scores(game_pin: str, api_key: str):
     user_id = await check_api_key(api_key)
-    redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None:
-        game_pin = await redis.get(f"game_pin:{user_id}:{game_pin}")
-        redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None or user_id is None:
-        raise HTTPException(status_code=404, detail="Game not found or API key not found")
+    game_pin, _ = await _resolve_api_key_live_game(game_pin, user_id)
     res = await redis.hgetall(f"game_session:{game_pin}:player_scores")
     player_zones = await redis.hgetall(f"game:{game_pin}:players:zones")
     return_arr = []
@@ -237,13 +244,7 @@ async def get_live_player_scores(game_pin: str, api_key: str):
 @router.get("/get_question/now")
 async def too_stupid_to_come_up_with_a_name(game_pin: str, api_key: str, in_human_count: bool = False):
     user_id = await check_api_key(api_key)
-    redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None:
-        game_pin = await redis.get(f"game_pin:{user_id}:{game_pin}")
-        redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None or user_id is None:
-        raise HTTPException(status_code=404, detail="Game not found or API key not found")
-    game = PlayGame.model_validate_json(redis_res)
+    _, game = await _resolve_api_key_live_game(game_pin, user_id)
     for i, question in enumerate(game.questions):
         if question.type == QuizQuestionType.ABCD:
             for o, answer in enumerate(question.answers):
@@ -269,13 +270,7 @@ async def too_stupid_to_come_up_with_a_name(game_pin: str, api_key: str, in_huma
 @router.get("/voting")
 async def voting_results(game_pin: str, api_key: str, as_array: bool = False):
     user_id = await check_api_key(api_key)
-    redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None:
-        game_pin = await redis.get(f"game_pin:{user_id}:{game_pin}")
-        redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is None or user_id is None:
-        raise HTTPException(status_code=404, detail="Game not found or API key not found")
-    game = PlayGame.model_validate_json(redis_res)
+    game_pin, game = await _resolve_api_key_live_game(game_pin, user_id)
     if game.questions[game.current_question].type != QuizQuestionType.VOTING:
         return
     answer_data = await redis.get(f"game_session:{game_pin}:{game.current_question}")

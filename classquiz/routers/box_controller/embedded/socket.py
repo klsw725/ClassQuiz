@@ -27,6 +27,8 @@ async def submit_answer_fn(data_answer: int, game_pin: str, player_id: str, now:
     if redis_res_game is None or username is None:
         raise HTTPException(status_code=404, detail="id not existent")
     game = PlayGame.model_validate_json(redis_res_game)
+    if game.game_mode == "solo":
+        raise HTTPException(status_code=404, detail="id not existent")
     if not game.question_show:
         return
 
@@ -97,12 +99,22 @@ async def websocket_endpoint(ws: WebSocket, game_id: str):
             print(f"Client {game_id} already exists.")
             return
         await ws.accept()
-        wss_clients[game_id] = ws
 
         player_id, game_pin = game_id.split(":")
         if player_id is None or game_pin is None:
             await ws.send_text(WebSocketRequest(type=WebSocketTypes.Error, data="BadId").model_dump_json())
             await ws.close(code=status.WS_1003_UNSUPPORTED_DATA)
+        redis_res_game = await redis.get(f"game:{game_pin}")
+        if redis_res_game is None:
+            await ws.send_text(WebSocketRequest(type=WebSocketTypes.Error, data="BadId").model_dump_json())
+            await ws.close(code=status.WS_1003_UNSUPPORTED_DATA)
+            return
+        game = PlayGame.model_validate_json(redis_res_game)
+        if game.game_mode == "solo":
+            await ws.send_text(WebSocketRequest(type=WebSocketTypes.Error, data="BadId").model_dump_json())
+            await ws.close(code=status.WS_1003_UNSUPPORTED_DATA)
+            return
+        wss_clients[game_id] = ws
         username = await redis.get(f"game:cqc:player:{player_id}")
         await sio.emit(
             "player_joined",

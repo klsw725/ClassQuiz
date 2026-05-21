@@ -248,6 +248,7 @@ class PlayGame(BaseModel):
     questions: list[QuizQuestion]
     game_id: uuid.UUID
     game_pin: str
+    solo_token: str | None = None
     started: bool = False
     captcha_enabled: bool = False
     cover_image: str | None = None

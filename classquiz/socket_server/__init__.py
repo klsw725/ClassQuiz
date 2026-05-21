@@ -93,6 +93,10 @@ async def rejoin_game(sid: str, data: dict):
     except ValidationError as e:
         await sio.emit("error", room=sid)
         print(e)
+    game_data = PlayGame.model_validate_json(redis_res)
+    if game_data.game_mode == "solo":
+        await sio.emit("game_not_found", room=sid)
+        return
     redis_sid_key = f"game_session:{data.game_pin}:players:{data.username}"
     old_sid = await redis.get(redis_sid_key)
     if old_sid != data.old_sid:
@@ -108,7 +112,6 @@ async def rejoin_game(sid: str, data: dict):
         f"game_session:{data.game_pin}:players",
         GamePlayer(username=data.username, sid=sid).model_dump_json(),
     )
-    game_data = PlayGame.model_validate_json(redis_res)
     zone = await redis.hget(f"game:{data.game_pin}:players:zones", data.username)
     session = {
         "game_pin": data.game_pin,
@@ -140,6 +143,9 @@ async def join_game(sid: str, data: dict):
         print(e)
         return
     game_data = PlayGame.model_validate_json(redis_res)
+    if game_data.game_mode == "solo":
+        await sio.emit("game_not_found", room=sid)
+        return
     if game_data.started:
         await sio.emit("game_already_started", room=sid)
         return
@@ -219,6 +225,10 @@ async def register_as_admin(sid: str, data: dict):
         return
     game_pin = data.game_pin
     game_id = data.game_id
+    redis_res = await redis.get(f"game:{game_pin}")
+    if redis_res is not None and PlayGame.model_validate_json(redis_res).game_mode == "solo":
+        await sio.emit("game_not_found", room=sid)
+        return
     if await redis.get(f"game_session:{game_pin}") is not None:
         await sio.emit("already_registered_as_admin", room=sid)
         return
@@ -424,6 +434,10 @@ async def register_as_remote(sid: str, data: dict):
     except ValidationError as e:
         await sio.emit("error", room=sid)
         print(e)
+        return
+    redis_res = await redis.get(f"game:{data.game_pin}")
+    if redis_res is not None and PlayGame.model_validate_json(redis_res).game_mode == "solo":
+        await sio.emit("game_not_found", room=sid)
         return
     await sio.emit(
         "registered_as_admin",

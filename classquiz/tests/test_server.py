@@ -3,11 +3,16 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
+import json
 import uuid
+from datetime import datetime
 
 import pytest
 from redis import Redis
 from classquiz.config import settings
+from fastapi import HTTPException
+from classquiz.db.models import GameResults
+from classquiz.routers.box_controller.embedded.socket import submit_answer_fn
 from classquiz.tests import test_user_email, test_user_password, example_quiztivity
 from classquiz.tests import test_client, example_quiz, ValueStorage  # noqa : F401
 from fastapi.testclient import TestClient
@@ -360,6 +365,263 @@ class TestPlayQuiz:
         ValueStorage.game_id = resp.json()["game_id"]
 
     @pytest.mark.asyncio
+    async def test_start_solo_quiz(self, test_client: TestClient):  # noqa : F811
+        redis = Redis().from_url(settings().redis)
+        me = test_client.get("/api/v1/users/me", cookies=ValueStorage.cookies).json()
+        lobby_key = f"game_in_lobby:{uuid.UUID(me['id']).hex}"
+        lobby_before = redis.get(lobby_key)
+        live_alias_key = f"game_pin:{me['id']}:{ValueStorage.quiz_id}"
+        live_alias_before = redis.get(live_alias_key)
+        resp = test_client.post(
+            f"/api/v1/quiz/start/{ValueStorage.quiz_id}?game_mode=solo&cqcs_enabled=true", cookies=ValueStorage.cookies
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        ValueStorage.solo_game_pin = data["game_pin"]
+        ValueStorage.solo_token = data["solo_token"]
+        assert data["game_mode"] == "solo"
+        assert data["solo_token"] is not None
+        assert data["cqc_code"] is None
+        assert redis.get(lobby_key) == lobby_before
+        assert redis.get(live_alias_key) == live_alias_before
+        stored_game = json.loads(redis.get(f"game:{ValueStorage.solo_game_pin}"))
+        assert stored_game["solo_token"] == ValueStorage.solo_token
+        assert redis.get(f"game_session:{ValueStorage.solo_game_pin}") is None
+
+    @pytest.mark.asyncio
+    async def test_solo_text_question_does_not_expose_answer_before_submit(self, test_client: TestClient):  # noqa : F811
+        redis = Redis().from_url(settings().redis)
+        solo_text_game_pin = "654321"
+        solo_text_token = "solo-text-token"
+        stored_game = json.loads(redis.get(f"game:{ValueStorage.solo_game_pin}"))
+        stored_game["game_pin"] = solo_text_game_pin
+        stored_game["solo_token"] = solo_text_token
+        stored_game["questions"] = [
+            {
+                "type": "TEXT",
+                "question": "Type the secret",
+                "time": 10,
+                "answers": [{"answer": "secret answer", "case_sensitive": False}],
+                "hide_results": False,
+            }
+        ]
+        redis.set(f"game:{solo_text_game_pin}", json.dumps(stored_game), ex=18000)
+        resp = test_client.post(
+            "/api/v1/solo/attempts",
+            json={
+                "game_pin": solo_text_game_pin,
+                "solo_token": solo_text_token,
+                "username": "Solo Text Player",
+                "zone": "1구역",
+            },
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["question"]["answers"] == []
+        assert "secret answer" not in json.dumps(data["question"])
+
+        resp = test_client.post(
+            f"/api/v1/solo/attempts/{data['attempt_id']}/submit",
+            json={"question_index": 0, "answer": "secret answer"},
+        )
+        assert resp.status_code == 200
+        assert resp.json()["solution"]["answers"][0]["answer"] == "secret answer"
+
+    @pytest.mark.asyncio
+    async def test_reject_solo_game_in_live_rest_endpoints(self, test_client: TestClient):  # noqa : F811
+        redis = Redis().from_url(settings().redis)
+        me = test_client.get("/api/v1/users/me", cookies=ValueStorage.cookies).json()
+        api_key = "solo-live-test-api-key"
+        redis.set(f"apikey:{api_key}", me["id"], ex=3600)
+        stored_before = json.loads(redis.get(f"game:{ValueStorage.solo_game_pin}"))
+        assert stored_before["current_question"] == -1
+
+        live_requests = [
+            ("get", "/api/v1/live/"),
+            ("get", "/api/v1/live/user_count"),
+            ("get", "/api/v1/live/players"),
+            ("get", "/api/v1/live/scores"),
+            ("get", "/api/v1/live/get_question/now"),
+            ("get", "/api/v1/live/voting"),
+            ("post", "/api/v1/live/set_question"),
+        ]
+        for method, path in live_requests:
+            resp = getattr(test_client, method)(
+                path,
+                params={"game_pin": ValueStorage.solo_game_pin, "api_key": api_key, "question_number": 0},
+            )
+            assert resp.status_code == 404
+
+        live_alias_key = f"game_pin:{me['id']}:{ValueStorage.quiz_id}"
+        live_alias_before = redis.get(live_alias_key)
+        redis.set(live_alias_key, ValueStorage.solo_game_pin, ex=18000)
+        resp = test_client.get(
+            "/api/v1/live/scores",
+            params={"game_pin": ValueStorage.quiz_id, "api_key": api_key},
+        )
+        assert resp.status_code == 404
+        if live_alias_before is None:
+            redis.delete(live_alias_key)
+        else:
+            redis.set(live_alias_key, live_alias_before, ex=18000)
+
+        stored_after = json.loads(redis.get(f"game:{ValueStorage.solo_game_pin}"))
+        assert stored_after["current_question"] == -1
+
+    @pytest.mark.asyncio
+    async def test_reject_solo_game_in_cqc_submit_answer(self, test_client: TestClient):  # noqa : F811
+        redis = Redis().from_url(settings().redis)
+        redis.set("game:cqc:player:solo-player", "Solo Player", ex=60)
+        with pytest.raises(HTTPException) as exc_info:
+            await submit_answer_fn(0, ValueStorage.solo_game_pin, "solo-player", datetime.now())
+        assert exc_info.value.status_code == 404
+        assert redis.hgetall(f"game_session:{ValueStorage.solo_game_pin}:player_scores") == {}
+
+    @pytest.mark.asyncio
+    async def test_create_solo_attempt(self, test_client: TestClient):  # noqa : F811
+        ValueStorage.solo_results_count = await GameResults.objects.count()
+        for game_pin in ["12345", "1234567", "abcdef", "12345a"]:
+            resp = test_client.post(
+                "/api/v1/solo/attempts",
+                json={
+                    "game_pin": game_pin,
+                    "solo_token": ValueStorage.solo_token,
+                    "username": "Solo Player",
+                    "zone": "3구역",
+                },
+            )
+            assert resp.status_code == 422
+        resp = test_client.post(
+            "/api/v1/solo/attempts",
+            json={
+                "game_pin": ValueStorage.solo_game_pin,
+                "solo_token": ValueStorage.solo_token,
+                "username": "Solo Player",
+                "zone": "12구역",
+            },
+        )
+        assert resp.status_code == 422
+        resp = test_client.post(
+            "/api/v1/solo/attempts",
+            json={"game_pin": ValueStorage.solo_game_pin, "username": "Solo Player", "zone": "3구역"},
+        )
+        assert resp.status_code == 404
+        resp = test_client.post(
+            "/api/v1/solo/attempts",
+            json={
+                "game_pin": ValueStorage.solo_game_pin,
+                "solo_token": "wrong",
+                "username": "Solo Player",
+                "zone": "3구역",
+            },
+        )
+        assert resp.status_code == 404
+        resp = test_client.post(
+            "/api/v1/solo/attempts",
+            json={
+                "game_pin": ValueStorage.solo_game_pin,
+                "solo_token": ValueStorage.solo_token,
+                "username": "Solo Player",
+                "zone": "3구역",
+            },
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        ValueStorage.solo_attempt_id = data["attempt_id"]
+        assert data["game_pin"] == ValueStorage.solo_game_pin
+        assert data["username"] == "Solo Player"
+        assert data["zone"] == "3구역"
+        assert data["current_question"] == 0
+        assert data["completed"] is False
+        assert data["awaiting_next_question"] is False
+        assert data["question"]["answers"][0].get("right") is None
+        redis = Redis().from_url(settings().redis)
+        stored_attempt = json.loads(redis.get(f"solo_attempt:{ValueStorage.solo_attempt_id}"))
+        assert stored_attempt["zone"] == "3구역"
+
+    @pytest.mark.asyncio
+    async def test_reject_oversized_solo_submit_payloads(self, test_client: TestClient):  # noqa : F811
+        resp = test_client.post(
+            f"/api/v1/solo/attempts/{ValueStorage.solo_attempt_id}/submit",
+            json={"question_index": 0, "answer": "x" * 1001},
+        )
+        assert resp.status_code == 422
+        resp = test_client.post(
+            f"/api/v1/solo/attempts/{ValueStorage.solo_attempt_id}/submit",
+            json={"question_index": 0, "answer": "Yes", "complex_answer": [{"answer": "x" * 1001}]},
+        )
+        assert resp.status_code == 422
+        resp = test_client.post(
+            f"/api/v1/solo/attempts/{ValueStorage.solo_attempt_id}/submit",
+            json={"question_index": 0, "answer": "Yes", "complex_answer": [{"answer": "Yes"}] * 101},
+        )
+        assert resp.status_code == 422
+
+    @pytest.mark.asyncio
+    async def test_answer_first_solo_question(self, test_client: TestClient):  # noqa : F811
+        resp = test_client.post(
+            f"/api/v1/solo/attempts/{ValueStorage.solo_attempt_id}/submit",
+            json={"question_index": 0, "answer": "Yes"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["right"] is True
+        assert data["score"] > 0
+        assert data["total_score"] == data["score"]
+        assert data["completed"] is False
+        assert "next_question" not in data
+        resp = test_client.post(
+            f"/api/v1/solo/attempts/{ValueStorage.solo_attempt_id}/submit",
+            json={"question_index": 0, "answer": "Yes"},
+        )
+        assert resp.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_advance_solo_attempt(self, test_client: TestClient):  # noqa : F811
+        resp = test_client.post(f"/api/v1/solo/attempts/{ValueStorage.solo_attempt_id}/advance")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["current_question"] == 1
+        assert data["completed"] is False
+        assert data["awaiting_next_question"] is False
+        assert data["question"]["answers"][0].get("right") is None
+
+    @pytest.mark.asyncio
+    async def test_complete_second_solo_question(self, test_client: TestClient):  # noqa : F811
+        resp = test_client.post(
+            f"/api/v1/solo/attempts/{ValueStorage.solo_attempt_id}/submit",
+            json={"question_index": 1, "answer": "Yes"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["right"] is True
+        assert data["completed"] is True
+        assert "next_question" not in data
+        redis = Redis().from_url(settings().redis)
+        stored_attempt = json.loads(redis.get(f"solo_attempt:{ValueStorage.solo_attempt_id}"))
+        assert stored_attempt["current_question"] == 2
+        assert stored_attempt["awaiting_next_question"] is False
+        assert stored_attempt["answers"][0]["zone"] == "3구역"
+        assert stored_attempt["answers"][1]["zone"] == "3구역"
+        assert redis.get(f"solo_attempt:{ValueStorage.solo_attempt_id}") is not None
+        assert redis.get(f"game_session:{ValueStorage.solo_game_pin}") is None
+        assert redis.hgetall(f"game:{ValueStorage.solo_game_pin}:players:zones") == {}
+        assert await GameResults.objects.count() == ValueStorage.solo_results_count
+
+    @pytest.mark.asyncio
+    async def test_reject_live_game_pin_for_solo_attempt(self, test_client: TestClient):  # noqa : F811
+        resp = test_client.post(
+            "/api/v1/solo/attempts",
+            json={
+                "game_pin": ValueStorage.game_pin,
+                "solo_token": ValueStorage.solo_token,
+                "username": "Solo Player",
+                "zone": "3구역",
+            },
+        )
+        assert resp.status_code == 400
+
+    @pytest.mark.asyncio
     async def test_check_captcha_enabled(self, test_client: TestClient):  # noqa : F811
         res = test_client.get(f"/api/v1/quiz/play/check_captcha/{ValueStorage.game_pin}")
         assert res.status_code == 200
@@ -370,6 +632,8 @@ class TestPlayQuiz:
 
     @pytest.mark.asyncio
     async def test_join_game_route(self, test_client: TestClient):  # noqa : F811
+        res = test_client.get(f"/api/v1/quiz/join/{ValueStorage.solo_game_pin}")
+        assert res.status_code == 404
         res = test_client.get(f"/api/v1/quiz/join/{ValueStorage.game_pin}")
         assert res.status_code == 200
         assert res.text == f'"{ValueStorage.game_id}"'

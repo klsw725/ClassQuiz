@@ -39,7 +39,8 @@ SPDX-License-Identifier: MPL-2.0
 		let res: Response;
 		loading = true;
 		localStorage.setItem('custom_field', custom_field);
-		const cqcs_enabled_parsed = cqcs_enabled ? 'True' : 'False';
+		const cqcs_enabled_parsed =
+			selected_game_mode === 'solo' || !cqcs_enabled ? 'False' : 'True';
 		const randomized_answers_parsed = randomized_answers ? 'True' : 'False';
 		if (captcha_enabled && captcha_selected) {
 			res = await fetch(
@@ -71,6 +72,14 @@ SPDX-License-Identifier: MPL-2.0
 			const data = await res.json();
 			// eslint-disable-next-line no-undef
 			plausible('Started Game', { props: { quiz_id: id, game_id: data.game_id } });
+			if (selected_game_mode === 'solo') {
+				const solo_params = new URLSearchParams({
+					pin: data.game_pin,
+					token: data.solo_token
+				});
+				window.location.assign(`/solo/host?${solo_params.toString()}`);
+				return;
+			}
 			window.location.assign(
 				`/admin?token=${data.game_id}&pin=${data.game_pin}&connect=1&cqc_code=${data.cqc_code}`
 			);
@@ -132,7 +141,7 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 		{/if}
 
-		<div class="grid grid-cols-2 gap-8 my-auto">
+		<div class="grid grid-cols-1 gap-8 my-auto lg:grid-cols-3">
 			<div
 				class="cq-card cq-card-interactive cursor-pointer p-2"
 				class:opacity-50={selected_game_mode !== 'kahoot'}
@@ -156,6 +165,24 @@ SPDX-License-Identifier: MPL-2.0
 				<p>
 					{$t('start_game.old_school_mode_description')}
 				</p>
+			</div>
+			<div
+				class="cq-card cq-card-interactive cursor-pointer p-2"
+				class:opacity-50={selected_game_mode !== 'solo'}
+				role="button"
+				tabindex="0"
+				onclick={() => {
+					selected_game_mode = 'solo';
+				}}
+				onkeydown={(e) => {
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault();
+						selected_game_mode = 'solo';
+					}
+				}}
+			>
+				<h2 class="text-center text-2xl">Solo preview</h2>
+				<p>Let one player open a shareable link and play at their own pace.</p>
 			</div>
 		</div>
 		<div class="flex justify-center items-center my-auto">
