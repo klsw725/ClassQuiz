@@ -194,6 +194,9 @@ SPDX-License-Identifier: MPL-2.0
 	socket.on('player_joined', (int_data) => {
 		game_state.players = [...game_state.players, int_data];
 	});
+	socket.on('player_left', (data: Player) => {
+		game_state.players = game_state.players.filter((player) => player.username !== data.username);
+	});
 	socket.on('already_registered_as_admin', () => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore

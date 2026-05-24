@@ -216,6 +216,7 @@ SPDX-License-Identifier: MPL-2.0
 		preventReload = false;
 		game_pin = '';
 		username = '';
+		Cookies.remove('joined_game');
 		Cookies.set('kicked', 'value', { expires: 1 });
 		window.location.reload();
 	});

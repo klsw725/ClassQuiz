@@ -186,6 +186,9 @@ SPDX-License-Identifier: MPL-2.0
 	socket.on('player_joined', (data) => {
 		players = [...players, data];
 	});
+	socket.on('player_left', (data: { username: string }) => {
+		players = players.filter((player) => player.username !== data.username);
+	});
 </script>
 
 <svelte:window onbeforeunload={confirmUnload} />
