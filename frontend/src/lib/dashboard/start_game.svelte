@@ -22,6 +22,7 @@ SPDX-License-Identifier: MPL-2.0
 	let custom_field = $state('');
 	let cqcs_enabled = $state(false);
 	let randomized_answers = $state(false);
+	let randomize_answers_mode = $state('same_for_all');
 
 	const tippy = createTippy({
 		arrow: true,
@@ -42,21 +43,17 @@ SPDX-License-Identifier: MPL-2.0
 		const cqcs_enabled_parsed =
 			selected_game_mode === 'solo' || !cqcs_enabled ? 'False' : 'True';
 		const randomized_answers_parsed = randomized_answers ? 'True' : 'False';
-		if (captcha_enabled && captcha_selected) {
-			res = await fetch(
-				`/api/v1/quiz/start/${id}?captcha_enabled=True&game_mode=${selected_game_mode}&custom_field=${custom_field}&cqcs_enabled=${cqcs_enabled_parsed}&randomize_answers=${randomized_answers_parsed}`,
-				{
-					method: 'POST'
-				}
-			);
-		} else {
-			res = await fetch(
-				`/api/v1/quiz/start/${id}?captcha_enabled=False&game_mode=${selected_game_mode}&custom_field=${custom_field}&cqcs_enabled=${cqcs_enabled_parsed}&randomize_answers=${randomized_answers_parsed}`,
-				{
-					method: 'POST'
-				}
-			);
-		}
+		const start_params = new URLSearchParams({
+			captcha_enabled: captcha_enabled && captcha_selected ? 'True' : 'False',
+			game_mode: selected_game_mode,
+			custom_field,
+			cqcs_enabled: cqcs_enabled_parsed,
+			randomize_answers: randomized_answers_parsed,
+			randomize_answers_mode
+		});
+		res = await fetch(`/api/v1/quiz/start/${id}?${start_params.toString()}`, {
+			method: 'POST'
+		});
 		if (res.status !== 200) {
 			/*			alertModal.set({
 				open: true,
@@ -219,21 +216,56 @@ SPDX-License-Identifier: MPL-2.0
 			</label>
 		</div>
 		<div class="flex justify-center w-full my-auto">
-			<label
-				for="randomized-answers-toggle"
-				class="inline-flex relative items-center cursor-pointer"
-			>
-				<input
-					type="checkbox"
-					bind:checked={randomized_answers}
-					id="randomized-answers-toggle"
-					class="sr-only peer"
-				/>
-				<span
-					class="w-14 h-7 cq-surface-muted peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-cq-brand rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cq-surface after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-cq-surface after:border-cq-border after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-cq-border peer-checked:bg-cq-brand"
-				></span>
-				<span class="ml-3 text-sm font-medium text-cq-text"> Randomize answers</span>
-			</label>
+			<div class="flex flex-col items-center gap-2">
+				<label
+					for="randomized-answers-toggle"
+					class="inline-flex relative items-center cursor-pointer"
+				>
+					<input
+						type="checkbox"
+						bind:checked={randomized_answers}
+						id="randomized-answers-toggle"
+						class="sr-only peer"
+					/>
+					<span
+						class="w-14 h-7 cq-surface-muted peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-cq-brand rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cq-surface after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-cq-surface after:border-cq-border after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-cq-border peer-checked:bg-cq-brand"
+					></span>
+					<span class="ml-3 text-sm font-medium text-cq-text"
+						>{$t('start_game.randomize_answers')}</span
+					>
+				</label>
+				{#if randomized_answers}
+					<div
+						class="cq-surface-muted grid grid-cols-2 gap-1 rounded-full p-1 text-xs"
+						in:fade|global
+					>
+						<label class="cursor-pointer">
+							<input
+								type="radio"
+								bind:group={randomize_answers_mode}
+								value="same_for_all"
+								class="sr-only peer"
+							/>
+							<span
+								class="block rounded-full px-3 py-2 text-center text-cq-muted transition peer-checked:bg-cq-brand peer-checked:text-cq-surface"
+								>{$t('start_game.randomize_answers_same_for_all')}</span
+							>
+						</label>
+						<label class="cursor-pointer">
+							<input
+								type="radio"
+								bind:group={randomize_answers_mode}
+								value="per_participant"
+								class="sr-only peer"
+							/>
+							<span
+								class="block rounded-full px-3 py-2 text-center text-cq-muted transition peer-checked:bg-cq-brand peer-checked:text-cq-surface"
+								>{$t('start_game.randomize_answers_per_participant')}</span
+							>
+						</label>
+					</div>
+				{/if}
+			</div>
 		</div>
 
 		<button
