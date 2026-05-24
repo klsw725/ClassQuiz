@@ -324,7 +324,15 @@
         "views_n_plays": "Views & Plays",
         "info_analytics": "The \"Plays\" only show how often the quiz was started (you included), whereas the \"Views\" count how often the \"View\"-page was visited, so it also counts bots (sorry for that).",
         "commandpalette_notice": "Press <kbd>Ctr</kbd>+<kbd>k</kbd> or <kbd>Meta</kbd>+<kbd>k</kbd> to open the command palette",
-        "create_quiz": "Create a new quiz"
+        "create_quiz": "Create a new quiz",
+        "live_games_title": "Live games",
+        "live_games_description": "Resume an active game from where it stopped.",
+        "live_games_count": "{{count}} game",
+        "live_games_count_plural": "{{count}} games",
+        "live_game_waiting_lobby": "Waiting in lobby",
+        "live_game_question_progress": "Question {{current}}/{{total}}",
+        "live_game_pin_progress": "Pin {{pin}} · {{progress}}",
+        "live_game_resume": "Resume"
     },
     "footer": {
         "self_ads": "Made with ❤️ by {{mawoka_link}} and with the help of {{others_link}}.",
@@ -436,6 +444,9 @@
         "normal_mode_description": "Question and answer will only be shown on admins screen. The players will only have colored buttons with symbols matching these on the screen of the admin.",
         "old_school_mode": "Old-School",
         "old_school_mode_description": "Questions and images will be shown on both admins screen and on the screen of the players",
+        "randomize_answers": "Randomize answers",
+        "randomize_answers_same_for_all": "Same order for everyone",
+        "randomize_answers_per_participant": "Different order per participant",
         "start_game": "Start Game"
     },
     "quiztivity": {
