@@ -7,9 +7,12 @@ SPDX-License-Identifier: MPL-2.0
 # Order
 
 ## Summary
+
 - Bring the answers in a correct order
-- The order gets randomized before the quiz so that every player has the same random order
+- The order is randomized when the question is shown. If answer randomization is set to
+  per-participant, players can receive different answer orders.
 - Remember to give some time, since it's kinda slow to move the answers up and down
 
 ## Use case
+
 - Order historic events

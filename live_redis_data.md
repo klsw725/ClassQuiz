@@ -85,7 +85,8 @@ data:
 
 ## game_session:{GAME_PIN} [string]
 
-Mostly unused, only used to check if an admin is registered. The `answers` never change.
+Stores the current admin sid and game id. A running game can update the admin sid
+when the host resumes the live game.
 
 model: GameSession
 

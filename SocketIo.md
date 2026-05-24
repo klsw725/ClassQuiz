@@ -24,7 +24,12 @@ SPDX-License-Identifier: MPL-2.0
 > Note: Most of these events require some kind of data.
 
 ### Player
-TODO
+
+1. The player emits `join_game` with `game_pin`, `username`, `zone`, optional `captcha`, and optional `custom_field`.
+2. After a successful join, the player receives `joined_game` and stores the current Socket.IO sid for reconnect.
+3. If the browser reconnects, the player emits `rejoin_game` with `game_pin`, `username`, and `old_sid`.
+4. If the old sid is still connected, the server emits `participant_already_connected`. If the old sid is inactive and belongs to the registered player, the server emits `rejoined_game`.
+
 ## API-Docs
 
 ### Init
