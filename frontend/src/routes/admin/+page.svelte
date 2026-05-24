@@ -33,6 +33,20 @@ SPDX-License-Identifier: MPL-2.0
 		data: any;
 	}
 
+	type RegisteredAsAdminPayload = {
+		game_id?: string;
+		game: string;
+		players?: Player[];
+		player_scores?: Record<string, number>;
+		selected_question?: number;
+		current_question?: number;
+		question_show?: boolean;
+		question_results?: unknown;
+		answer_count?: number;
+		timer_res?: string | number;
+		game_started?: boolean;
+	};
+
 	class GameState implements IGameState {
 		public game_id: string;
 		public players: Player[];
@@ -98,7 +112,7 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	let { data }: Props = $props();
-	let { auto_connect, game_token } = $state(data);
+	let { auto_connect, game_token, resume } = $state(data);
 	const game_pin = data.game_pin;
 	let errorMessage = $state('');
 	let success = $state(false);
@@ -122,9 +136,42 @@ SPDX-License-Identifier: MPL-2.0
 	const connect = async () => {
 		socket.emit('register_as_admin', {
 			game_pin: game_pin,
-			game_id: game_token
+			game_id: game_token,
+			resume
 		});
 		await fetch(`/api/v1/quiz/play/check_captcha/${game_pin}`);
+	};
+
+	const hydrateGameState = (data: RegisteredAsAdminPayload) => {
+		if (data.game_id !== undefined) {
+			game_state.game_id = data.game_id;
+		}
+		if (data.players !== undefined) {
+			game_state.players = data.players;
+		}
+		if (data.player_scores !== undefined) {
+			game_state.player_scores = data.player_scores;
+		}
+
+		const question_index = data.selected_question ?? data.current_question;
+		if (question_index !== undefined) {
+			game_state.selected_question = question_index;
+			game_state.shown_question_now = question_index;
+		}
+		if (data.question_results !== undefined) {
+			game_state.question_results = data.question_results;
+		}
+		if (data.answer_count !== undefined) {
+			game_state.answer_count = data.answer_count;
+		}
+		if (data.timer_res !== undefined) {
+			game_state.timer_res = data.timer_res.toString();
+		} else if (data.question_show === false && question_index !== undefined) {
+			game_state.timer_res = '0';
+		}
+		if (data.game_started !== undefined) {
+			game_state.game_started = data.game_started;
+		}
 	};
 	onMount(() => {
 		if (auto_connect) {
@@ -137,8 +184,10 @@ SPDX-License-Identifier: MPL-2.0
 	});
 	socket.on('session_id', (_d) => {});
 
-	socket.on('registered_as_admin', (data) => {
-		game_state.quiz_data = JSON.parse(data['game']);
+	socket.on('registered_as_admin', (data: RegisteredAsAdminPayload) => {
+		game_state.quiz_data = JSON.parse(data.game);
+		game_state.game_started = Boolean(game_state.quiz_data.started);
+		hydrateGameState(data);
 		console.log(game_state.quiz_data);
 		success = true;
 	});
