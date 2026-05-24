@@ -38,16 +38,7 @@ export class SocketGameControls {
 		this.socket.emit('start_game', '');
 	}
 
-	kick_player(username: string, players: any[]) {
-		this.socket.emit('kick_player', { username: username });
-
-		for (let i = 0; i < players.length; i++) {
-			console.log(players[i].username, username);
-			if (players[i].username === username) {
-				players.splice(i, 1);
-				break;
-			}
-		}
-		return players;
+	kick_player(player: { username: string; zone?: string }) {
+		this.socket.emit('kick_player', { username: player.username, zone: player.zone });
 	}
 }

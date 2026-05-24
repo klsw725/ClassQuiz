@@ -11,6 +11,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { fade } from 'svelte/transition';
 	import { SocketGameControls } from '$lib/play/admin/socket_game_controls.ts';
 	import type { GameState } from '$lib/play/admin/game_state';
+	import { participantKey } from '$lib/admin';
 
 	interface Props {
 		game_pin: string;
@@ -33,12 +34,19 @@ SPDX-License-Identifier: MPL-2.0
 	const formatPlayerName = (player: { username: string; zone?: string }) =>
 		player.zone ? `${player.zone}-${player.username}` : player.username;
 	let visible_lobby_player_count = $state(LOBBY_VISIBLE_PLAYER_LIMIT);
-	let visible_lobby_players = $derived(
-		game_state.players.slice(0, visible_lobby_player_count)
-	);
+	let visible_lobby_players = $derived(game_state.players.slice(0, visible_lobby_player_count));
+	let selected_lobby_player_key = $state<string | null>(null);
 	let hidden_lobby_player_count = $derived(
 		Math.max(game_state.players.length - visible_lobby_players.length, 0)
 	);
+	const togglePlayerMenu = (player: { username: string; zone?: string }) => {
+		const key = participantKey(player.username, player.zone);
+		selected_lobby_player_key = selected_lobby_player_key === key ? null : key;
+	};
+	const kickPlayer = (player: { username: string; zone?: string }) => {
+		socket_game_controls.kick_player(player);
+		selected_lobby_player_key = null;
+	};
 
 	if (cqc_code === 'null') {
 		cqc_code = null;
@@ -117,15 +125,36 @@ SPDX-License-Identifier: MPL-2.0
 	</div>
 	<div class="flex flex-row w-full mt-4 px-10 flex-wrap">
 		{#if game_state.players.length > 0}
-			{#each visible_lobby_players as player (player.username)}
-				<div class="cq-surface-muted p-2 m-2 hover:cursor-pointer">
-					<span
-						class="link-hover hover:line-through text-lg"
+			{#each visible_lobby_players as player (participantKey(player.username, player.zone))}
+				{@const player_key = participantKey(player.username, player.zone)}
+				<div class="cq-surface-muted relative p-2 m-2">
+					<button
+						type="button"
+						class="link-hover text-lg"
+						aria-haspopup="menu"
+						aria-expanded={selected_lobby_player_key === player_key}
 						onclick={() => {
-							socket_game_controls.kick_player(player.username, game_state.players);
-						}}>{formatPlayerName(player)}</span
+							togglePlayerMenu(player);
+						}}>{formatPlayerName(player)}</button
 					>
-					<!--					<button>{$t('words.kick')}</button>-->
+					{#if selected_lobby_player_key === player_key}
+						<div
+							class="cq-card absolute left-0 top-full z-10 mt-1 w-max p-1"
+							role="menu"
+						>
+							<button
+								type="button"
+								role="menuitem"
+								class="action-button w-full text-sm"
+								aria-label="{$t('words.kick')} {formatPlayerName(player)}"
+								onclick={() => {
+									kickPlayer(player);
+								}}
+							>
+								{$t('words.kick')}
+							</button>
+						</div>
+					{/if}
 				</div>
 			{/each}
 			{#if hidden_lobby_player_count > 0}

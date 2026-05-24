@@ -53,6 +53,9 @@ export const getWinnersSorted = (
 	}
 };
 
+export const participantKey = (username: string, zone?: string | null): string =>
+	JSON.stringify([zone ?? null, username]);
+
 export interface Player {
 	username: string;
 	zone?: string;
