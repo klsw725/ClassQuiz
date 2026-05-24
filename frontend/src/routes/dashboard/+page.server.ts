@@ -41,14 +41,16 @@ export const load: PageServerLoad = async ({ fetch, parent, request }) => {
 	}
 
 	const cookie = request.headers.get('cookie') ?? '';
-	const [quizzes, quiztivities] = await Promise.all([
+	const [quizzes, quiztivities, live_games] = await Promise.all([
 		fetchDashboardJson(fetch, cookie, '/api/v1/quiz/list?page_size=100'),
-		fetchDashboardJson(fetch, cookie, '/api/v1/quiztivity/')
+		fetchDashboardJson(fetch, cookie, '/api/v1/quiztivity/'),
+		fetchDashboardJson(fetch, cookie, '/api/v1/remote/live_games')
 	]);
 
 	return {
 		email,
 		quizzes,
-		quiztivities
+		quiztivities,
+		live_games
 	};
 };
