@@ -109,6 +109,15 @@ SPDX-License-Identifier: MPL-2.0
 		display_names = nextDisplayNames;
 	};
 
+	const restoreJoinedGameState = (data: JoinedGameCookie) => {
+		username = data.username;
+		game_pin = data.game_pin;
+		if (data.zone) {
+			zone = data.zone;
+			display_names = { ...display_names, [data.username]: `${data.zone}-${data.username}` };
+		}
+	};
+
 	const confirmUnload = (event: BeforeUnloadEvent) => {
 		if (preventReload) {
 			event.preventDefault();
@@ -127,16 +136,13 @@ SPDX-License-Identifier: MPL-2.0
 			return;
 		}
 		const data = JSON.parse(cookie_data) as JoinedGameCookie;
-		if (data.zone) {
-			zone = data.zone;
-			display_names = { ...display_names, [data.username]: `${data.zone}-${data.username}` };
-		}
+		restoreJoinedGameState(data);
 		socket.emit('rejoin_game', {
 			old_sid: data.sid,
 			username: data.username,
 			game_pin: data.game_pin
 		});
-		const res = await fetch(`/api/v1/quiz/play/check_captcha/${game_pin}`);
+		const res = await fetch(`/api/v1/quiz/play/check_captcha/${data.game_pin}`);
 		const json: CheckCaptchaResponse = await res.json();
 		game_mode = json.game_mode;
 	});
@@ -152,10 +158,24 @@ SPDX-License-Identifier: MPL-2.0
 		});
 	});
 	socket.on('rejoined_game', (data: GameData) => {
+		const cookie_data = Cookies.get('joined_game');
+		if (cookie_data) {
+			const joinedGame = JSON.parse(cookie_data) as JoinedGameCookie;
+			restoreJoinedGameState(joinedGame);
+			Cookies.set('joined_game', JSON.stringify({ ...joinedGame, sid: socket.id }), {
+				expires: 3600
+			});
+		}
 		gameData = data;
 		if (data.started) {
 			gameMeta.started = true;
 		}
+	});
+
+	socket.on('participant_already_connected', () => {
+		window.alert(
+			'This game is already open in another tab or device. Please use the active session or close it before reconnecting.'
+		);
 	});
 
 	socket.on('game_not_found', () => {
