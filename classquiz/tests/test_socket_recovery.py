@@ -311,8 +311,27 @@ async def test_kicked_player_cannot_started_game_fallback(recovery_context):
     ]
     assert ("old-sid", "123456") in fake_sio.left_rooms
     assert ("kick", None, "old-sid") in fake_sio.emitted
+    assert ("player_left", {"username": "alice"}, "admin:123456") in fake_sio.emitted
     assert ("game_already_started", None, "new-sid") in fake_sio.emitted
     assert "new-sid" not in sessions
+
+
+@pytest.mark.asyncio
+async def test_kick_player_requires_admin(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    game = make_game(uuid.uuid4(), started=False)
+    fake_redis.values["game:123456"] = game.model_dump_json()
+    add_registered_player(fake_redis, "123456", "alice", "old-sid")
+    sessions["player-sid"] = {"game_pin": "123456", "admin": False}
+
+    await socket_server.kick_player("player-sid", {"username": "alice"})
+
+    assert fake_redis.values["game_session:123456:players:alice"] == "old-sid"
+    assert GamePlayer(username="alice", sid="old-sid").model_dump_json() in fake_redis.sets[
+        "game_session:123456:players"
+    ]
+    assert fake_sio.left_rooms == []
+    assert fake_sio.emitted == []
 
 
 @pytest.mark.asyncio
@@ -389,6 +408,23 @@ async def test_register_as_admin_resume_wrong_game_id_rejects(recovery_context):
     )
 
     assert ("game_not_found", None, "new-admin") in fake_sio.emitted
+
+
+@pytest.mark.asyncio
+async def test_register_as_remote_wrong_game_id_rejects(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    user_id = uuid.uuid4()
+    actual_game_id = uuid.uuid4()
+    fake_redis.values["game:123456"] = make_game(user_id, game_id=actual_game_id).model_dump_json()
+
+    await socket_server.register_as_remote(
+        "remote-sid",
+        {"game_pin": "123456", "game_id": str(uuid.uuid4())},
+    )
+
+    assert ("game_not_found", None, "remote-sid") in fake_sio.emitted
+    assert "remote-sid" not in sessions
+    assert all(event != "registered_as_admin" for event, _data, _room in fake_sio.emitted)
 
 
 @pytest.mark.asyncio

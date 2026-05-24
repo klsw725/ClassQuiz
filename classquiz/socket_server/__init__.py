@@ -634,8 +634,14 @@ async def kick_player(sid: str, data: dict):
         GamePlayer(username=data.username, sid=player_sid).model_dump_json(),
     )
     await redis.delete(f"game_session:{session['game_pin']}:players:{data.username}")
-    await sio.leave_room(player_sid, session["game_pin"])
-    await sio.emit("kick", room=player_sid)
+    await sio.emit(
+        "player_left",
+        {"username": data.username},
+        room=f"admin:{session['game_pin']}",
+    )
+    if player_sid is not None:
+        await sio.leave_room(player_sid, session["game_pin"])
+        await sio.emit("kick", room=player_sid)
 
 
 class _RegisterAsRemoteInput(BaseModel):
@@ -652,12 +658,16 @@ async def register_as_remote(sid: str, data: dict):
         print(e)
         return
     redis_res = await redis.get(f"game:{data.game_pin}")
-    if redis_res is not None and PlayGame.model_validate_json(redis_res).game_mode == "solo":
+    if redis_res is None:
+        await sio.emit("game_not_found", room=sid)
+        return
+    game_data = PlayGame.model_validate_json(redis_res)
+    if game_data.game_mode == "solo" or str(game_data.game_id) != str(data.game_id):
         await sio.emit("game_not_found", room=sid)
         return
     await sio.emit(
         "registered_as_admin",
-        {"game_id": data.game_id, "game": await redis.get(f"game:{data.game_pin}")},
+        {"game_id": data.game_id, "game": redis_res},
         room=sid,
     )
     await sio.emit("control_visibility", {"visible": False}, room=f"admin:{data.game_pin}")
