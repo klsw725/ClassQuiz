@@ -82,52 +82,225 @@ async def set_answer(answers, game_pin: str, q_index: int, data: AnswerData) -> 
     return answers
 
 
-@sio.event
-async def rejoin_game(sid: str, data: dict):
-    redis_res = await redis.get(f"game:{data['game_pin']}")
-    if redis_res is None:
-        await sio.emit("game_not_found", room=sid)
+def should_randomize_answer_order_for_player(game_data: PlayGame) -> bool:
+    return game_data.randomize_answers and game_data.randomize_answers_mode == "per_participant"
+
+
+def can_randomize_question_answers(question_type: QuizQuestionType | None) -> bool:
+    return question_type in {
+        QuizQuestionType.ABCD,
+        QuizQuestionType.CHECK,
+        QuizQuestionType.ORDER,
+        QuizQuestionType.VOTING,
+    }
+
+
+def build_return_question(game_data: PlayGame, question_index: int, shuffle_answers: bool = False) -> tuple[dict, list[int]]:
+    question = game_data.questions[question_index]
+    temp_return = game_data.model_dump(include={"questions"})["questions"][question_index]
+    if question.type == QuizQuestionType.VOTING:
+        for i in range(len(temp_return["answers"])):
+            temp_return["answers"][i] = VotingQuizAnswer(**temp_return["answers"][i])
+    temp_return["type"] = question.type
+    answer_order = list(range(len(temp_return["answers"]))) if isinstance(temp_return.get("answers"), list) else []
+    if shuffle_answers and can_randomize_question_answers(question.type) and answer_order:
+        indexed_answers = list(zip(answer_order, temp_return["answers"]))
+        random.shuffle(indexed_answers)
+        answer_order = [index for index, _answer in indexed_answers]
+        temp_return["answers"] = [answer for _index, answer in indexed_answers]
+    return ReturnQuestion(**temp_return).model_dump(), answer_order
+
+
+async def emit_player_randomized_question(game_pin: str, question_index: int, game_data: PlayGame):
+    players = await redis.smembers(f"game_session:{game_pin}:players")
+    for raw_player in players:
+        player = GamePlayer.model_validate_json(raw_player)
+        if player.sid is None:
+            continue
+        await emit_question_to_player(player.sid, game_pin, player.username, question_index, game_data)
+
+
+async def emit_question_to_player(
+    sid: str,
+    game_pin: str,
+    username: str,
+    question_index: int,
+    game_data: PlayGame,
+    use_remaining_time: bool = False,
+):
+    question_type = game_data.questions[question_index].type
+    if question_type == QuizQuestionType.SLIDE:
+        await sio.emit("set_question_number", {"question_index": question_index}, room=sid)
         return
-    try:
-        data = RejoinGameData(**data)
-    except ValidationError as e:
-        await sio.emit("error", room=sid)
-        print(e)
-    game_data = PlayGame.model_validate_json(redis_res)
-    if game_data.game_mode == "solo":
-        await sio.emit("game_not_found", room=sid)
-        return
-    redis_sid_key = f"game_session:{data.game_pin}:players:{data.username}"
-    old_sid = await redis.get(redis_sid_key)
-    if old_sid != data.old_sid:
-        return
-    encrypted_datetime = fernet.encrypt(datetime.now().isoformat().encode("utf-8")).decode("utf-8")
-    await sio.emit("time_sync", encrypted_datetime, room=sid)
-    await redis.set(redis_sid_key, sid)
-    await redis.srem(
-        f"game_session:{data.game_pin}:players",
-        GamePlayer(username=data.username, sid=data.old_sid).model_dump_json(),
+
+    shuffle_answers = should_randomize_answer_order_for_player(game_data) or question_type == QuizQuestionType.ORDER
+    question, answer_order = build_return_question(game_data, question_index, shuffle_answers=shuffle_answers)
+    if use_remaining_time:
+        question_started_raw = await redis.get(f"game:{game_pin}:current_time")
+        if question_started_raw is not None:
+            question_started = datetime.fromisoformat(question_started_raw)
+            question_time = int(float(game_data.questions[question_index].time))
+            elapsed = int((datetime.now() - question_started).total_seconds())
+            question["time"] = str(max(question_time - elapsed, 0))
+    if should_randomize_answer_order_for_player(game_data) and question_type == QuizQuestionType.CHECK:
+        await redis.set(
+            f"game_session:{game_pin}:answer_order:{question_index}:{username}",
+            json.dumps(answer_order),
+            ex=7200,
+        )
+    await sio.emit(
+        "set_question_number",
+        {
+            "question_index": question_index,
+            "question": question,
+        },
+        room=sid,
     )
-    await redis.sadd(
-        f"game_session:{data.game_pin}:players",
-        GamePlayer(username=data.username, sid=sid).model_dump_json(),
-    )
-    zone = await redis.hget(f"game:{data.game_pin}:players:zones", data.username)
+
+
+async def remap_player_randomized_check_answer(game_pin: str, username: str, data: SubmitAnswerData):
+    order_raw = await redis.get(f"game_session:{game_pin}:answer_order:{data.question_index}:{username}")
+    if order_raw is None:
+        return
+    answer_order = json.loads(order_raw)
+    selected_answer_indexes = sorted(answer_order[int(i)] for i in str(data.answer))
+    data.answer = "".join(str(i) for i in selected_answer_indexes)
+
+
+async def get_admin_resume_payload(game_pin: str, game_id: str, game_data: PlayGame) -> dict:
+    player_rows = []
+    player_zone_key = f"game:{game_pin}:players:zones"
+    for raw_player in await redis.smembers(f"game_session:{game_pin}:players"):
+        player = GamePlayer.model_validate_json(raw_player)
+        player_data = player.model_dump()
+        zone = await redis.hget(player_zone_key, player.username)
+        if zone is not None:
+            player_data["zone"] = zone
+        player_rows.append(player_data)
+
+    player_scores = {
+        username: int(score)
+        for username, score in (await redis.hgetall(f"game_session:{game_pin}:player_scores")).items()
+    }
+    answer_count = 0
+    question_results = None
+    timer_res = None
+    if game_data.current_question != -1:
+        answers = await AnswerDataList.get_redis_or_empty(game_pin, str(game_data.current_question))
+        answer_count = len(answers)
+        if not game_data.question_show:
+            question_results = answers.model_dump()
+            timer_res = "0"
+            for answer in answers:
+                if answer.username in player_scores:
+                    player_scores[answer.username] -= answer.score
+        else:
+            question_started_raw = await redis.get(f"game:{game_pin}:current_time")
+            question_started = datetime.fromisoformat(question_started_raw)
+            question_time = int(float(game_data.questions[game_data.current_question].time))
+            elapsed = int((datetime.now() - question_started).total_seconds())
+            timer_res = str(max(question_time - elapsed, 0))
+
+    payload = {
+        "game_id": game_id,
+        "game": game_data.model_dump_json(),
+        "players": player_rows,
+        "player_scores": player_scores,
+        "current_question": game_data.current_question,
+        "selected_question": game_data.current_question,
+        "question_show": game_data.question_show,
+        "question_results": question_results,
+        "answer_count": answer_count,
+        "game_started": game_data.started,
+    }
+    if timer_res is not None:
+        payload["timer_res"] = timer_res
+    return payload
+
+
+def player_sid_key(game_pin: str, username: str) -> str:
+    return f"game_session:{game_pin}:players:{username}"
+
+
+def player_set_key(game_pin: str) -> str:
+    return f"game_session:{game_pin}:players"
+
+
+def player_set_value(username: str, sid: str | None) -> str:
+    return GamePlayer(username=username, sid=sid).model_dump_json()
+
+
+def is_active_player_sid(existing_sid: str, game_pin: str) -> bool:
+    return bool(sio.manager.is_connected(existing_sid, "/")) and game_pin in sio.rooms(existing_sid, namespace="/")
+
+
+async def is_registered_player(game_pin: str, username: str, existing_sid: str | None) -> bool:
+    if existing_sid is None:
+        return False
+    players = await redis.smembers(player_set_key(game_pin))
+    return player_set_value(username, existing_sid) in players
+
+
+async def restore_player_session(
+    sid: str,
+    game_pin: str,
+    username: str,
+    old_sid: str,
+    game_data: PlayGame,
+) -> None:
+    await redis.set(player_sid_key(game_pin, username), sid, ex=7200)
+    await redis.srem(player_set_key(game_pin), player_set_value(username, old_sid))
+    await redis.sadd(player_set_key(game_pin), player_set_value(username, sid))
+    zone = await redis.hget(f"game:{game_pin}:players:zones", username)
     session = {
-        "game_pin": data.game_pin,
-        "username": data.username,
+        "game_pin": game_pin,
+        "username": username,
         "sid_custom": sid,
         "admin": False,
     }
     if zone is not None:
         session["zone"] = zone
     await save_session(sid, sio, session)
-    await sio.enter_room(sid, data.game_pin)
-    await sio.emit(
-        "rejoined_game",
-        game_data.to_player_data(),
-        room=sid,
-    )
+    await sio.enter_room(sid, game_pin)
+    await sio.emit("rejoined_game", game_data.to_player_data(), room=sid)
+    encrypted_datetime = fernet.encrypt(datetime.now().isoformat().encode("utf-8")).decode("utf-8")
+    await sio.emit("time_sync", encrypted_datetime, room=sid)
+    if game_data.started and game_data.question_show and game_data.current_question != -1:
+        await emit_question_to_player(
+            sid,
+            game_pin,
+            username,
+            game_data.current_question,
+            game_data,
+            use_remaining_time=True,
+        )
+
+
+@sio.event
+async def rejoin_game(sid: str, data: dict):
+    try:
+        data = RejoinGameData(**data)
+    except ValidationError as e:
+        await sio.emit("error", room=sid)
+        print(e)
+        return
+    redis_res = await redis.get(f"game:{data.game_pin}")
+    if redis_res is None:
+        await sio.emit("game_not_found", room=sid)
+        return
+    game_data = PlayGame.model_validate_json(redis_res)
+    if game_data.game_mode == "solo":
+        await sio.emit("game_not_found", room=sid)
+        return
+    old_sid = await redis.get(player_sid_key(data.game_pin, data.username))
+    if old_sid != data.old_sid:
+        return
+    if not await is_registered_player(data.game_pin, data.username, data.old_sid):
+        return
+    if is_active_player_sid(data.old_sid, data.game_pin):
+        await sio.emit("participant_already_connected", room=sid)
+        return
+    await restore_player_session(sid, data.game_pin, data.username, data.old_sid, game_data)
 
 
 @sio.event
@@ -147,7 +320,18 @@ async def join_game(sid: str, data: dict):
         await sio.emit("game_not_found", room=sid)
         return
     if game_data.started:
-        await sio.emit("game_already_started", room=sid)
+        old_sid = await redis.get(player_sid_key(data.game_pin, data.username))
+        zone = await redis.hget(f"game:{data.game_pin}:players:zones", data.username)
+        if old_sid is None or not await is_registered_player(data.game_pin, data.username, old_sid):
+            await sio.emit("game_already_started", room=sid)
+            return
+        if zone != data.zone:
+            await sio.emit("username_already_exists", room=sid)
+            return
+        if is_active_player_sid(old_sid, data.game_pin):
+            await sio.emit("participant_already_connected", room=sid)
+            return
+        await restore_player_session(sid, data.game_pin, data.username, old_sid, game_data)
         return
     # +++ START checking captcha +++
     if game_data.captcha_enabled:
@@ -226,16 +410,37 @@ async def register_as_admin(sid: str, data: dict):
     game_pin = data.game_pin
     game_id = data.game_id
     redis_res = await redis.get(f"game:{game_pin}")
-    if redis_res is not None and PlayGame.model_validate_json(redis_res).game_mode == "solo":
+    if redis_res is None:
         await sio.emit("game_not_found", room=sid)
         return
-    if await redis.get(f"game_session:{game_pin}") is not None:
-        await sio.emit("already_registered_as_admin", room=sid)
+
+    game_data = PlayGame.model_validate_json(redis_res)
+    if game_data.game_mode == "solo" or str(game_data.game_id) != str(game_id):
+        await sio.emit("game_not_found", room=sid)
         return
-    await GameSession(admin=sid, game_id=game_id, answers=[]).save(game_pin)
+
+    session_raw = await redis.get(f"game_session:{game_pin}")
+    if session_raw is None:
+        await GameSession(admin=sid, game_id=game_id, answers=[]).save(game_pin)
+        payload = {"game_id": game_id, "game": redis_res}
+    else:
+        if not data.resume:
+            await sio.emit("already_registered_as_admin", room=sid)
+            return
+        game_session = GameSession.model_validate_json(session_raw)
+        if str(game_session.game_id) != str(game_id):
+            await sio.emit("game_not_found", room=sid)
+            return
+        old_admin = game_session.admin
+        if old_admin != sid:
+            await sio.disconnect(old_admin, namespace="/")
+        game_session.admin = sid
+        await game_session.save(game_pin)
+        payload = await get_admin_resume_payload(game_pin, game_id, game_data)
+
     await sio.emit(
         "registered_as_admin",
-        {"game_id": game_id, "game": await redis.get(f"game:{game_pin}")},
+        payload,
         room=sid,
     )
     session = {"game_pin": game_pin, "admin": True, "remote": False}
@@ -269,27 +474,35 @@ async def set_question_number(sid: str, data: str):
     game_data.question_show = True
     await game_data.save(session["game_pin"])
     await redis.set(f"game:{session['game_pin']}:current_time", datetime.now().isoformat(), ex=7200)
-    temp_return = game_data.model_dump(include={"questions"})["questions"][int(float(data))]
+    question_index = int(float(data))
     if game_data.questions[int(float(data))].type == QuizQuestionType.SLIDE:
         await sio.emit(
             "set_question_number",
             {
-                "question_index": int(float(data)),
+                "question_index": question_index,
             },
             room=sid,
         )
         return
-    if game_data.questions[int(float(data))].type == QuizQuestionType.VOTING:
-        for i in range(len(temp_return["answers"])):
-            temp_return["answers"][i] = VotingQuizAnswer(**temp_return["answers"][i])
-    temp_return["type"] = game_data.questions[int(float(data))].type
-    if temp_return["type"] == QuizQuestionType.ORDER:
-        random.shuffle(temp_return["answers"])
+    if should_randomize_answer_order_for_player(game_data) and can_randomize_question_answers(
+        game_data.questions[question_index].type
+    ):
+        await sio.emit(
+            "set_question_number",
+            {
+                "question_index": question_index,
+            },
+            room=f"admin:{game_pin}",
+        )
+        await emit_player_randomized_question(game_pin, question_index, game_data)
+        return
+    shuffle_answers = game_data.questions[question_index].type == QuizQuestionType.ORDER
+    question, _answer_order = build_return_question(game_data, question_index, shuffle_answers=shuffle_answers)
     await sio.emit(
         "set_question_number",
         {
-            "question_index": int(float(data)),
-            "question": ReturnQuestion(**temp_return).model_dump(),
+            "question_index": question_index,
+            "question": question,
         },
         room=game_pin,
     )
@@ -318,6 +531,8 @@ async def submit_answer(sid: str, data: dict):
         await sio.emit("already_replied", room=sid)
         return
 
+    if game_data.questions[question_index].type == QuizQuestionType.CHECK:
+        await remap_player_randomized_check_answer(session["game_pin"], session["username"], data)
     answer_right, answer = check_answer(game_data, data)
     latency = int(float(session["ping"]))
     time_q_started = datetime.fromisoformat(await redis.get(f"game:{session['game_pin']}:current_time"))
@@ -418,6 +633,7 @@ async def kick_player(sid: str, data: dict):
         f"game_session:{session['game_pin']}:players",
         GamePlayer(username=data.username, sid=player_sid).model_dump_json(),
     )
+    await redis.delete(f"game_session:{session['game_pin']}:players:{data.username}")
     await sio.leave_room(player_sid, session["game_pin"])
     await sio.emit("kick", room=player_sid)
 

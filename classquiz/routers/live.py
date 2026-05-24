@@ -5,6 +5,7 @@
 
 import json
 import uuid
+from datetime import datetime
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, field_validator
@@ -23,7 +24,13 @@ from classquiz.db.models import (
     AnswerDataList,
 )
 from classquiz.auth import check_api_key
-from classquiz.socket_server import ReturnQuestion, sio
+from classquiz.socket_server import (
+    build_return_question,
+    can_randomize_question_answers,
+    emit_player_randomized_question,
+    should_randomize_answer_order_for_player,
+    sio,
+)
 
 settings = settings()
 
@@ -211,14 +218,22 @@ async def set_next_question(game_pin: str, question_number: int, api_key: str):
     user_id = await check_api_key(api_key)
     game_pin, game_data = await _resolve_owned_live_game(game_pin, user_id)
     game_data.current_question = question_number
+    game_data.question_show = True
     await redis.set(f"game:{game_pin}", game_data.model_dump_json(), ex=18000)
+    await redis.set(f"game:{game_pin}:current_time", datetime.now().isoformat(), ex=7200)
+    if should_randomize_answer_order_for_player(game_data) and can_randomize_question_answers(
+        game_data.questions[question_number].type
+    ):
+        await sio.emit("set_question_number", {"question_index": question_number}, room=f"admin:{game_pin}")
+        await emit_player_randomized_question(game_pin, question_number, game_data)
+        return
+    shuffle_answers = game_data.questions[question_number].type == QuizQuestionType.ORDER
+    question, _answer_order = build_return_question(game_data, question_number, shuffle_answers=shuffle_answers)
     await sio.emit(
         "set_question_number",
         {
             "question_index": question_number,
-            "question": ReturnQuestion(
-                **game_data.model_dump(include={"questions"})["questions"][question_number]
-            ).model_dump(),
+            "question": question,
         },
         room=game_pin,
     )

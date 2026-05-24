@@ -83,8 +83,13 @@ async def start_quiz(
     custom_field: str | None = None,
     cqcs_enabled: bool = False,
     randomize_answers: bool = False,
+    randomize_answers_mode: str = "same_for_all",
     user: User = Depends(get_current_user),
 ):
+    if randomize_answers_mode not in {"same_for_all", "per_participant"}:
+        raise HTTPException(status_code=400, detail="invalid randomize_answers_mode")
+    if not randomize_answers:
+        randomize_answers_mode = "same_for_all"
     try:
         quiz_id = uuid.UUID(quiz_id)
     except ValueError:
@@ -104,7 +109,7 @@ async def start_quiz(
         game_pin = randint(100000, 999999)
         game = await redis.get(f"game:{game_pin}")
 
-    if randomize_answers:
+    if randomize_answers and randomize_answers_mode == "same_for_all":
         for question in quiz.questions:
             if question["type"] == QuizQuestionType.RANGE:
                 continue
@@ -129,6 +134,8 @@ async def start_quiz(
         custom_field=custom_field,
         background_image=quiz.background_image,
         time_based_scoring=quiz.time_based_scoring,
+        randomize_answers=randomize_answers,
+        randomize_answers_mode=randomize_answers_mode,
     )
     code = None
     if cqcs_enabled and game_mode != "solo":

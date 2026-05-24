@@ -259,6 +259,8 @@ class PlayGame(BaseModel):
     custom_field: str | None = None
     question_show: bool = False
     time_based_scoring: bool = True
+    randomize_answers: bool = False
+    randomize_answers_mode: str = "same_for_all"
 
     @classmethod
     async def get_from_redis(self, game_pin: str) -> Self:
