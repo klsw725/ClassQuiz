@@ -146,10 +146,10 @@ def check_check_question(answer: str, answers: list[ABCDQuizAnswer]) -> bool:
     return bool(correct_string == answer)
 
 
-async def has_already_answered(game_pin: str, q_index: int, username: str) -> bool:
+async def has_already_answered(game_pin: str, q_index: int, username: str, zone: str | None = None) -> bool:
     answers = await AnswerDataList.get_redis_or_empty(game_pin, q_index)
     if answers is None:
         return False
     else:
-        answers = list(filter(lambda a: a.username == username, answers.root))
+        answers = list(filter(lambda a: a.username == username and a.zone == zone, answers.root))
         return len(answers) > 0

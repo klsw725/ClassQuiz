@@ -23,6 +23,7 @@ from classquiz.socket_server import register_as_admin
 import classquiz.db.models as db_models
 import classquiz.routers.remote as remote_router
 import classquiz.socket_server as socket_server
+from classquiz.socket_server.participant_identity import participant_key
 
 
 class FakeRedis:
@@ -51,6 +52,12 @@ class FakeRedis:
     async def hset(self, key, field, value):
         self.hashes.setdefault(key, {})[field] = value
 
+    async def hdel(self, key, field):
+        self.hashes.setdefault(key, {}).pop(field, None)
+
+    async def hincrby(self, key, field, amount):
+        self.hashes.setdefault(key, {})[field] = str(int(self.hashes.setdefault(key, {}).get(field, 0)) + amount)
+
     async def expire(self, key, ex):
         return None
 
@@ -65,6 +72,9 @@ class FakeRedis:
 
     async def srem(self, key, value):
         self.sets.setdefault(key, set()).discard(value)
+
+    async def scard(self, key):
+        return len(self.sets.get(key, set()))
 
 
 class FakeManager:
@@ -150,16 +160,70 @@ def recovery_context(monkeypatch):
 
 
 def add_registered_player(fake_redis, game_pin, username, sid, zone="1구역"):
-    fake_redis.values[f"game_session:{game_pin}:players:{username}"] = sid
+    key = participant_key(username, zone)
+    fake_redis.values[f"game_session:{game_pin}:players:{key}"] = sid
     fake_redis.sets.setdefault(f"game_session:{game_pin}:players", set()).add(
-        GamePlayer(username=username, sid=sid).model_dump_json()
+        GamePlayer(username=username, sid=sid, zone=zone).model_dump_json()
     )
-    fake_redis.hashes.setdefault(f"game:{game_pin}:players:zones", {})[username] = zone
+    fake_redis.hashes.setdefault(f"game:{game_pin}:players:zones", {})[key] = zone
 
 
 def activate_player(fake_sio, sid, game_pin):
     fake_sio.active_sids.add(sid)
     fake_sio.rooms_by_sid.setdefault(sid, set()).add(game_pin)
+
+
+@pytest.mark.asyncio
+async def test_same_username_different_zones_can_join_before_start(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    game = make_game(uuid.uuid4(), started=False)
+    fake_redis.values["game:123456"] = game.model_dump_json()
+
+    for sid, zone in [("sid-zone-1", "1구역"), ("sid-zone-2", "2구역")]:
+        await socket_server.join_game(
+            sid,
+            {
+                "game_pin": "123456",
+                "username": "alice",
+                "zone": zone,
+                "captcha": None,
+                "custom_field": "",
+            },
+        )
+
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '1구역')}"] == "sid-zone-1"
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '2구역')}"] == "sid-zone-2"
+    assert GamePlayer(username="alice", sid="sid-zone-1", zone="1구역").model_dump_json() in fake_redis.sets[
+        "game_session:123456:players"
+    ]
+    assert GamePlayer(username="alice", sid="sid-zone-2", zone="2구역").model_dump_json() in fake_redis.sets[
+        "game_session:123456:players"
+    ]
+    assert sessions["sid-zone-1"]["zone"] == "1구역"
+    assert sessions["sid-zone-2"]["zone"] == "2구역"
+    assert len([event for event, _data, _room in fake_sio.emitted if event == "joined_game"]) == 2
+
+
+@pytest.mark.asyncio
+async def test_same_username_same_zone_is_rejected_before_start(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    game = make_game(uuid.uuid4(), started=False)
+    fake_redis.values["game:123456"] = game.model_dump_json()
+    add_registered_player(fake_redis, "123456", "alice", "old-sid", zone="1구역")
+
+    await socket_server.join_game(
+        "new-sid",
+        {
+            "game_pin": "123456",
+            "username": "alice",
+            "zone": "1구역",
+            "captcha": None,
+            "custom_field": "",
+        },
+    )
+
+    assert ("username_already_exists", None, "new-sid") in fake_sio.emitted
+    assert "new-sid" not in sessions
 
 
 @pytest.mark.asyncio
@@ -172,11 +236,11 @@ async def test_cookie_rejoin_rejects_active_old_sid(recovery_context):
 
     await socket_server.rejoin_game(
         "new-sid",
-        {"game_pin": "123456", "username": "alice", "old_sid": "old-sid"},
+        {"game_pin": "123456", "username": "alice", "zone": "1구역", "old_sid": "old-sid"},
     )
 
     assert ("participant_already_connected", None, "new-sid") in fake_sio.emitted
-    assert fake_redis.values["game_session:123456:players:alice"] == "old-sid"
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '1구역')}"] == "old-sid"
     assert "new-sid" not in sessions
 
 
@@ -185,15 +249,15 @@ async def test_cookie_rejoin_rejects_stale_sid_key_without_set_membership(recove
     fake_redis, fake_sio, sessions = recovery_context
     game = make_game(uuid.uuid4())
     fake_redis.values["game:123456"] = game.model_dump_json()
-    fake_redis.values["game_session:123456:players:alice"] = "old-sid"
+    fake_redis.values[f"game_session:123456:players:{participant_key('alice', '1구역')}"] = "old-sid"
 
     await socket_server.rejoin_game(
         "new-sid",
-        {"game_pin": "123456", "username": "alice", "old_sid": "old-sid"},
+        {"game_pin": "123456", "username": "alice", "zone": "1구역", "old_sid": "old-sid"},
     )
 
     assert all(event != "rejoined_game" for event, _data, _room in fake_sio.emitted)
-    assert fake_redis.values["game_session:123456:players:alice"] == "old-sid"
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '1구역')}"] == "old-sid"
     assert "new-sid" not in sessions
 
 
@@ -216,9 +280,9 @@ async def test_started_game_fallback_restores_inactive_registered_player_with_ma
     )
 
     players = fake_redis.sets["game_session:123456:players"]
-    assert fake_redis.values["game_session:123456:players:alice"] == "new-sid"
-    assert GamePlayer(username="alice", sid="old-sid").model_dump_json() not in players
-    assert GamePlayer(username="alice", sid="new-sid").model_dump_json() in players
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '2구역')}"] == "new-sid"
+    assert GamePlayer(username="alice", sid="old-sid", zone="2구역").model_dump_json() not in players
+    assert GamePlayer(username="alice", sid="new-sid", zone="2구역").model_dump_json() in players
     assert sessions["new-sid"] == {
         "game_pin": "123456",
         "username": "alice",
@@ -247,7 +311,7 @@ async def test_rejoin_active_question_restores_question_payload(recovery_context
 
     await socket_server.rejoin_game(
         "new-sid",
-        {"game_pin": "123456", "username": "alice", "old_sid": "old-sid"},
+        {"game_pin": "123456", "username": "alice", "zone": "1구역", "old_sid": "old-sid"},
     )
 
     question_events = [
@@ -281,8 +345,34 @@ async def test_started_game_fallback_rejects_active_old_sid(recovery_context):
     )
 
     assert ("participant_already_connected", None, "new-sid") in fake_sio.emitted
-    assert fake_redis.values["game_session:123456:players:alice"] == "old-sid"
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '1구역')}"] == "old-sid"
     assert "new-sid" not in sessions
+
+
+@pytest.mark.asyncio
+async def test_active_sid_guard_is_zone_scoped(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    game = make_game(uuid.uuid4(), started=True)
+    fake_redis.values["game:123456"] = game.model_dump_json()
+    add_registered_player(fake_redis, "123456", "alice", "zone-1-sid", zone="1구역")
+    add_registered_player(fake_redis, "123456", "alice", "zone-2-sid", zone="2구역")
+    activate_player(fake_sio, "zone-1-sid", "123456")
+
+    await socket_server.join_game(
+        "new-zone-2-sid",
+        {
+            "game_pin": "123456",
+            "username": "alice",
+            "zone": "2구역",
+            "captcha": None,
+            "custom_field": "",
+        },
+    )
+
+    assert ("participant_already_connected", None, "new-zone-2-sid") not in fake_sio.emitted
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '1구역')}"] == "zone-1-sid"
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '2구역')}"] == "new-zone-2-sid"
+    assert sessions["new-zone-2-sid"]["zone"] == "2구역"
 
 
 @pytest.mark.asyncio
@@ -293,7 +383,7 @@ async def test_kicked_player_cannot_started_game_fallback(recovery_context):
     add_registered_player(fake_redis, "123456", "alice", "old-sid")
     sessions["admin-sid"] = {"game_pin": "123456", "admin": True}
 
-    await socket_server.kick_player("admin-sid", {"username": "alice"})
+    await socket_server.kick_player("admin-sid", {"username": "alice", "zone": "1구역"})
     await socket_server.join_game(
         "new-sid",
         {
@@ -305,15 +395,43 @@ async def test_kicked_player_cannot_started_game_fallback(recovery_context):
         },
     )
 
-    assert "game_session:123456:players:alice" not in fake_redis.values
-    assert GamePlayer(username="alice", sid="old-sid").model_dump_json() not in fake_redis.sets[
+    assert f"game_session:123456:players:{participant_key('alice', '1구역')}" not in fake_redis.values
+    assert GamePlayer(username="alice", sid="old-sid", zone="1구역").model_dump_json() not in fake_redis.sets[
         "game_session:123456:players"
     ]
     assert ("old-sid", "123456") in fake_sio.left_rooms
     assert ("kick", None, "old-sid") in fake_sio.emitted
-    assert ("player_left", {"username": "alice"}, "admin:123456") in fake_sio.emitted
     assert ("game_already_started", None, "new-sid") in fake_sio.emitted
     assert "new-sid" not in sessions
+
+
+@pytest.mark.asyncio
+async def test_kick_player_removes_only_matching_zone(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    game = make_game(uuid.uuid4(), started=False)
+    fake_redis.values["game:123456"] = game.model_dump_json()
+    add_registered_player(fake_redis, "123456", "alice", "zone-1-sid", zone="1구역")
+    add_registered_player(fake_redis, "123456", "alice", "zone-2-sid", zone="2구역")
+    sessions["admin-sid"] = {"game_pin": "123456", "admin": True}
+
+    await socket_server.kick_player("admin-sid", {"username": "alice", "zone": "1구역"})
+
+    assert f"game_session:123456:players:{participant_key('alice', '1구역')}" not in fake_redis.values
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '2구역')}"] == "zone-2-sid"
+    assert GamePlayer(username="alice", sid="zone-1-sid", zone="1구역").model_dump_json() not in fake_redis.sets[
+        "game_session:123456:players"
+    ]
+    assert GamePlayer(username="alice", sid="zone-2-sid", zone="2구역").model_dump_json() in fake_redis.sets[
+        "game_session:123456:players"
+    ]
+    assert ("zone-1-sid", "123456") in fake_sio.left_rooms
+    assert ("kick", None, "zone-1-sid") in fake_sio.emitted
+    assert ("kick", None, "zone-2-sid") not in fake_sio.emitted
+    assert (
+        "player_left",
+        {"username": "alice", "zone": "1구역"},
+        "admin:123456",
+    ) in fake_sio.emitted
 
 
 @pytest.mark.asyncio
@@ -321,17 +439,56 @@ async def test_kick_player_requires_admin(recovery_context):
     fake_redis, fake_sio, sessions = recovery_context
     game = make_game(uuid.uuid4(), started=False)
     fake_redis.values["game:123456"] = game.model_dump_json()
-    add_registered_player(fake_redis, "123456", "alice", "old-sid")
+    add_registered_player(fake_redis, "123456", "alice", "zone-1-sid", zone="1구역")
     sessions["player-sid"] = {"game_pin": "123456", "admin": False}
 
-    await socket_server.kick_player("player-sid", {"username": "alice"})
+    await socket_server.kick_player("player-sid", {"username": "alice", "zone": "1구역"})
 
-    assert fake_redis.values["game_session:123456:players:alice"] == "old-sid"
-    assert GamePlayer(username="alice", sid="old-sid").model_dump_json() in fake_redis.sets[
+    assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '1구역')}"] == "zone-1-sid"
+    assert GamePlayer(username="alice", sid="zone-1-sid", zone="1구역").model_dump_json() in fake_redis.sets[
         "game_session:123456:players"
     ]
     assert fake_sio.left_rooms == []
     assert fake_sio.emitted == []
+
+
+@pytest.mark.asyncio
+async def test_submit_answer_scores_same_username_different_zones_separately(recovery_context):
+    fake_redis, _fake_sio, sessions = recovery_context
+    question = QuizQuestion(
+        question="Question",
+        time="30",
+        answers=[ABCDQuizAnswer(answer="A", right=True), ABCDQuizAnswer(answer="B")],
+    )
+    game = make_game(uuid.uuid4(), question_show=True, questions=[question], started=True)
+    fake_redis.values["game:123456"] = game.model_dump_json()
+    fake_redis.values["game:123456:current_time"] = datetime.now().isoformat()
+    add_registered_player(fake_redis, "123456", "alice", "zone-1-sid", zone="1구역")
+    add_registered_player(fake_redis, "123456", "alice", "zone-2-sid", zone="2구역")
+    sessions["zone-1-sid"] = {
+        "game_pin": "123456",
+        "username": "alice",
+        "sid_custom": "zone-1-sid",
+        "admin": False,
+        "zone": "1구역",
+        "ping": 0,
+    }
+    sessions["zone-2-sid"] = {
+        "game_pin": "123456",
+        "username": "alice",
+        "sid_custom": "zone-2-sid",
+        "admin": False,
+        "zone": "2구역",
+        "ping": 0,
+    }
+
+    await socket_server.submit_answer("zone-1-sid", {"question_index": 0, "answer": 0})
+    await socket_server.submit_answer("zone-2-sid", {"question_index": 0, "answer": 0})
+
+    scores = fake_redis.hashes["game_session:123456:player_scores"]
+    assert set(scores) == {participant_key("alice", "1구역"), participant_key("alice", "2구역")}
+    answers = AnswerDataList.model_validate_json(fake_redis.values["game_session:123456:0"])
+    assert [(answer.username, answer.zone) for answer in answers] == [("alice", "1구역"), ("alice", "2구역")]
 
 
 @pytest.mark.asyncio
@@ -345,12 +502,13 @@ async def test_register_as_admin_resume_replaces_admin_sid_and_hydrates_state(re
         admin="old-admin", game_id=str(game_id), answers=[]
     ).model_dump_json()
     fake_redis.sets["game_session:123456:players"] = {
-        GamePlayer(username="alice", sid="alice-sid").model_dump_json()
+        GamePlayer(username="alice", sid="alice-sid", zone="1구역").model_dump_json()
     }
-    fake_redis.hashes["game:123456:players:zones"] = {"alice": "1구역"}
-    fake_redis.hashes["game_session:123456:player_scores"] = {"alice": "100"}
+    alice_key = participant_key("alice", "1구역")
+    fake_redis.hashes["game:123456:players:zones"] = {alice_key: "1구역"}
+    fake_redis.hashes["game_session:123456:player_scores"] = {alice_key: "100"}
     fake_redis.values["game_session:123456:0"] = AnswerDataList(
-        [AnswerData(username="alice", answer="A", right=True, time_taken=100.0, score=100)]
+        [AnswerData(username="alice", answer="A", right=True, time_taken=100.0, score=100, zone="1구역")]
     ).model_dump_json()
 
     await register_as_admin(
@@ -360,14 +518,14 @@ async def test_register_as_admin_resume_replaces_admin_sid_and_hydrates_state(re
 
     saved_session = GameSession.model_validate_json(fake_redis.values["game_session:123456"])
     assert saved_session.admin == "new-admin"
-    assert fake_redis.hashes["game_session:123456:player_scores"] == {"alice": "100"}
+    assert fake_redis.hashes["game_session:123456:player_scores"] == {alice_key: "100"}
     registered_payload = next(
         data for event, data, _room in fake_sio.emitted if event == "registered_as_admin"
     )
     assert registered_payload["players"] == [
         {"username": "alice", "sid": "alice-sid", "zone": "1구역"}
     ]
-    assert registered_payload["player_scores"] == {"alice": 0}
+    assert registered_payload["player_scores"] == {alice_key: 0}
     assert registered_payload["selected_question"] == 0
     assert registered_payload["answer_count"] == 1
     assert registered_payload["timer_res"] == "0"

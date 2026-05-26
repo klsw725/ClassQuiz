@@ -12,6 +12,7 @@ import classquiz.socket_server as socket_server
 from classquiz.db.models import ABCDQuizAnswer, GamePlayer, PlayGame, QuizQuestion, QuizQuestionType
 from classquiz.socket_server import remap_player_randomized_check_answer, set_question_number
 from classquiz.socket_server.models import SubmitAnswerData
+from classquiz.socket_server.participant_identity import participant_key
 
 
 class FakeRedis:
@@ -87,8 +88,8 @@ async def test_per_participant_randomization_emits_distinct_player_questions(ran
     fake_redis, fake_sio = randomization_context
     fake_redis.values["game:123456"] = make_game().model_dump_json()
     fake_redis.sets["game_session:123456:players"] = {
-        GamePlayer(username="alice", sid="alice-sid").model_dump_json(),
-        GamePlayer(username="bob", sid="bob-sid").model_dump_json(),
+        GamePlayer(username="alice", sid="alice-sid", zone="1구역").model_dump_json(),
+        GamePlayer(username="bob", sid="bob-sid", zone="2구역").model_dump_json(),
     }
     shuffle_calls = 0
 
@@ -121,10 +122,10 @@ async def test_per_participant_randomization_emits_distinct_player_questions(ran
 @pytest.mark.asyncio
 async def test_per_participant_check_answer_remaps_display_indexes(randomization_context):
     fake_redis, _fake_sio = randomization_context
-    fake_redis.values["game_session:123456:answer_order:0:alice"] = json.dumps([2, 0, 1])
+    fake_redis.values[f"game_session:123456:answer_order:0:{participant_key('alice', '1구역')}"] = json.dumps([2, 0, 1])
     data = SubmitAnswerData(question_index=0, answer="01")
 
-    await remap_player_randomized_check_answer("123456", "alice", data)
+    await remap_player_randomized_check_answer("123456", "alice", "1구역", data)
 
     assert data.answer == "02"
 
@@ -135,8 +136,8 @@ async def test_live_api_per_participant_randomization_emits_player_questions(ran
     game = make_game()
     fake_redis.values["game:123456"] = game.model_dump_json()
     fake_redis.sets["game_session:123456:players"] = {
-        GamePlayer(username="alice", sid="alice-sid").model_dump_json(),
-        GamePlayer(username="bob", sid="bob-sid").model_dump_json(),
+        GamePlayer(username="alice", sid="alice-sid", zone="1구역").model_dump_json(),
+        GamePlayer(username="bob", sid="bob-sid", zone="2구역").model_dump_json(),
     }
     shuffle_calls = 0
 
