@@ -20,6 +20,7 @@ from io import BytesIO
 from PIL import Image
 from classquiz.config import meilisearch, settings, LOGGER
 from classquiz.helpers.hashcash import check as hc_check
+from classquiz.socket_server.participant_identity import parse_participant_key
 
 settings = settings()
 YOUTUBE_MEDIA_RE = re.compile(r"^youtube:[A-Za-z0-9_-]{11}$")
@@ -54,12 +55,15 @@ async def generate_spreadsheet(
     if player_zones:
         _ = player_worksheet.write(0, 3, "Zone")
     for i, player in enumerate(player_scores.keys()):
-        player_worksheet.write(i + 1, 0, player)
+        username, parsed_zone = parse_participant_key(player)
+        player_worksheet.write(i + 1, 0, username)
         player_worksheet.write(i + 1, 1, player_scores[player])
         if player in player_fields:
             player_worksheet.write(i + 1, 2, player_fields[player])
         if player_zones and player in player_zones:
             player_worksheet.write(i + 1, 3, player_zones[player])
+        elif parsed_zone is not None:
+            player_worksheet.write(i + 1, 3, parsed_zone)
 
     worksheet = workbook.add_worksheet()
     worksheet.name = "Questions"
@@ -110,6 +114,7 @@ async def generate_spreadsheet(
         _ = ws.write(0, 0, "Answer")
         _ = ws.write(0, 1, "Correct")
         _ = ws.write(0, 2, "Username")
+        _ = ws.write(0, 3, "Zone")
         for j, _ in enumerate(answer_data):
             _ = ws.write(j + 1, 0, answer_data[j]["answer"])
             if answer_data[j]["right"]:
@@ -117,6 +122,8 @@ async def generate_spreadsheet(
             else:
                 _ = ws.write(j + 1, 1, "False")
             _ = ws.write(j + 1, 2, answer_data[j]["username"])
+            if "zone" in answer_data[j]:
+                _ = ws.write(j + 1, 3, answer_data[j]["zone"])
 
     workbook.close()
     _ = storage.seek(0)
