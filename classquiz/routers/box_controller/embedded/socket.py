@@ -13,6 +13,7 @@ from classquiz.config import redis
 from classquiz.db.models import PlayGame, QuizQuestionType, AnswerData, GamePlayer
 from classquiz.scoring import calculate_answer_score
 from classquiz.socket_server import sio, set_answer
+from classquiz.socket_server.participant_identity import participant_key
 
 router = APIRouter()
 
@@ -59,7 +60,7 @@ async def submit_answer_fn(data_answer: int, game_pin: str, player_id: str, now:
         question.points,
     )
     await redis.set(f"answer_given:{player_id}:{game.current_question}", "True", ex=600)
-    await redis.hincrby(f"game_session:{game_pin}:player_scores", username, score)
+    await redis.hincrby(f"game_session:{game_pin}:player_scores", participant_key(username, None), score)
     answer_data = AnswerData(
         username=username,
         answer=selected_answer,
@@ -121,7 +122,11 @@ async def websocket_endpoint(ws: WebSocket, game_id: str):
             {"username": username, "sid": None},
             room=f"admin:{game_pin}",
         )
-        await redis.sadd(f"game_session:{game_pin}:players", GamePlayer(username=username, sid=None).model_dump_json())
+        await redis.set(f"game_session:{game_pin}:players:{participant_key(username, None)}", "", ex=7200)
+        await redis.sadd(
+            f"game_session:{game_pin}:players",
+            GamePlayer(username=username, sid=None, zone=None).model_dump_json(),
+        )
 
         while True:
             raw_data = await ws.receive_text()

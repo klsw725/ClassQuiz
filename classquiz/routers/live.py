@@ -31,6 +31,7 @@ from classquiz.socket_server import (
     should_randomize_answer_order_for_player,
     sio,
 )
+from classquiz.socket_server.participant_identity import participant_display_data, participant_key
 
 settings = settings()
 
@@ -206,7 +207,7 @@ async def get_game_session(game_pin: str, api_key: str | None = None, game_id: u
     player_list = []
     for p in players:
         player = GamePlayer.model_validate_json(p).model_dump()
-        zone = player_zones.get(player["username"])
+        zone = player_zones.get(participant_key(player["username"], player.get("zone")))
         if zone is not None:
             player["zone"] = zone
         player_list.append(player)
@@ -246,9 +247,9 @@ async def get_live_player_scores(game_pin: str, api_key: str):
     res = await redis.hgetall(f"game_session:{game_pin}:player_scores")
     player_zones = await redis.hgetall(f"game:{game_pin}:players:zones")
     return_arr = []
-    for username in res:
-        player_score = {"username": username, "score": int(res[username])}
-        zone = player_zones.get(username)
+    for player_key in res:
+        player_score = {**participant_display_data(player_key), "score": int(res[player_key])}
+        zone = player_zones.get(player_key)
         if zone is not None:
             player_score["zone"] = zone
         return_arr.append(player_score)

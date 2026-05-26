@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from classquiz.config import redis
 from classquiz.db.models import PlayGame, Controller
 from classquiz.routers.box_controller.embedded.socket import router as socket_router
+from classquiz.socket_server.participant_identity import participant_key
 
 router = APIRouter()
 router.include_router(socket_router, prefix="/socket")
@@ -42,7 +43,7 @@ async def join_game(data: JoinGameInput) -> JoinGameResponse:
     if game.started:
         raise HTTPException(status_code=400, detail="Game started already")
     # check if username already exists
-    if await redis.get(f"game_session:{game_pin}:players:{controller.player_name}") is not None:
+    if await redis.get(f"game_session:{game_pin}:players:{participant_key(controller.player_name, None)}") is not None:
         raise HTTPException(status_code=409, detail="Username already exists")
 
     player_id = os.urandom(5).hex()
