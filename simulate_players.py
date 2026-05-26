@@ -54,7 +54,15 @@ def __main__():
     arr_of_sio_instances[3].on("set_question_number", set_question_number)
     arr_of_sio_instances[3].on("time_sync", time_sync)
     for index, i in enumerate(arr_of_sio_instances):
-        i.emit("join_game", {"username": str(index), "game_pin": GAME_PIN, "captcha": None})
+        i.emit(
+            "join_game",
+            {
+                "username": str(index),
+                "game_pin": GAME_PIN,
+                "zone": f"{index % 11 + 1}구역",
+                "captcha": None,
+            },
+        )
         time.sleep(0.03)
     print("Everyone joined!")
 
