@@ -6,6 +6,7 @@ SPDX-License-Identifier: MPL-2.0
 
 <script lang="ts">
 	import { getLocalization } from '$lib/i18n';
+	import { parseParticipantKey, participantKey } from '$lib/admin';
 
 	const { t } = getLocalization();
 	const zones = Array.from({ length: 11 }, (_, index) => `${index + 1}구역`);
@@ -14,6 +15,7 @@ SPDX-License-Identifier: MPL-2.0
 	interface PlayerAnswer {
 		username: string;
 		right: boolean;
+		zone?: string;
 	}
 
 	interface Props {
@@ -40,9 +42,7 @@ SPDX-License-Identifier: MPL-2.0
 	);
 	let visible_player_count = $state(RESULT_TABLE_PAGE_SIZE);
 	let visible_usernames = $derived(usernames.slice(0, visible_player_count));
-	let hidden_player_count = $derived(
-		Math.max(usernames.length - visible_usernames.length, 0)
-	);
+	let hidden_player_count = $derived(Math.max(usernames.length - visible_usernames.length, 0));
 	let has_zone_data = $derived(Object.keys(player_zone_data).length !== 0);
 	let zone_totals = $derived(
 		zones.map((zone) => ({
@@ -56,10 +56,32 @@ SPDX-License-Identifier: MPL-2.0
 		}))
 	);
 
+	const scoreKeyForAnswer = (answer: PlayerAnswer): string => {
+		const key = participantKey(answer.username, answer.zone);
+		if (key in scores) {
+			return key;
+		}
+		if (answer.username in scores) {
+			return answer.username;
+		}
+		return key;
+	};
+
+	const playerZone = (key: string): string | undefined => {
+		const player = parseParticipantKey(key);
+		return player.zone ?? player_zone_data[key];
+	};
+
+	const playerDisplayName = (key: string): string => {
+		const player = parseParticipantKey(key);
+		const zone = playerZone(key);
+		return zone ? `${zone}-${player.username}` : player.username;
+	};
+
 	const correctCounts: Record<string, number> = {};
 	answers.forEach((questionAnswers) => {
 		questionAnswers.forEach((answer) => {
-			const user = answer.username;
+			const user = scoreKeyForAnswer(answer);
 			if (!correctCounts[user]) {
 				correctCounts[user] = 0;
 			}
@@ -113,7 +135,7 @@ SPDX-License-Identifier: MPL-2.0
 			<tbody>
 				{#each visible_usernames as uname (uname)}
 					<tr class="text-left">
-						<td class="border-r p-1 border-cq-border">{uname}</td>
+						<td class="border-r p-1 border-cq-border">{playerDisplayName(uname)}</td>
 						<td class="border-r p-1 border-cq-border">{correctCounts[uname]}</td>
 						<td class="p-1">{scores[uname]}</td>
 						{#if custom_field[uname]}

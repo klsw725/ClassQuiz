@@ -8,6 +8,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { getLocalization } from '$lib/i18n';
 	import type { Answer as QuizAnswer, GeneralQuizAnswer, Question } from '$lib/quiz_types';
+	import { participantKey } from '$lib/admin';
 
 	const { t } = getLocalization();
 	const RESULT_TABLE_PAGE_SIZE = 100;
@@ -18,6 +19,7 @@ SPDX-License-Identifier: MPL-2.0
 		right: boolean;
 		time_taken: number;
 		score: number;
+		zone?: string;
 	}
 
 	interface Props {
@@ -28,9 +30,9 @@ SPDX-License-Identifier: MPL-2.0
 	let { question, answers }: Props = $props();
 	let visible_answer_count = $state(RESULT_TABLE_PAGE_SIZE);
 	let visible_answers = $derived(answers.slice(0, visible_answer_count));
-	let hidden_answer_count = $derived(
-		Math.max(answers.length - visible_answers.length, 0)
-	);
+	let hidden_answer_count = $derived(Math.max(answers.length - visible_answers.length, 0));
+	const playerDisplayName = (answer: PlayerAnswer): string =>
+		answer.zone ? `${answer.zone}-${answer.username}` : answer.username;
 
 	const get_answer_for_comparison = (answer: string): string => {
 		if (question.type === QuizQuestionType.TEXT && question.ignore_whitespace) {
@@ -139,15 +141,13 @@ SPDX-License-Identifier: MPL-2.0
 					</tr>
 				</thead>
 				<tbody>
-					{#each visible_answers as answer (answer.username)}
+					{#each visible_answers as answer (participantKey(answer.username, answer.zone))}
 						<tr>
 							<td class="border-r p-1 border-cq-border"
-								>{answer.username}</td
+								>{playerDisplayName(answer)}</td
 							>
 							{#if question.type !== QuizQuestionType.VOTING}
-								<td class="border-r p-1 border-cq-border"
-									>{answer.score}</td
-								>
+								<td class="border-r p-1 border-cq-border">{answer.score}</td>
 							{/if}
 							<td class="border-r p-1 border-cq-border"
 								>{(answer.time_taken / 1000).toFixed(3)}s
