@@ -7,6 +7,7 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getLocalization } from '$lib/i18n';
+	import { parseParticipantKey } from '$lib/admin';
 
 	const { t } = getLocalization();
 
@@ -56,10 +57,16 @@ SPDX-License-Identifier: MPL-2.0
 		return { zone, username };
 	};
 
-	const formatPlayerName = (player: string) =>
-		parseZonePlayerName(display_names[player] ?? player).username;
-	const getPlayerZone = (player: string) =>
-		parseZonePlayerName(display_names[player] ?? player).zone;
+	const getPlayerDisplayData = (player: string): ParsedPlayerName => {
+		const displayName = display_names[player];
+		if (displayName) return parseZonePlayerName(displayName);
+		const parsed = parseParticipantKey(player);
+		return parsed.zone && isSupportedZone(parsed.zone)
+			? { username: parsed.username, zone: parsed.zone }
+			: { username: parsed.username };
+	};
+	const formatPlayerName = (player: string) => getPlayerDisplayData(player).username;
+	const getPlayerZone = (player: string) => getPlayerDisplayData(player).zone;
 
 	let player_names = $derived(
 		Object.keys(data).sort((a, b) => {
@@ -76,9 +83,7 @@ SPDX-License-Identifier: MPL-2.0
 	);
 	let current_player_place = $derived(current_player_index + 1);
 	let show_current_player_result = $derived(
-		username !== undefined &&
-			username in data &&
-			current_player_index !== -1
+		username !== undefined && username in data && current_player_index !== -1
 	);
 
 	let canvas: HTMLCanvasElement = $state();
@@ -112,7 +117,9 @@ SPDX-License-Identifier: MPL-2.0
 					points: data[player]
 				})}
 				{#if player_zone}
-					<span class="zone-badge {zone_badge_backgrounds[player_zone]}">{player_zone}</span>
+					<span class="zone-badge {zone_badge_backgrounds[player_zone]}"
+						>{player_zone}</span
+					>
 				{/if}
 			</p>
 		{/each}

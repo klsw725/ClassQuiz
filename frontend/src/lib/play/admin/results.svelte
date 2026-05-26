@@ -10,6 +10,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { fly } from 'svelte/transition';
 	import { onMount } from 'svelte';
 	import { getLocalization } from '$lib/i18n';
+	import { parseParticipantKey, participantKey } from '$lib/admin';
 	import type { Question } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 
@@ -37,7 +38,7 @@ SPDX-License-Identifier: MPL-2.0
 	const group_username_by_score = (_new_d: any[]): object => {
 		let ret_data = {};
 		for (const i of new_data) {
-			ret_data[i.username] = i.score;
+			ret_data[participantKey(i.username, i.zone)] = i.score;
 		}
 		return ret_data;
 	};
@@ -46,11 +47,16 @@ SPDX-License-Identifier: MPL-2.0
 		Object.fromEntries(
 			new_data
 				.filter((answer) => answer.zone)
-				.map((answer) => [answer.username, `${answer.zone}-${answer.username}`])
+				.map((answer) => [
+					participantKey(answer.username, answer.zone),
+					`${answer.zone}-${answer.username}`
+				])
 		)
 	);
 	const formatPlayerName = (username: string) =>
-		answer_display_names[username] ?? player_display_names[username] ?? username;
+		answer_display_names[username] ??
+		player_display_names[username] ??
+		parseParticipantKey(username).username;
 
 	let player_names = $derived(
 		Object.keys(data).sort((a, b) => {
@@ -59,13 +65,11 @@ SPDX-License-Identifier: MPL-2.0
 			return scoreB - scoreA;
 		})
 	);
-	let visible_player_names = $derived(
-		player_names.slice(0, LIVE_SCORE_VISIBLE_PLAYER_LIMIT)
-	);
+	let visible_player_names = $derived(player_names.slice(0, LIVE_SCORE_VISIBLE_PLAYER_LIMIT));
 
 	if (JSON.stringify(data) === '{}') {
 		for (const i of new_data) {
-			data[i.username] = 0;
+			data[participantKey(i.username, i.zone)] = 0;
 		}
 	}
 
@@ -80,8 +84,9 @@ SPDX-License-Identifier: MPL-2.0
 			data[i] = (score_by_username[i] ?? 0) + data[i];
 		}
 		for (const i of new_data) {
-			if (!data[i.username]) {
-				data[i.username] = score_by_username[i.username];
+			const key = participantKey(i.username, i.zone);
+			if (!data[key]) {
+				data[key] = score_by_username[key];
 			}
 		}
 		show_new_score_clicked = true;
@@ -125,9 +130,7 @@ SPDX-License-Identifier: MPL-2.0
 							<td class="p-3 md:p-5 border-r border-cq-border font-semibold"
 								>{formatPlayerName(player)}</td
 							>
-							<td class="p-3 md:p-5 font-bold text-cq-brand"
-								>{data[player]}</td
-							>
+							<td class="p-3 md:p-5 font-bold text-cq-brand">{data[player]}</td>
 							{#if show_new_score_clicked}
 								<td
 									in:fly|global={{ x: 300 }}

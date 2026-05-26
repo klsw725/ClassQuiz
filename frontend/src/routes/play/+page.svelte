@@ -15,6 +15,7 @@ SPDX-License-Identifier: MPL-2.0
 	import ShowEndScreen from '$lib/play/admin/final_results.svelte';
 	import KahootResults from '$lib/play/results_kahoot.svelte';
 	import { getLocalization } from '$lib/i18n';
+	import { participantKey } from '$lib/admin';
 	import Cookies from 'js-cookie';
 	const { t } = getLocalization();
 
@@ -86,6 +87,7 @@ SPDX-License-Identifier: MPL-2.0
 	let zone = $state('1구역');
 	let scores: Record<string, number> = $state({});
 	let display_names: Record<string, string> = $state({});
+	let current_participant_key = $derived(participantKey(username, zone));
 	let gameMeta: GameMeta = $state({
 		started: false
 	});
@@ -103,7 +105,8 @@ SPDX-License-Identifier: MPL-2.0
 		const nextDisplayNames = { ...display_names };
 		for (const result of results) {
 			if (result?.zone) {
-				nextDisplayNames[result.username] = `${result.zone}-${result.username}`;
+				nextDisplayNames[participantKey(result.username, result.zone)] =
+					`${result.zone}-${result.username}`;
 			}
 		}
 		display_names = nextDisplayNames;
@@ -114,7 +117,10 @@ SPDX-License-Identifier: MPL-2.0
 		game_pin = data.game_pin;
 		if (data.zone) {
 			zone = data.zone;
-			display_names = { ...display_names, [data.username]: `${data.zone}-${data.username}` };
+			display_names = {
+				...display_names,
+				[participantKey(data.username, data.zone)]: `${data.zone}-${data.username}`
+			};
 		}
 	};
 
@@ -140,7 +146,8 @@ SPDX-License-Identifier: MPL-2.0
 		socket.emit('rejoin_game', {
 			old_sid: data.sid,
 			username: data.username,
-			game_pin: data.game_pin
+			game_pin: data.game_pin,
+			zone: data.zone
 		});
 		const res = await fetch(`/api/v1/quiz/play/check_captcha/${data.game_pin}`);
 		const json: CheckCaptchaResponse = await res.json();
@@ -152,7 +159,10 @@ SPDX-License-Identifier: MPL-2.0
 		gameData = data;
 		// eslint-disable-next-line no-undef
 		plausible('Joined Game', { props: { game_id: gameData.game_id } });
-		display_names = { ...display_names, [username]: `${zone}-${username}` };
+		display_names = {
+			...display_names,
+			[participantKey(username, zone)]: `${zone}-${username}`
+		};
 		Cookies.set('joined_game', JSON.stringify({ sid: socket.id, username, game_pin, zone }), {
 			expires: 3600
 		});
@@ -253,7 +263,7 @@ SPDX-License-Identifier: MPL-2.0
 			<ShowEndScreen
 				bind:data={scores}
 				show_final_results={true}
-				{username}
+				username={current_participant_key}
 				{display_names}
 			/>
 		{:else if gameData !== undefined && question_index === ''}
@@ -279,7 +289,7 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 				{#key unique}
 					<KahootResults
-						{username}
+						username={current_participant_key}
 						question_results={answer_results}
 						bind:scores
 						bind:display_names

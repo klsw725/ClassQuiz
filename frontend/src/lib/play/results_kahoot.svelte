@@ -6,6 +6,7 @@ SPDX-License-Identifier: MPL-2.0
 
 <script lang="ts">
 	import { getLocalization } from '$lib/i18n';
+	import { participantKey } from '$lib/admin';
 
 	const { t } = getLocalization();
 
@@ -13,7 +14,9 @@ SPDX-License-Identifier: MPL-2.0
 		const ret = {};
 		Object.keys(obj)
 			.sort((a, b) => obj[b] - obj[a])
-			.forEach((s) => (ret[s] = obj[s]));
+			.forEach((s) => {
+				ret[s] = obj[s];
+			});
 		return ret;
 	}
 
@@ -42,28 +45,29 @@ SPDX-License-Identifier: MPL-2.0
 		const nextDisplayNames = { ...display_names };
 		for (const result of question_results) {
 			if (result.zone) {
-				nextDisplayNames[result.username] = `${result.zone}-${result.username}`;
+				nextDisplayNames[participantKey(result.username, result.zone)] =
+					`${result.zone}-${result.username}`;
 			}
 		}
 		display_names = nextDisplayNames;
 	};
 	addDisplayNames();
 	let currentPlayerResult = $derived(
-		question_results.find((result) => result.username === username)
+		question_results.find((result) => participantKey(result.username, result.zone) === username)
 	);
 
 	if (JSON.stringify(scores) === '{}') {
 		for (const i of question_results) {
-			scores[i.username] = 0;
+			scores[participantKey(i.username, i.zone)] = 0;
 		}
 	}
 	for (const i of question_results) {
-		score_by_username[i.username] = i.score;
+		score_by_username[participantKey(i.username, i.zone)] = i.score;
 	}
 	for (const username of Object.keys(score_by_username)) {
 		scores[username] = (score_by_username[username] ?? 0) + (scores[username] ?? 0);
 	}
-	scores = scores;
+	scores = { ...scores };
 	let sorted_scores = $derived(sortObjectbyValue(scores));
 </script>
 
