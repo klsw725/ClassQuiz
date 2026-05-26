@@ -56,6 +56,25 @@ export const getWinnersSorted = (
 export const participantKey = (username: string, zone?: string | null): string =>
 	JSON.stringify([zone ?? null, username]);
 
+export const parseParticipantKey = (key: string): { username: string; zone?: string } => {
+	try {
+		const parsed: unknown = JSON.parse(key);
+		if (
+			Array.isArray(parsed) &&
+			parsed.length === 2 &&
+			(parsed[0] === null || typeof parsed[0] === 'string') &&
+			typeof parsed[1] === 'string'
+		) {
+			return parsed[0] === null
+				? { username: parsed[1] }
+				: { username: parsed[1], zone: parsed[0] };
+		}
+	} catch {
+		return { username: key };
+	}
+	return { username: key };
+};
+
 export interface Player {
 	username: string;
 	zone?: string;
