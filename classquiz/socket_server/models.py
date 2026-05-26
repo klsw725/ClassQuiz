@@ -27,6 +27,13 @@ class RejoinGameData(BaseModel):
     old_sid: str
     game_pin: str
     username: str
+    zone: str | None = None
+
+    @field_validator("zone")
+    def zone_must_be_allowed(cls, v: str | None):
+        if v is not None and v not in ALLOWED_ZONES:
+            raise ValueError("Zone must be between 1구역 and 11구역")
+        return v
 
 
 class RegisterAsAdminData(BaseModel):
@@ -74,6 +81,13 @@ class SubmitAnswerData(BaseModel):
 
 class KickPlayerInput(BaseModel):
     username: str
+    zone: str | None = None
+
+    @field_validator("zone")
+    def zone_must_be_allowed(cls, v: str | None):
+        if v is not None and v not in ALLOWED_ZONES:
+            raise ValueError("Zone must be between 1구역 and 11구역")
+        return v
 
 
 class ConnectSessionIdEvent(BaseModel):
