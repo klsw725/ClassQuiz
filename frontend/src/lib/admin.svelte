@@ -13,7 +13,7 @@ SPDX-License-Identifier: MPL-2.0
 	import Question from '$lib/play/admin/question.svelte';
 	import { SocketGameControls } from '$lib/play/admin/socket_game_controls.ts';
 	import type { IGameState } from '$lib/play/admin/game_state.ts';
-	import type { Player } from '$lib/admin';
+	import { participantKey, type Player } from '$lib/admin';
 
 	const { t } = getLocalization();
 	const default_colors = ['#D6EDC9', '#B07156', '#7F7057', '#4E6E58'];
@@ -87,7 +87,8 @@ SPDX-License-Identifier: MPL-2.0
 		const displayNames: Record<string, string> = {};
 		for (const player of players) {
 			if (player.zone) {
-				displayNames[player.username] = `${player.zone}-${player.username}`;
+				displayNames[participantKey(player.username, player.zone)] =
+					`${player.zone}-${player.username}`;
 			}
 		}
 		return displayNames;

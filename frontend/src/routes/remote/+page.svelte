@@ -12,6 +12,7 @@ SPDX-License-Identifier: MPL-2.0
 	import Spinner from '$lib/Spinner.svelte';
 	import CircularTimer from '$lib/play/circular_progress.svelte';
 	import { getLocalization } from '$lib/i18n';
+	import { participantKey } from '$lib/admin';
 	import { navbarVisible } from '$lib/stores.svelte.ts';
 	import MediaComponent from '$lib/editor/MediaComponent.svelte';
 
@@ -186,8 +187,11 @@ SPDX-License-Identifier: MPL-2.0
 	socket.on('player_joined', (data) => {
 		players = [...players, data];
 	});
-	socket.on('player_left', (data: { username: string }) => {
-		players = players.filter((player) => player.username !== data.username);
+	socket.on('player_left', (data: { username: string; zone?: string }) => {
+		const left_player_key = participantKey(data.username, data.zone);
+		players = players.filter(
+			(player) => participantKey(player.username, player.zone) !== left_player_key
+		);
 	});
 </script>
 
@@ -325,7 +329,7 @@ SPDX-License-Identifier: MPL-2.0
 			{:then _}
 				<div class="cq-surface-muted mt-3 p-3 text-cq-muted">
 					<ul>
-						{#each visible_lobby_players as player (player.username)}
+						{#each visible_lobby_players as player (participantKey(player.username, player.zone))}
 							<li>{formatPlayerName(player)}</li>
 						{/each}
 					</ul>
@@ -333,7 +337,8 @@ SPDX-License-Identifier: MPL-2.0
 						<button
 							type="button"
 							class="cq-surface mt-3 w-full p-2 font-semibold text-cq-muted hover:text-cq-text transition"
-							onclick={() => (visible_lobby_player_count += LOBBY_VISIBLE_PLAYER_LIMIT)}
+							onclick={() =>
+								(visible_lobby_player_count += LOBBY_VISIBLE_PLAYER_LIMIT)}
 						>
 							+{Math.min(LOBBY_VISIBLE_PLAYER_LIMIT, hidden_lobby_player_count)}
 						</button>

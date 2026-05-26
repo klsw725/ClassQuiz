@@ -18,6 +18,7 @@ SPDX-License-Identifier: MPL-2.0
 	import type { IGameState } from '$lib/play/admin/game_state.ts';
 	import { QuizQuestionType, type QuizData } from '$lib/quiz_types';
 	import type { Player, PlayerAnswer } from '$lib/admin';
+	import { participantKey } from '$lib/admin';
 	import { tinykeys } from '$lib/tinykeys';
 
 	navbarVisible.visible = false;
@@ -126,7 +127,8 @@ SPDX-License-Identifier: MPL-2.0
 		const displayNames: Record<string, string> = {};
 		for (const player of players) {
 			if (player.zone) {
-				displayNames[player.username] = `${player.zone}-${player.username}`;
+				displayNames[participantKey(player.username, player.zone)] =
+					`${player.zone}-${player.username}`;
 			}
 		}
 		return displayNames;
@@ -195,7 +197,10 @@ SPDX-License-Identifier: MPL-2.0
 		game_state.players = [...game_state.players, int_data];
 	});
 	socket.on('player_left', (data: Player) => {
-		game_state.players = game_state.players.filter((player) => player.username !== data.username);
+		const left_player_key = participantKey(data.username, data.zone);
+		game_state.players = game_state.players.filter(
+			(player) => participantKey(player.username, player.zone) !== left_player_key
+		);
 	});
 	socket.on('already_registered_as_admin', () => {
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
