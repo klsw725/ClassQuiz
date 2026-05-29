@@ -39,9 +39,11 @@ class FakeRedis:
 
     async def delete(self, key):
         self.values.pop(key, None)
+        self.hashes.pop(key, None)
+        self.sets.pop(key, None)
 
     async def scan_iter(self, match):
-        for key in self.values:
+        for key in list(self.values) + list(self.hashes) + list(self.sets):
             if fnmatch.fnmatch(key, match):
                 yield key
 
@@ -542,15 +544,39 @@ async def test_register_as_admin_fresh_session_saves_and_enters_rooms(recovery_c
 @pytest.mark.asyncio
 async def test_disconnect_clears_matching_admin_session(recovery_context):
     fake_redis, _fake_sio, sessions = recovery_context
+    user_id = uuid.uuid4()
     game_id = uuid.uuid4()
     sessions["admin-sid"] = {"game_pin": "123456", "admin": True, "remote": False}
+    game = make_game(user_id, game_id=game_id, started=True, current_question=0, question_show=True)
+    fake_redis.values["game:123456"] = game.model_dump_json()
     fake_redis.values["game_session:123456"] = GameSession(
         admin="admin-sid", game_id=str(game_id), answers=[]
     ).model_dump_json()
+    fake_redis.values["game_session:123456:0"] = AnswerDataList([]).model_dump_json()
+    fake_redis.values[
+        f"game_session:123456:players:{participant_key('alice', '1구역')}"
+    ] = "alice-sid"
+    fake_redis.values["game_session:123456:answer_order:0:key"] = "[0]"
+    fake_redis.values["game:123456:current_time"] = datetime.now().isoformat()
+    fake_redis.hashes["game_session:123456:player_scores"] = {participant_key("alice", "1구역"): "10"}
+    fake_redis.hashes["game:123456:players:zones"] = {participant_key("alice", "1구역"): "1구역"}
+    fake_redis.hashes["game:123456:players:custom_fields"] = {participant_key("alice", "1구역"): "field"}
+    fake_redis.sets["game_session:123456:players"] = {
+        GamePlayer(username="alice", sid="alice-sid", zone="1구역").model_dump_json()
+    }
 
     await socket_server.disconnect("admin-sid")
 
-    assert "game_session:123456" not in fake_redis.values
+    assert not any(key.startswith("game_session:123456") for key in fake_redis.values)
+    assert not any(key.startswith("game_session:123456") for key in fake_redis.hashes)
+    assert not any(key.startswith("game_session:123456") for key in fake_redis.sets)
+    assert "game:123456:current_time" not in fake_redis.values
+    assert "game:123456:players:zones" not in fake_redis.hashes
+    assert "game:123456:players:custom_fields" not in fake_redis.hashes
+    saved_game = PlayGame.model_validate_json(fake_redis.values["game:123456"])
+    assert saved_game.started is False
+    assert saved_game.current_question == -1
+    assert saved_game.question_show is False
 
 
 @pytest.mark.asyncio

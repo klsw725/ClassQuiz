@@ -212,7 +212,7 @@ SPDX-License-Identifier: MPL-2.0
 			}
 		};
 		const handleSocketConnectError = () => {
-			if (success || (!auto_connect && !shouldRegisterWhenConnected)) {
+			if (!auto_connect && !shouldRegisterWhenConnected) {
 				return;
 			}
 			socketErrorMessage = $t('admin_page.unable_to_connect_socket');
@@ -220,6 +220,16 @@ SPDX-License-Identifier: MPL-2.0
 		};
 		const handleSocketDisconnect = () => {
 			registerAsAdminInProgress = false;
+			if (success) {
+				success = false;
+				auto_connect = false;
+				shouldRegisterWhenConnected = false;
+				socketErrorMessage = '';
+				socketConnectionMessage = '';
+				errorMessage = $t('admin_page.host_session_ended');
+				warnToLeave = false;
+				return;
+			}
 			if (success || (!auto_connect && !shouldRegisterWhenConnected)) {
 				return;
 			}

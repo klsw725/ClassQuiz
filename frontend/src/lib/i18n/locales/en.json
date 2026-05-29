@@ -261,6 +261,7 @@
         "socket_disconnected_reconnecting": "The Socket connection was lost. Reconnecting...",
         "game_not_found": "Game not found.",
         "error": "An error occurred.",
+        "host_session_ended": "The host session ended because the Socket connection was lost.",
         "connecting_to_host_session": "Connecting to the host session...",
         "please_wait": "Please wait.",
         "start_game": "Start game",

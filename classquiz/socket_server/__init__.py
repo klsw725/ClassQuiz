@@ -174,6 +174,24 @@ async def remap_player_randomized_check_answer(
     data.answer = "".join(str(i) for i in selected_answer_indexes)
 
 
+async def clear_live_session_state(game_pin: str):
+    await redis.delete(f"game_session:{game_pin}")
+    async for key in redis.scan_iter(match=f"game_session:{game_pin}:*"):
+        await redis.delete(key)
+    await redis.delete(f"game:{game_pin}:current_time")
+    await redis.delete(f"game:{game_pin}:players:zones")
+    await redis.delete(f"game:{game_pin}:players:custom_fields")
+
+    game_raw = await redis.get(f"game:{game_pin}")
+    if game_raw is None:
+        return
+    game_data = PlayGame.model_validate_json(game_raw)
+    game_data.started = False
+    game_data.current_question = -1
+    game_data.question_show = False
+    await game_data.save(game_pin)
+
+
 def player_sid_key(game_pin: str, username: str, zone: str | None) -> str:
     return f"game_session:{game_pin}:players:{participant_key(username, zone)}"
 
@@ -692,4 +710,4 @@ async def disconnect(sid: str):
         return
     game_session = GameSession.model_validate_json(session_raw)
     if game_session.admin == sid:
-        await redis.delete(f"game_session:{game_pin}")
+        await clear_live_session_state(game_pin)
