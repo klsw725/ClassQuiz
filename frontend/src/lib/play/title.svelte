@@ -23,7 +23,7 @@ SPDX-License-Identifier: MPL-2.0
 				<img
 					class="block max-h-[30vh] max-w-full"
 					src="/api/v1/storage/download/{cover_image}"
-					alt="Not provided"
+					alt="제공되지 않음"
 				/>
 			</div>
 		{/if}

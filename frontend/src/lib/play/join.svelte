@@ -99,7 +99,7 @@ SPDX-License-Identifier: MPL-2.0
                 body: 'The game pin you entered seems invalid.'
             });*/
 			if (browser) {
-				alert('Game not found');
+				alert('게임을 찾을 수 없습니다');
 			}
 			game_pin = '';
 			return;
@@ -110,7 +110,7 @@ SPDX-License-Identifier: MPL-2.0
                 body: `Unknown error with response-code ${res.status}`,
                 title: 'Unknown Error'
             });*/
-			alert('Unknown error');
+			alert('알 수 없는 오류가 발생했습니다');
 			return;
 		}
 	};
@@ -155,7 +155,7 @@ SPDX-License-Identifier: MPL-2.0
                         body: "The captcha failed, which is normal, but most of the time it's fixed by reloading!",
                         title: 'Captcha failed'
                     });*/
-					alert('Captcha failed!');
+					alert('캡차 인증에 실패했습니다!');
 					window.location.reload();
 				}
 			} else if (import.meta.env.VITE_RECAPTCHA) {
@@ -188,7 +188,7 @@ SPDX-License-Identifier: MPL-2.0
 	socket.on('game_not_found', () => {
 		game_pin = '';
 		if (browser) {
-			alert('Game not found');
+			alert('게임을 찾을 수 없습니다');
 		}
 	});
 	$effect(() => {
