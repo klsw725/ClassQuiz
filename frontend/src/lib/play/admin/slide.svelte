@@ -40,6 +40,6 @@ SPDX-License-Identifier: MPL-2.0
 		<div bind:this={canvas_el} class="w-full h-full block"></div>
 	</div>
 	<div class="w-full h-full flex justify-center">
-		<img src={img_src} alt="Slide image" />
+		<img src={img_src} alt="슬라이드 이미지" />
 	</div>
 </div>
