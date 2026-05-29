@@ -227,7 +227,6 @@ SPDX-License-Identifier: MPL-2.0
 		game_pin = '';
 		username = '';
 		Cookies.remove('joined_game');
-		Cookies.set('kicked', 'value', { expires: 1 });
 		window.location.reload();
 	});
 	socket.on('final_results', (data: Record<string, PlayerAnswer[]>) => {

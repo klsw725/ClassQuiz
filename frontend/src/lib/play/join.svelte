@@ -10,7 +10,6 @@ SPDX-License-Identifier: MPL-2.0
 	import { browser } from '$app/environment';
 	import * as Sentry from '@sentry/browser';
 	import { getLocalization } from '$lib/i18n';
-	import Cookies from 'js-cookie';
 	import BrownButton from '$lib/components/buttons/brown.svelte';
 
 	const { t } = getLocalization();
@@ -127,11 +126,6 @@ SPDX-License-Identifier: MPL-2.0
 			return;
 		}
 		let captcha_resp: string;
-		if (Cookies.get('kicked')) {
-			console.log("%cYou're Banned!", 'font-size:6rem');
-			return;
-		}
-
 		if (captcha_enabled) {
 			if (hcaptchaSitekey) {
 				try {
