@@ -70,7 +70,8 @@ SPDX-License-Identifier: MPL-2.0
 			{#each quiz_answers as answer, i}
 				<div class="w-24 sm:w-28 lg:w-32">
 					<p
-						class="cq-surface-muted -rotate-45 rounded-lg px-3 py-2 text-2xl md:text-3xl text-str"
+						class="cq-surface-muted -rotate-45 rounded-lg px-3 py-2 text-2xl md:text-3xl text-str notranslate"
+						translate="no"
 						class:line-through={!answer_correct[i] &&
 							question.type !== QuizQuestionType.VOTING}
 					>

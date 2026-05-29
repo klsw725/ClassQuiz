@@ -167,8 +167,12 @@ SPDX-License-Identifier: MPL-2.0
 	<br />
 	{#if game_state.selected_question === -1}
 		<div class="flex flex-col justify-center w-screen h-full">
-			<h1 class="text-7xl text-center">{@html game_state.quiz_data.title}</h1>
-			<p class="text-3xl pt-8 text-center">{@html game_state.quiz_data.description}</p>
+			<h1 class="text-7xl text-center notranslate" translate="no">
+				{@html game_state.quiz_data.title}
+			</h1>
+			<p class="text-3xl pt-8 text-center notranslate" translate="no">
+				{@html game_state.quiz_data.description}
+			</p>
 			{#if game_state.quiz_data.cover_image}
 				<div class="flex justify-center align-middle items-center">
 					<div class="h-[30vh] m-auto w-auto mt-12">

@@ -46,7 +46,7 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="flex flex-col justify-center w-screen h-1/6">
-	<h1 class="text-6xl text-center">
+	<h1 class="text-6xl text-center notranslate" translate="no">
 		{@html quiz_data.questions[selected_question].question}
 	</h1>
 	<!--			<span class='text-center py-2 text-lg'>{$t('admin_page.time_left')}: {timer_res}</span>-->
@@ -92,7 +92,8 @@ SPDX-License-Identifier: MPL-2.0
 					/>
 				{/if}
 				<span
-					class="text-center text-2xl px-2 py-4 w-full"
+					class="text-center text-2xl px-2 py-4 w-full notranslate"
+					translate="no"
 					style="color: {get_foreground_color(answer.color ?? default_colors[i])}"
 					>{answer.answer}</span
 				>
@@ -105,8 +106,9 @@ SPDX-License-Identifier: MPL-2.0
 		<div class="grid grid-cols-2 gap-2 w-full p-4">
 			{#each quiz_data.questions[selected_question].answers as answer, _i}
 				<div class="cq-surface-muted h-fit flex">
-					<span class="text-center text-2xl px-2 py-4 w-full text-cq-text"
-						>{answer.answer}</span
+					<span
+						class="text-center text-2xl px-2 py-4 w-full text-cq-text notranslate"
+						translate="no">{answer.answer}</span
 					>
 					<span class="pl-4 w-10"></span>
 				</div>

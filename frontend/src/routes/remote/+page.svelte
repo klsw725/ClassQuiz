@@ -251,8 +251,8 @@ SPDX-License-Identifier: MPL-2.0
 	{/if}
 	{#if selected_question === -1}
 		<div class="cq-card m-4 p-6 text-cq-text">
-			<h1 class="text-4xl font-bold">{game_data.title}</h1>
-			<p class="mt-2 text-cq-muted">{game_data.description}</p>
+			<h1 class="text-4xl font-bold notranslate" translate="no">{game_data.title}</h1>
+			<p class="mt-2 text-cq-muted notranslate" translate="no">{game_data.description}</p>
 		</div>
 	{:else if game_data.questions[selected_question].type === QuizQuestionType.SLIDE}
 		{#await import('$lib/play/admin/slide.svelte')}
@@ -262,7 +262,7 @@ SPDX-License-Identifier: MPL-2.0
 		{/await}
 	{:else}
 		<div class="cq-card m-4 flex flex-col justify-center p-4 text-cq-text">
-			<h1 class="text-6xl text-center font-semibold">
+			<h1 class="text-6xl text-center font-semibold notranslate" translate="no">
 				{@html game_data.questions[selected_question].question}
 			</h1>
 			<!--			<span class='text-center py-2 text-lg'>{$t('admin_page.time_left')}: {timer_res}</span>-->
@@ -290,7 +290,10 @@ SPDX-License-Identifier: MPL-2.0
 								game_data.questions[selected_question].type ===
 									QuizQuestionType.ABCD}
 						>
-							<span class="text-center text-2xl px-2 py-4 w-full text-black">
+							<span
+								class="text-center text-2xl px-2 py-4 w-full text-black notranslate"
+								translate="no"
+							>
 								{#if answer.emoji}
 									<span class="mr-2" aria-label="답변 이모지"
 										>{answer.emoji}</span
