@@ -36,6 +36,7 @@ SPDX-License-Identifier: MPL-2.0
 	if (browser) {
 		const saved_language = localStorage.getItem('language');
 		start_language = saved_language ?? 'ko';
+		document.documentElement.lang = start_language;
 	}
 	initLocalizationContext(start_language);
 </script>
