@@ -19,6 +19,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	let { children }: Props = $props();
 	const plausible_data_url = import.meta.env.VITE_PLAUSIBLE_DATA_URL;
+	const toDocumentLanguage = (language: string) => language.replace('_', '-');
 
 	if (browser) {
 		pathname.set(window.location.pathname);
@@ -36,7 +37,7 @@ SPDX-License-Identifier: MPL-2.0
 	if (browser) {
 		const saved_language = localStorage.getItem('language');
 		start_language = saved_language ?? 'ko';
-		document.documentElement.lang = start_language;
+		document.documentElement.lang = toDocumentLanguage(start_language);
 	}
 	initLocalizationContext(start_language);
 </script>
