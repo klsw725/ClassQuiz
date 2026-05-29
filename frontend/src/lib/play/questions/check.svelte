@@ -74,11 +74,11 @@ SPDX-License-Identifier: MPL-2.0
 			>
 				{#if game_mode === 'kahoot'}
 					{#if answer.emoji}
-						<span class="m-auto text-6xl leading-none" aria-label="Answer emoji"
+						<span class="m-auto text-6xl leading-none" aria-label="답변 이모지"
 							>{answer.emoji}</span
 						>
 					{:else}
-						<img class="h-2/3 inline-block m-auto" alt="Icon" src={kahoot_icons[i]} />
+						<img class="h-2/3 inline-block m-auto" alt="아이콘" src={kahoot_icons[i]} />
 					{/if}
 				{:else}
 					<p class="m-auto notranslate" translate="no">{answer.answer}</p>

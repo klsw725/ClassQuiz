@@ -97,7 +97,7 @@ SPDX-License-Identifier: MPL-2.0
 		<img
 			in:fade|global={{ duration: 300 }}
 			src={img_data.data}
-			alt={img_data.alt_text ?? 'Not available'}
+			alt={img_data.alt_text ?? '사용할 수 없음'}
 			class={css_classes}
 			onclick={() => open_fullscreen()}
 		/>
@@ -122,7 +122,7 @@ SPDX-License-Identifier: MPL-2.0
 		{#if allow_fullscreen}
 			<iframe
 				src={youtube_embed_src}
-				title="YouTube video player"
+				title="YouTube 동영상 플레이어"
 				class={`aspect-video min-h-[200px] min-w-[200px] ${css_classes}`}
 				allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 				allowfullscreen
@@ -132,13 +132,13 @@ SPDX-License-Identifier: MPL-2.0
 		{:else}
 			<div
 				class={`cq-surface-muted flex items-center justify-center text-cq-muted ${css_classes}`}
-				aria-label="YouTube video"
+				aria-label="YouTube 동영상"
 			>
 				YouTube
 			</div>
 		{/if}
 	{:else}
-		<p>Unknown media type</p>
+		<p>알 수 없는 미디어 유형입니다</p>
 	{/if}
 {/await}
 
@@ -150,7 +150,7 @@ SPDX-License-Identifier: MPL-2.0
 	>
 		<img
 			src={img_data.data}
-			alt={img_data.alt_text ?? 'Not available'}
+			alt={img_data.alt_text ?? '사용할 수 없음'}
 			class="object-cover rounded-lg m-auto max-h-full max-w-full"
 		/>
 	</div>

@@ -283,12 +283,12 @@ SPDX-License-Identifier: MPL-2.0
 								{#if answer.emoji}
 									<span
 										class="m-auto text-6xl leading-none"
-										aria-label="Answer emoji">{answer.emoji}</span
+										aria-label="답변 이모지">{answer.emoji}</span
 									>
 								{:else}
 									<img
 										class="h-2/3 inline-block m-auto"
-										alt="Icon"
+										alt="아이콘"
 										src={kahoot_icons[i]}
 									/>
 								{/if}
@@ -380,7 +380,7 @@ SPDX-License-Identifier: MPL-2.0
 							}}
 							class="action-button w-full flex justify-center p-2 disabled:opacity-50"
 							type="button"
-							aria-label="Move item up"
+							aria-label="항목 위로 이동"
 							disabled={i === 0 || Boolean(selected_answer)}
 						>
 							<svg
@@ -410,7 +410,7 @@ SPDX-License-Identifier: MPL-2.0
 							}}
 							class="action-button w-full flex justify-center p-2 disabled:opacity-50"
 							type="button"
-							aria-label="Move item down"
+							aria-label="항목 아래로 이동"
 							disabled={i === question.answers.length - 1 || Boolean(selected_answer)}
 						>
 							<svg
