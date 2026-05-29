@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 import uuid
 
 import pytest
+from fastapi import HTTPException
 
 from classquiz.db.models import (
     ABCDQuizAnswer,
@@ -17,7 +18,6 @@ from classquiz.db.models import (
     QuizQuestion,
     User,
 )
-from classquiz.routers.remote import get_live_games
 from classquiz.socket_server import register_as_admin
 import classquiz.db.models as db_models
 import classquiz.routers.remote as remote_router
@@ -597,7 +597,7 @@ async def test_register_as_remote_wrong_game_id_rejects(recovery_context):
 
 
 @pytest.mark.asyncio
-async def test_live_games_returns_empty_list(recovery_context):
+async def test_live_games_returns_gone(recovery_context):
     fake_redis, _fake_sio, _sessions = recovery_context
     user_id = uuid.uuid4()
     game_id = uuid.uuid4()
@@ -608,8 +608,9 @@ async def test_live_games_returns_empty_list(recovery_context):
         admin="old-admin", game_id=str(game_id), answers=[]
     ).model_dump_json()
 
-    live_games = await get_live_games(
-        user=User(id=user_id, email="user@example.com", username="user", avatar=b"")
-    )
+    with pytest.raises(HTTPException) as exc_info:
+        await remote_router.get_live_games(
+            user=User(id=user_id, email="user@example.com", username="user", avatar=b"")
+        )
 
-    assert live_games == []
+    assert exc_info.value.status_code == 410

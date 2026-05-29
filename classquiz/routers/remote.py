@@ -22,4 +22,4 @@ async def get_game_in_lobby(user: User = Depends(get_current_user)):
 
 @router.get("/live_games")
 async def get_live_games(user: User = Depends(get_current_user)):
-    return []
+    raise HTTPException(status_code=410, detail="Live game resume has been removed")
