@@ -63,9 +63,9 @@ SPDX-License-Identifier: MPL-2.0
 		}
 		try {
 			await navigator.clipboard.writeText(player_url);
-			copy_status = 'Copied';
+			copy_status = '복사되었습니다';
 		} catch {
-			copy_status = copy_with_textarea(player_url) ? 'Copied' : 'Copy failed';
+			copy_status = copy_with_textarea(player_url) ? '복사되었습니다' : '복사에 실패했습니다';
 		}
 	};
 
@@ -96,42 +96,42 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <svelte:head>
-	<title>ClassQuiz - Solo Host</title>
+	<title>ClassQuiz - 솔로 호스트</title>
 </svelte:head>
 
 <main class="flex min-h-screen items-center justify-center px-4 py-10 text-cq-text">
 	<section class="cq-card flex w-full max-w-2xl flex-col gap-5 p-6 text-center">
 		<div>
-			<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">Solo preview</p>
-			<h1 class="mt-2 text-3xl font-bold text-cq-text">Share this solo game</h1>
+			<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">솔로 미리보기</p>
+			<h1 class="mt-2 text-3xl font-bold text-cq-text">이 솔로 게임 공유</h1>
 		</div>
 
-		<p class="text-cq-muted">Copy the player link and send it to players.</p>
+		<p class="text-cq-muted">플레이어 링크를 복사해서 참가자에게 보내세요.</p>
 
 		{#if player_url}
 			<div class="cq-surface-muted flex flex-col gap-3 p-3 text-left">
 				{#if qr_image_url}
 					<img
 						src={qr_image_url}
-						alt="QR code for the solo player link"
+						alt="솔로 플레이어 링크 QR 코드"
 						class="cq-surface mx-auto aspect-square w-full max-w-56 bg-white p-2 dark:bg-white"
 					/>
 				{/if}
 				<div>
-					<p class="text-sm font-semibold text-cq-text">Player link</p>
+					<p class="text-sm font-semibold text-cq-text">플레이어 링크</p>
 					<p class="break-all text-sm text-cq-muted">{player_url}</p>
 				</div>
-				<BrownButton onclick={copy_player_url}>Copy player link</BrownButton>
+				<BrownButton onclick={copy_player_url}>플레이어 링크 복사</BrownButton>
 				{#if copy_status}
 					<p class="text-center text-sm text-cq-muted" role="status">{copy_status}</p>
 				{/if}
 			</div>
 		{:else}
 			<p class="cq-surface-muted p-3 text-cq-muted" role="alert">
-				No solo player link is available.
+				사용 가능한 솔로 플레이어 링크가 없습니다.
 			</p>
 		{/if}
 
-		<GrayButton href="/dashboard">Back to dashboard</GrayButton>
+		<GrayButton href="/dashboard">대시보드로 돌아가기</GrayButton>
 	</section>
 </main>

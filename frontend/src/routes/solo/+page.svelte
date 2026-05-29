@@ -165,7 +165,7 @@ SPDX-License-Identifier: MPL-2.0
 		loading = false;
 		if (!response.ok) {
 			error_message =
-				response.status === 404 ? 'Solo game not found.' : 'Could not start solo attempt.';
+				response.status === 404 ? '솔로 게임을 찾을 수 없습니다.' : '솔로 시도를 시작할 수 없습니다.';
 			return;
 		}
 		attempt = (await response.json()) as SoloAttemptState;
@@ -196,7 +196,7 @@ SPDX-License-Identifier: MPL-2.0
 		});
 		loading = false;
 		if (!response.ok) {
-			error_message = 'Could not submit this answer.';
+			error_message = '이 답변을 제출할 수 없습니다.';
 			return;
 		}
 		submit_result = (await response.json()) as SoloSubmitResult;
@@ -238,7 +238,7 @@ SPDX-License-Identifier: MPL-2.0
 		});
 		loading = false;
 		if (!response.ok) {
-			error_message = 'Could not load the next question.';
+			error_message = '다음 문제를 불러올 수 없습니다.';
 			return;
 		}
 		attempt = (await response.json()) as SoloAttemptState;
@@ -252,9 +252,9 @@ SPDX-License-Identifier: MPL-2.0
 		}
 		try {
 			await navigator.clipboard.writeText(share_url);
-			copy_status = 'Copied';
+			copy_status = '복사되었습니다';
 		} catch {
-			copy_status = 'Copy failed';
+			copy_status = '복사에 실패했습니다';
 		}
 	};
 
@@ -291,7 +291,7 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <svelte:head>
-	<title>ClassQuiz - Solo</title>
+	<title>ClassQuiz - 솔로</title>
 </svelte:head>
 
 <div class="min-h-screen px-4 py-8 text-cq-text">
@@ -303,9 +303,9 @@ SPDX-License-Identifier: MPL-2.0
 			>
 				<div>
 					<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
-						Solo preview
+						솔로 미리보기
 					</p>
-					<h1 class="mt-2 text-3xl font-bold text-cq-text">Play at your own pace</h1>
+					<h1 class="mt-2 text-3xl font-bold text-cq-text">내 속도로 풀기</h1>
 				</div>
 
 				<label class="flex flex-col gap-2 text-left font-semibold text-cq-text">
@@ -322,17 +322,17 @@ SPDX-License-Identifier: MPL-2.0
 					<div
 						class="cq-surface-muted flex flex-col gap-2 p-3 text-left text-sm text-cq-muted"
 					>
-						<span class="font-semibold text-cq-text">Share solo link</span>
+						<span class="font-semibold text-cq-text">솔로 링크 공유</span>
 						<span class="break-all">{share_url}</span>
 						<button type="button" class="action-button w-full" onclick={copy_share_url}
-							>Copy share link</button
+							>공유 링크 복사</button
 						>
 						{#if copy_status}<p>{copy_status}</p>{/if}
 					</div>
 				{/if}
 
 				<label class="flex flex-col gap-2 text-left font-semibold text-cq-text">
-					Name
+					이름
 					<input
 						class="cq-surface-muted w-full p-3 text-center outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand"
 						bind:value={username}
@@ -360,7 +360,7 @@ SPDX-License-Identifier: MPL-2.0
 					type="submit"
 					disabled={loading || !game_pin || !token || username.length < 1}
 				>
-					{#if loading}<Spinner my_20={false} />{:else}Start solo attempt{/if}
+					{#if loading}<Spinner my_20={false} />{:else}솔로 시도 시작{/if}
 				</BrownButton>
 			</form>
 		</div>
@@ -368,10 +368,10 @@ SPDX-License-Identifier: MPL-2.0
 		<section class="mx-auto flex min-h-[80vh] w-full max-w-2xl items-center justify-center">
 			<div class="cq-card flex w-full flex-col gap-4 p-6 text-center">
 				<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
-					Final score
+					최종 점수
 				</p>
 				<h1 class="text-4xl font-bold text-cq-text">{attempt.total_score}</h1>
-				<p class="text-cq-muted">{attempt.username}, your solo attempt is complete.</p>
+				<p class="text-cq-muted">{attempt.username}님, 솔로 시도가 완료되었습니다.</p>
 				<div class="cq-surface-muted p-3 text-sm text-cq-muted">
 					<p class="font-semibold text-cq-text">PIN {attempt.game_pin}</p>
 					<p class="break-all">{share_url}</p>
@@ -386,7 +386,7 @@ SPDX-License-Identifier: MPL-2.0
 			>
 				<div>
 					<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
-						Question {current_question_index + 1} of {attempt.question_count}
+						문제 {current_question_index + 1} / {attempt.question_count}
 					</p>
 					<h1 class="notranslate text-2xl font-bold text-cq-text" translate="no">
 						{@html attempt.title}
@@ -397,7 +397,7 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 				<div class="cq-surface-muted p-3 text-sm text-cq-muted">
 					<p class="font-semibold text-cq-text">PIN {attempt.game_pin}</p>
-					<p>Score {attempt.total_score}</p>
+					<p>점수 {attempt.total_score}</p>
 				</div>
 			</header>
 
@@ -418,7 +418,7 @@ SPDX-License-Identifier: MPL-2.0
 					{#if !submit_result}
 						<div
 							class="cq-surface-muted overflow-hidden p-1"
-							aria-label="Time remaining"
+							aria-label="남은 시간"
 						>
 							<div
 								class="h-3 rounded-sm bg-cq-brand transition-all"
@@ -435,17 +435,17 @@ SPDX-License-Identifier: MPL-2.0
 						aria-live="polite"
 					>
 						<p class="text-3xl font-bold text-cq-text">
-							{#if submit_result.right}Correct{:else}Result{/if}
+							{#if submit_result.right}정답{:else}결과{/if}
 						</p>
-						<p class="text-xl text-cq-text">+{submit_result.score} points</p>
-						<p class="text-cq-muted">Total score: {submit_result.total_score}</p>
+						<p class="text-xl text-cq-text">+{submit_result.score}점</p>
+						<p class="text-cq-muted">총점: {submit_result.total_score}</p>
 
 						{#if submit_result.solution}
 							<div class="cq-card flex flex-col gap-2 p-4">
-								<p class="font-semibold text-cq-text">Solution</p>
+								<p class="font-semibold text-cq-text">해설</p>
 								{#if submit_result.solution.type === QuizQuestionType.VOTING}
 									<p class="text-cq-muted">
-										Poll questions do not have a correct answer.
+										투표 문제에는 정답이 없습니다.
 									</p>
 								{:else}
 									{#each solution_answers(submit_result.solution) as answer, index (index)}
@@ -464,11 +464,11 @@ SPDX-License-Identifier: MPL-2.0
 									attempt = { ...attempt, completed: true };
 								}}
 							>
-								Show final score
+								최종 점수 보기
 							</BrownButton>
 						{:else}
 							<BrownButton onclick={show_next_question} disabled={loading}
-								>Next question</BrownButton
+								>다음 문제</BrownButton
 							>
 						{/if}
 					</div>
@@ -504,7 +504,7 @@ SPDX-License-Identifier: MPL-2.0
 							</button>
 						{/each}
 						<BrownButton onclick={submit_check_answer} disabled={loading}
-							>Submit</BrownButton
+							>제출</BrownButton
 						>
 					</div>
 				{:else if current_question.type === QuizQuestionType.RANGE}
@@ -524,7 +524,7 @@ SPDX-License-Identifier: MPL-2.0
 						{/await}
 						<BrownButton
 							onclick={() => submit_answer(range_value[0])}
-							disabled={loading}>Submit</BrownButton
+							disabled={loading}>제출</BrownButton
 						>
 					</div>
 				{:else if current_question.type === QuizQuestionType.TEXT}
@@ -535,7 +535,7 @@ SPDX-License-Identifier: MPL-2.0
 						/>
 						<BrownButton
 							onclick={() => submit_answer(text_input)}
-							disabled={loading || !text_input}>Submit</BrownButton
+							disabled={loading || !text_input}>제출</BrownButton
 						>
 					</div>
 				{:else if current_question.type === QuizQuestionType.ORDER}
@@ -563,7 +563,7 @@ SPDX-License-Identifier: MPL-2.0
 											);
 										}}
 									>
-										Move up
+										위로 이동
 									</GrayButton>
 									<GrayButton
 										disabled={index === current_question.answers.length - 1}
@@ -575,13 +575,13 @@ SPDX-License-Identifier: MPL-2.0
 											);
 										}}
 									>
-										Move down
+										아래로 이동
 									</GrayButton>
 								</div>
 							</div>
 						{/each}
 						<BrownButton onclick={submit_order_answer} disabled={loading}
-							>Submit order</BrownButton
+							>순서 제출</BrownButton
 						>
 					</div>
 				{:else if current_question.type === QuizQuestionType.VOTING}
@@ -609,7 +609,7 @@ SPDX-License-Identifier: MPL-2.0
 							</div>
 						{/await}
 						<BrownButton onclick={() => submit_answer()} disabled={loading}
-							>Continue</BrownButton
+							>계속</BrownButton
 						>
 					</div>
 				{/if}
