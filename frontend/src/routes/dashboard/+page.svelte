@@ -21,23 +21,11 @@ SPDX-License-Identifier: MPL-2.0
 	import MediaComponent from '$lib/editor/MediaComponent.svelte';
 	import { onMount } from 'svelte';
 
-	type LiveGame = {
-		game_pin: string;
-		game_id: string;
-		quiz_id: string;
-		title: string;
-		current_question: number;
-		question_count: number;
-		started: boolean;
-		resume_url: string;
-	};
-
 	interface Props {
 		// import GrayButton from "$lib/components/buttons/gray.svelte";
-		data: Omit<PageData, 'quizzes' | 'quiztivities' | 'live_games'> & {
+		data: Omit<PageData, 'quizzes' | 'quiztivities'> & {
 			quizzes: QuizData[];
 			quiztivities: QuizData[];
-			live_games?: LiveGame[];
 		};
 	}
 
@@ -79,17 +67,6 @@ SPDX-License-Identifier: MPL-2.0
 
 		const res = fuse.search(search_term);
 		items_to_show = res.map((r) => r.item);
-	};
-
-	const formatLiveGameProgress = (live_game: LiveGame) => {
-		if (!live_game.started || live_game.current_question < 0 || live_game.question_count <= 0) {
-			return $t('dashboard.live_game_waiting_lobby');
-		}
-
-		return $t('dashboard.live_game_question_progress', {
-			current: Math.min(live_game.current_question + 1, live_game.question_count),
-			total: live_game.question_count
-		});
 	};
 
 	onMount(async () => {
@@ -173,52 +150,6 @@ SPDX-License-Identifier: MPL-2.0
 					</BrownButton>
 				</div>
 			</div>
-			{#if data.live_games?.length}
-				<section class="cq-card mx-4 mt-4 p-4 text-cq-text">
-					<div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-						<div>
-							<h2 class="text-lg font-semibold">
-								{$t('dashboard.live_games_title')}
-							</h2>
-							<p class="text-sm text-cq-muted">
-								{$t('dashboard.live_games_description')}
-							</p>
-						</div>
-						<p class="text-sm text-cq-muted">
-							{$t(
-								data.live_games.length === 1
-									? 'dashboard.live_games_count'
-									: 'dashboard.live_games_count_plural',
-								{ count: data.live_games.length }
-							)}
-						</p>
-					</div>
-					<div class="mt-3 flex flex-col gap-2">
-						{#each data.live_games as live_game (live_game.game_id)}
-							<div
-								class="cq-surface-muted flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between"
-							>
-								<div class="min-w-0">
-									<p class="truncate font-semibold text-cq-text">
-										{@html live_game.title}
-									</p>
-									<p class="text-sm text-cq-muted">
-										{$t('dashboard.live_game_pin_progress', {
-											pin: live_game.game_pin,
-											progress: formatLiveGameProgress(live_game)
-										})}
-									</p>
-								</div>
-								<div class="w-full sm:w-auto">
-									<BrownButton href={live_game.resume_url} flex={true}
-										>{$t('dashboard.live_game_resume')}</BrownButton
-									>
-								</div>
-							</div>
-						{/each}
-					</div>
-				</section>
-			{/if}
 			{#if all_items.length !== 0}
 				<div class="flex justify-center pt-4 w-full">
 					<div>

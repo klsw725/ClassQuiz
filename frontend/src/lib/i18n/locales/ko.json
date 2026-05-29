@@ -322,15 +322,7 @@
         "views_n_plays": "조회수 및 플레이",
         "info_analytics": "\"플레이\"는 퀴즈가 시작된 횟수(본인 포함)만 표시하는 반면, \"조회수\"는 \"보기\" 페이지가 방문된 횟수를 세므로 봇도 포함됩니다(미안합니다).",
         "commandpalette_notice": "명령 팔레트를 열려면 <kbd>Ctr</kbd>+<kbd>k</kbd> 또는 <kbd>Meta</kbd>+<kbd>k</kbd>를 누르세요",
-        "create_quiz": "새 퀴즈 만들기",
-        "live_games_title": "진행 중인 게임",
-        "live_games_description": "중단된 활성 게임을 이어서 진행하세요.",
-        "live_games_count": "{{count}}개 게임",
-        "live_games_count_plural": "{{count}}개 게임",
-        "live_game_waiting_lobby": "로비에서 대기 중",
-        "live_game_question_progress": "문제 {{current}}/{{total}}",
-        "live_game_pin_progress": "PIN {{pin}} · {{progress}}",
-        "live_game_resume": "이어하기"
+        "create_quiz": "새 퀴즈 만들기"
     },
     "footer": {
         "self_ads": "{{mawoka_link}}가 {{others_link}}의 도움을 받아 ❤️로 만들었습니다.",
