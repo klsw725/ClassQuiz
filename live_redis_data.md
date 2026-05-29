@@ -88,7 +88,7 @@ data:
 
 ## game_session:{GAME_PIN} [string]
 
-Stores the current admin sid and game id for the running game.
+Stores the active Socket.IO admin registration for the running game. This key is created when the admin registers and removed when that admin disconnects, so `game:{GAME_PIN}` can exist without an active `game_session:{GAME_PIN}`.
 
 model: GameSession
 

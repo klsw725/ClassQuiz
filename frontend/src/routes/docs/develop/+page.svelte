@@ -86,7 +86,7 @@ SPDX-License-Identifier: MPL-2.0
 				</li>
 				<li>
 					Start the frontend-dev-server:
-					<pre><code>cd frontend && API_URL=http://localhost:8080 pnpm dev</code></pre>
+					<pre><code>cd frontend && API_URL=http://localhost:8080 DEV_API_URL=http://localhost:8000 pnpm dev</code></pre>
 				</li>
 				<li>
 					Start Caddy:
@@ -142,7 +142,7 @@ SPDX-License-Identifier: MPL-2.0
 				</li>
 				<li>
 					Frontend:
-					<pre><code>cd frontend && API_URL=http://localhost:8080 pnpm dev</code></pre>
+					<pre><code>cd frontend && API_URL=http://localhost:8080 DEV_API_URL=http://localhost:8000 pnpm dev</code></pre>
 				</li>
 			</ul>
 		</li>
