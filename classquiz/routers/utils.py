@@ -4,6 +4,7 @@
 
 
 import io
+from urllib.parse import urlencode
 
 import qrcode
 import qrcode.image.svg
@@ -23,20 +24,38 @@ settings = settings()
 router = APIRouter()
 
 
-@router.get("/qr/{quiz_pin}")
-async def get_qr(quiz_pin: str, dark_mode: bool = False):
-    """
-    Get QR code for quiz
-    """
-    qr = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage, version=1, box_size=20, border=0)
-    qr.add_data(f"{settings.root_address}/play?pin={quiz_pin}&ref=Qr")
+def _get_svg_qr_bytes(payload: str, dark_mode: bool = False) -> bytes:
+    qr = qrcode.QRCode(image_factory=qrcode.image.svg.SvgPathImage, version=1, box_size=20, border=4)
+    qr.add_data(payload)
     buf = io.BytesIO()
     qr.make(fit=True)
     qr.make_image(fill_color="black", back_color="white").save(buf, "SVG")
     data = buf.getvalue()
     if dark_mode:
         data = data.replace(b'fill="#000000"', b'fill="#ffffff"')
+    return data
+
+
+@router.get("/qr/{quiz_pin}")
+async def get_qr(quiz_pin: str, dark_mode: bool = False):
+    """
+    Get QR code for quiz
+    """
+    data = _get_svg_qr_bytes(
+        f"{settings.root_address}/play?pin={quiz_pin}&ref=Qr", dark_mode=dark_mode
+    )
     return Response(content=data, media_type="image/svg+xml")
+
+
+@router.get("/qr/solo/{pin}")
+async def get_solo_qr(pin: str, token: str, dark_mode: bool = False):
+    payload = f"{settings.root_address}/solo?{urlencode({'pin': pin, 'token': token})}"
+    data = _get_svg_qr_bytes(payload, dark_mode=dark_mode)
+    return Response(
+        content=data,
+        media_type="image/svg+xml",
+        headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+    )
 
 
 class IpResponse(BaseModel):

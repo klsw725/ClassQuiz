@@ -30,6 +30,33 @@ SPDX-License-Identifier: MPL-2.0
 		return `${window.location.origin}/solo?${params.toString()}`;
 	});
 
+	const copy_with_textarea = (text: string) => {
+		const textarea = document.createElement('textarea');
+		textarea.value = text;
+		textarea.setAttribute('readonly', '');
+		textarea.style.position = 'absolute';
+		textarea.style.left = '-9999px';
+
+		const selection = document.getSelection();
+		const selected_range =
+			selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : undefined;
+
+		document.body.appendChild(textarea);
+		textarea.select();
+
+		try {
+			return document.execCommand('copy');
+		} catch {
+			return false;
+		} finally {
+			document.body.removeChild(textarea);
+			if (selection && selected_range) {
+				selection.removeAllRanges();
+				selection.addRange(selected_range);
+			}
+		}
+	};
+
 	const copy_player_url = async () => {
 		if (!player_url || !browser) {
 			return;
@@ -38,7 +65,7 @@ SPDX-License-Identifier: MPL-2.0
 			await navigator.clipboard.writeText(player_url);
 			copy_status = 'Copied';
 		} catch {
-			copy_status = 'Copy failed';
+			copy_status = copy_with_textarea(player_url) ? 'Copied' : 'Copy failed';
 		}
 	};
 

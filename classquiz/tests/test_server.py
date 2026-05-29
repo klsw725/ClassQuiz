@@ -12,6 +12,7 @@ from redis import Redis
 from classquiz.config import settings
 from fastapi import HTTPException
 from classquiz.db.models import GameResults
+from classquiz.routers import utils as utils_router
 from classquiz.routers.box_controller.embedded.socket import submit_answer_fn
 from classquiz.tests import test_user_email, test_user_password, example_quiztivity
 from classquiz.tests import test_client, example_quiz, ValueStorage  # noqa : F401
@@ -206,6 +207,23 @@ class TestUtils:
         resp = test_client.get("/api/v1/utils/qr/12345678")
         assert resp.status_code == 200
         assert resp.headers["Content-Type"] == "image/svg+xml"
+
+    @pytest.mark.asyncio
+    async def test_get_solo_qr(self, test_client: TestClient, monkeypatch):  # noqa : F811
+        payloads: list[tuple[str, bool]] = []
+
+        def fake_get_svg_qr_bytes(payload: str, dark_mode: bool = False) -> bytes:
+            payloads.append((payload, dark_mode))
+            return b"<svg></svg>"
+
+        monkeypatch.setattr(utils_router, "_get_svg_qr_bytes", fake_get_svg_qr_bytes)
+        resp = test_client.get("/api/v1/utils/qr/solo/123456", params={"token": "test token+&="})
+        assert resp.status_code == 200
+        assert resp.headers["Content-Type"] == "image/svg+xml"
+        assert resp.headers["Cache-Control"] == "no-store"
+        assert payloads == [
+            (f"{settings().root_address}/solo?pin=123456&token=test+token%2B%26%3D", False)
+        ]
 
 
 class TestStats:
