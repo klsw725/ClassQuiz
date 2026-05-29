@@ -88,8 +88,7 @@ data:
 
 ## game_session:{GAME_PIN} [string]
 
-Stores the current admin sid and game id. A running game can update the admin sid
-when the host resumes the live game.
+Stores the current admin sid and game id for the running game.
 
 model: GameSession
 
