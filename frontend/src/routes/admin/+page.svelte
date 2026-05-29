@@ -293,7 +293,7 @@ SPDX-License-Identifier: MPL-2.0
 
 <svelte:window onbeforeunload={confirmUnload} />
 <svelte:head>
-	<title>ClassQuiz - Host</title>
+	<title>ClassQuiz - 호스트</title>
 </svelte:head>
 <div
 	class="min-h-screen min-w-full"
@@ -375,5 +375,5 @@ SPDX-License-Identifier: MPL-2.0
 	target="_blank"
 	bind:this={dataexport_download_a}
 	download=""
-	class="absolute -top-3/4 -left-3/4 opacity-0">Download</a
+	class="absolute -top-3/4 -left-3/4 opacity-0">다운로드</a
 >
