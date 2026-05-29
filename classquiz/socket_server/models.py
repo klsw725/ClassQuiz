@@ -39,7 +39,6 @@ class RejoinGameData(BaseModel):
 class RegisterAsAdminData(BaseModel):
     game_pin: str
     game_id: str
-    resume: bool = False
 
 
 class ABCDQuizAnswerWithoutSolution(BaseModel):

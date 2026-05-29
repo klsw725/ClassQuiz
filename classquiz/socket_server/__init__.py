@@ -10,6 +10,7 @@ import os
 import random
 
 import socketio
+from socketio.exceptions import ConnectionRefusedError
 from cryptography.fernet import Fernet
 
 from classquiz.config import redis, settings
@@ -171,60 +172,6 @@ async def remap_player_randomized_check_answer(
     answer_order = json.loads(order_raw)
     selected_answer_indexes = sorted(answer_order[int(i)] for i in str(data.answer))
     data.answer = "".join(str(i) for i in selected_answer_indexes)
-
-
-async def get_admin_resume_payload(game_pin: str, game_id: str, game_data: PlayGame) -> dict:
-    player_zone_key = f"game:{game_pin}:players:zones"
-    player_rows = []
-    for raw_player in await redis.smembers(f"game_session:{game_pin}:players"):
-        player = GamePlayer.model_validate_json(raw_player)
-        key = participant_key(player.username, player.zone)
-        player_data = player.model_dump()
-        zone = await redis.hget(player_zone_key, key)
-        if zone is not None:
-            player_data["zone"] = zone
-        player_rows.append(player_data)
-
-    player_scores = {
-        player_key: int(score)
-        for player_key, score in (await redis.hgetall(f"game_session:{game_pin}:player_scores")).items()
-    }
-    answer_count = 0
-    question_results = None
-    timer_res = None
-    if game_data.current_question != -1:
-        answers = await AnswerDataList.get_redis_or_empty(game_pin, str(game_data.current_question))
-        answer_count = len(answers)
-        if not game_data.question_show:
-            question_results = answers.model_dump()
-            timer_res = "0"
-            for answer in answers:
-                key = participant_key(answer.username, answer.zone)
-                if key in player_scores:
-                    player_scores[key] -= answer.score
-        else:
-            question_started_raw = await redis.get(f"game:{game_pin}:current_time")
-            if question_started_raw is not None:
-                question_started = datetime.fromisoformat(question_started_raw)
-                question_time = int(float(game_data.questions[game_data.current_question].time))
-                elapsed = int((datetime.now() - question_started).total_seconds())
-                timer_res = str(max(question_time - elapsed, 0))
-
-    payload = {
-        "game_id": game_id,
-        "game": game_data.model_dump_json(),
-        "players": player_rows,
-        "player_scores": player_scores,
-        "current_question": game_data.current_question,
-        "selected_question": game_data.current_question,
-        "question_show": game_data.question_show,
-        "question_results": question_results,
-        "answer_count": answer_count,
-        "game_started": game_data.started,
-    }
-    if timer_res is not None:
-        payload["timer_res"] = timer_res
-    return payload
 
 
 def player_sid_key(game_pin: str, username: str, zone: str | None) -> str:
@@ -437,19 +384,8 @@ async def register_as_admin(sid: str, data: dict):
         await GameSession(admin=sid, game_id=game_id, answers=[]).save(game_pin)
         payload = {"game_id": game_id, "game": redis_res}
     else:
-        if not data.resume:
-            await sio.emit("already_registered_as_admin", room=sid)
-            return
-        game_session = GameSession.model_validate_json(session_raw)
-        if str(game_session.game_id) != str(game_id):
-            await sio.emit("game_not_found", room=sid)
-            return
-        old_admin = game_session.admin
-        if old_admin != sid:
-            await sio.disconnect(old_admin, namespace="/")
-        game_session.admin = sid
-        await game_session.save(game_pin)
-        payload = await get_admin_resume_payload(game_pin, game_id, game_data)
+        await sio.emit("already_registered_as_admin", room=sid)
+        return
 
     await sio.emit(
         "registered_as_admin",
@@ -738,3 +674,22 @@ async def connect(sid: str, _environ, _auth):
     sio_session = {"session_id": session_id}
     await sio.save_session(sid, sio_session)
     await sio.emit("session_id", ConnectSessionIdEvent(session_id=session_id).dict())
+
+
+@sio.event
+async def disconnect(sid: str):
+    try:
+        session = await get_session(sid, sio)
+    except (ConnectionRefusedError, KeyError, TypeError, json.JSONDecodeError):
+        return
+
+    if not session.get("admin") or session.get("remote"):
+        return
+
+    game_pin = session["game_pin"]
+    session_raw = await redis.get(f"game_session:{game_pin}")
+    if session_raw is None:
+        return
+    game_session = GameSession.model_validate_json(session_raw)
+    if game_session.admin == sid:
+        await redis.delete(f"game_session:{game_pin}")

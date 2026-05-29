@@ -10,7 +10,6 @@ import pytest
 
 from classquiz.db.models import (
     ABCDQuizAnswer,
-    AnswerData,
     AnswerDataList,
     GamePlayer,
     GameSession,
@@ -492,52 +491,7 @@ async def test_submit_answer_scores_same_username_different_zones_separately(rec
 
 
 @pytest.mark.asyncio
-async def test_register_as_admin_resume_replaces_admin_sid_and_hydrates_state(recovery_context):
-    fake_redis, fake_sio, sessions = recovery_context
-    user_id = uuid.uuid4()
-    game_id = uuid.uuid4()
-    game = make_game(user_id, game_id=game_id)
-    fake_redis.values["game:123456"] = game.model_dump_json()
-    fake_redis.values["game_session:123456"] = GameSession(
-        admin="old-admin", game_id=str(game_id), answers=[]
-    ).model_dump_json()
-    fake_redis.sets["game_session:123456:players"] = {
-        GamePlayer(username="alice", sid="alice-sid", zone="1구역").model_dump_json()
-    }
-    alice_key = participant_key("alice", "1구역")
-    fake_redis.hashes["game:123456:players:zones"] = {alice_key: "1구역"}
-    fake_redis.hashes["game_session:123456:player_scores"] = {alice_key: "100"}
-    fake_redis.values["game_session:123456:0"] = AnswerDataList(
-        [AnswerData(username="alice", answer="A", right=True, time_taken=100.0, score=100, zone="1구역")]
-    ).model_dump_json()
-
-    await register_as_admin(
-        "new-admin",
-        {"game_pin": "123456", "game_id": str(game_id), "resume": True},
-    )
-
-    saved_session = GameSession.model_validate_json(fake_redis.values["game_session:123456"])
-    assert saved_session.admin == "new-admin"
-    assert fake_redis.hashes["game_session:123456:player_scores"] == {alice_key: "100"}
-    registered_payload = next(
-        data for event, data, _room in fake_sio.emitted if event == "registered_as_admin"
-    )
-    assert registered_payload["players"] == [
-        {"username": "alice", "sid": "alice-sid", "zone": "1구역"}
-    ]
-    assert registered_payload["player_scores"] == {alice_key: 0}
-    assert registered_payload["selected_question"] == 0
-    assert registered_payload["answer_count"] == 1
-    assert registered_payload["timer_res"] == "0"
-    assert registered_payload["question_results"] is not None
-    assert sessions["new-admin"] == {"game_pin": "123456", "admin": True, "remote": False}
-    assert ("old-admin", "/") in fake_sio.disconnected
-    assert ("new-admin", "123456") in fake_sio.entered_rooms
-    assert ("new-admin", "admin:123456") in fake_sio.entered_rooms
-
-
-@pytest.mark.asyncio
-async def test_register_as_admin_existing_session_without_resume_still_rejects(recovery_context):
+async def test_register_as_admin_existing_session_rejects_takeover(recovery_context):
     fake_redis, fake_sio, _sessions = recovery_context
     user_id = uuid.uuid4()
     game_id = uuid.uuid4()
@@ -554,18 +508,49 @@ async def test_register_as_admin_existing_session_without_resume_still_rejects(r
 
 
 @pytest.mark.asyncio
-async def test_register_as_admin_resume_wrong_game_id_rejects(recovery_context):
+async def test_register_as_admin_wrong_game_id_rejects(recovery_context):
     fake_redis, fake_sio, _sessions = recovery_context
     user_id = uuid.uuid4()
     actual_game_id = uuid.uuid4()
     fake_redis.values["game:123456"] = make_game(user_id, game_id=actual_game_id).model_dump_json()
 
-    await register_as_admin(
-        "new-admin",
-        {"game_pin": "123456", "game_id": str(uuid.uuid4()), "resume": True},
-    )
+    await register_as_admin("new-admin", {"game_pin": "123456", "game_id": str(uuid.uuid4())})
 
     assert ("game_not_found", None, "new-admin") in fake_sio.emitted
+
+
+@pytest.mark.asyncio
+async def test_register_as_admin_fresh_session_saves_and_enters_rooms(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    user_id = uuid.uuid4()
+    game_id = uuid.uuid4()
+    game = make_game(user_id, game_id=game_id)
+    fake_redis.values["game:123456"] = game.model_dump_json()
+
+    await register_as_admin("admin-sid", {"game_pin": "123456", "game_id": str(game_id)})
+
+    saved_game_session = GameSession.model_validate_json(fake_redis.values["game_session:123456"])
+    assert saved_game_session.admin == "admin-sid"
+    assert saved_game_session.game_id == str(game_id)
+    assert saved_game_session.answers == []
+    assert ("registered_as_admin", {"game_id": str(game_id), "game": game.model_dump_json()}, "admin-sid") in fake_sio.emitted
+    assert sessions["admin-sid"] == {"game_pin": "123456", "admin": True, "remote": False}
+    assert ("admin-sid", "123456") in fake_sio.entered_rooms
+    assert ("admin-sid", "admin:123456") in fake_sio.entered_rooms
+
+
+@pytest.mark.asyncio
+async def test_disconnect_clears_matching_admin_session(recovery_context):
+    fake_redis, _fake_sio, sessions = recovery_context
+    game_id = uuid.uuid4()
+    sessions["admin-sid"] = {"game_pin": "123456", "admin": True, "remote": False}
+    fake_redis.values["game_session:123456"] = GameSession(
+        admin="admin-sid", game_id=str(game_id), answers=[]
+    ).model_dump_json()
+
+    await socket_server.disconnect("admin-sid")
+
+    assert "game_session:123456" not in fake_redis.values
 
 
 @pytest.mark.asyncio
@@ -586,85 +571,19 @@ async def test_register_as_remote_wrong_game_id_rejects(recovery_context):
 
 
 @pytest.mark.asyncio
-async def test_register_as_admin_resume_active_question_uses_remaining_time(recovery_context):
-    fake_redis, fake_sio, _sessions = recovery_context
-    user_id = uuid.uuid4()
-    game_id = uuid.uuid4()
-    question = QuizQuestion(
-        question="Question",
-        time="30",
-        answers=[ABCDQuizAnswer(answer="A", right=True)],
-    )
-    game = make_game(
-        user_id,
-        game_id=game_id,
-        question_show=True,
-        questions=[question],
-    )
-    fake_redis.values["game:123456"] = game.model_dump_json()
-    fake_redis.values["game_session:123456"] = GameSession(
-        admin="old-admin", game_id=str(game_id), answers=[]
-    ).model_dump_json()
-    fake_redis.values["game:123456:current_time"] = (datetime.now() - timedelta(seconds=5)).isoformat()
-
-    await register_as_admin(
-        "new-admin",
-        {"game_pin": "123456", "game_id": str(game_id), "resume": True},
-    )
-
-    registered_payload = next(
-        data for event, data, _room in fake_sio.emitted if event == "registered_as_admin"
-    )
-    assert registered_payload["question_results"] is None
-    assert 20 <= int(registered_payload["timer_res"]) <= 30
-
-
-@pytest.mark.asyncio
-async def test_live_games_lists_only_owned_games_with_sessions(recovery_context):
+async def test_live_games_returns_empty_list(recovery_context):
     fake_redis, _fake_sio, _sessions = recovery_context
     user_id = uuid.uuid4()
     game_id = uuid.uuid4()
     owned_game = make_game(user_id, game_id=game_id, game_pin="123456")
-    lobby_game = make_game(user_id, game_pin="222222")
-    missing_game = make_game(user_id, game_pin="444444")
-    other_user_game = make_game(uuid.uuid4(), game_pin="333333")
     fake_redis.values[f"game_pin:{user_id}:{owned_game.quiz_id}"] = "123456"
-    fake_redis.values[f"game_pin:{user_id}:{lobby_game.quiz_id}"] = "222222"
-    fake_redis.values[f"game_pin:{user_id}:{missing_game.quiz_id}"] = "444444"
-    fake_redis.values[f"game_pin:{user_id}:{other_user_game.quiz_id}"] = "333333"
     fake_redis.values["game:123456"] = owned_game.model_dump_json()
     fake_redis.values["game_session:123456"] = GameSession(
         admin="old-admin", game_id=str(game_id), answers=[]
-    ).model_dump_json()
-    fake_redis.values["game:222222"] = lobby_game.model_dump_json()
-    fake_redis.values["game:333333"] = other_user_game.model_dump_json()
-    fake_redis.values["game_session:333333"] = GameSession(
-        admin="old-admin", game_id=str(other_user_game.game_id), answers=[]
     ).model_dump_json()
 
     live_games = await get_live_games(
         user=User(id=user_id, email="user@example.com", username="user", avatar=b"")
     )
 
-    assert live_games == [
-        {
-            "game_pin": "123456",
-            "game_id": str(game_id),
-            "quiz_id": str(owned_game.quiz_id),
-            "title": "title",
-            "current_question": 0,
-            "question_count": 0,
-            "started": True,
-            "resume_url": f"/admin?token={game_id}&pin=123456&connect=1&resume=1",
-        },
-        {
-            "game_pin": "222222",
-            "game_id": str(lobby_game.game_id),
-            "quiz_id": str(lobby_game.quiz_id),
-            "title": "title",
-            "current_question": 0,
-            "question_count": 0,
-            "started": True,
-            "resume_url": f"/admin?token={lobby_game.game_id}&pin=222222&connect=1&resume=1",
-        },
-    ]
+    assert live_games == []
