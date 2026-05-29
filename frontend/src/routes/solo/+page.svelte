@@ -379,6 +379,7 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 		</section>
 	{:else if current_question}
+		{#key current_question_index}
 		<div class="mx-auto flex w-full max-w-5xl flex-col gap-4">
 			<header
 				class="cq-card flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between"
@@ -387,8 +388,10 @@ SPDX-License-Identifier: MPL-2.0
 					<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
 						Question {current_question_index + 1} of {attempt.question_count}
 					</p>
-					<h1 class="text-2xl font-bold text-cq-text">{@html attempt.title}</h1>
-					{#if attempt.description}<p class="text-cq-muted">
+					<h1 class="notranslate text-2xl font-bold text-cq-text" translate="no">
+						{@html attempt.title}
+					</h1>
+					{#if attempt.description}<p class="notranslate text-cq-muted" translate="no">
 							{@html attempt.description}
 						</p>{/if}
 				</div>
@@ -403,7 +406,7 @@ SPDX-License-Identifier: MPL-2.0
 					<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
 						{current_question.type ?? QuizQuestionType.ABCD}
 					</p>
-					<h2 class="text-3xl font-bold text-cq-text">
+					<h2 class="notranslate text-3xl font-bold text-cq-text" translate="no">
 						{@html current_question.question}
 					</h2>
 					{#if current_question.image}
@@ -446,7 +449,9 @@ SPDX-License-Identifier: MPL-2.0
 									</p>
 								{:else}
 									{#each solution_answers(submit_result.solution) as answer, index (index)}
-										<p class="cq-surface-muted p-2 text-cq-text">{answer}</p>
+										<p class="cq-surface-muted notranslate p-2 text-cq-text" translate="no">
+											{answer}
+										</p>
 									{/each}
 								{/if}
 							</div>
@@ -473,7 +478,8 @@ SPDX-License-Identifier: MPL-2.0
 						{#each answers as answer, index (index)}
 							<button
 								type="button"
-								class="cq-surface-muted cq-card-interactive p-4 text-center text-cq-text disabled:opacity-60"
+								class="cq-surface-muted cq-card-interactive notranslate p-4 text-center text-cq-text disabled:opacity-60"
+								translate="no"
 								onclick={() => submit_answer(answer.answer)}
 								disabled={loading}
 							>
@@ -487,7 +493,8 @@ SPDX-License-Identifier: MPL-2.0
 						{#each answers as answer, index (index)}
 							<button
 								type="button"
-								class="cq-surface-muted cq-card-interactive p-4 text-center text-cq-text opacity-60"
+								class="cq-surface-muted cq-card-interactive notranslate p-4 text-center text-cq-text opacity-60"
+								translate="no"
 								class:opacity-100={selected_check_answers[index]}
 								onclick={() => {
 									selected_check_answers[index] = !selected_check_answers[index];
@@ -539,7 +546,10 @@ SPDX-License-Identifier: MPL-2.0
 								class="cq-surface-muted flex flex-col gap-2 p-3"
 								animate:flip={{ duration: 100 }}
 							>
-								<p class="text-center text-xl font-semibold text-cq-text">
+								<p
+									class="notranslate text-center text-xl font-semibold text-cq-text"
+									translate="no"
+								>
 									{answer.answer}
 								</p>
 								<div class="grid grid-cols-2 gap-2">
@@ -580,7 +590,8 @@ SPDX-License-Identifier: MPL-2.0
 						{#each answers as answer, index (index)}
 							<button
 								type="button"
-								class="cq-surface-muted cq-card-interactive p-4 text-center text-cq-text disabled:opacity-60"
+								class="cq-surface-muted cq-card-interactive notranslate p-4 text-center text-cq-text disabled:opacity-60"
+								translate="no"
 								onclick={() => submit_answer(answer.answer)}
 								disabled={loading}
 							>
@@ -589,7 +600,7 @@ SPDX-License-Identifier: MPL-2.0
 						{/each}
 					</div>
 				{:else if current_question.type === QuizQuestionType.SLIDE}
-					<div class="flex flex-col gap-4">
+					<div class="notranslate flex flex-col gap-4" translate="no">
 						{#await import('$lib/play/admin/slide.svelte')}
 							<Spinner my_20={false} />
 						{:then slide}
@@ -610,5 +621,6 @@ SPDX-License-Identifier: MPL-2.0
 				{/if}
 			</section>
 		</div>
+		{/key}
 	{/if}
 </div>
