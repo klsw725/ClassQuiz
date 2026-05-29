@@ -63,7 +63,7 @@ SPDX-License-Identifier: MPL-2.0
 			/*alertModal.subscribe((_) => {
 				window.location.assign('/account/login?returnTo=/dashboard');
 			});*/
-			alert('게임 시작에 실패했습니다');
+			alert($t('start_game.start_failed'));
 			window.location.assign('/account/login?returnTo=/dashboard');
 		} else {
 			const data = await res.json();
@@ -125,7 +125,7 @@ SPDX-License-Identifier: MPL-2.0
 					class="w-14 h-7 cq-surface-muted peer-focus:outline-hidden peer-focus:ring-4 peer-focus:ring-cq-brand rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-cq-surface after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-cq-surface after:border-cq-border after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-cq-border peer-checked:bg-cq-brand"
 				></span>
 				<span class="ml-3 text-sm font-medium text-cq-text"
-					>캡차 {captcha_selected ? '활성화됨' : '비활성화됨'}</span
+					>{$t('start_game.captcha_status', { status: captcha_selected ? $t('start_game.enabled') : $t('start_game.disabled') })}</span
 				>
 			</label>
 		</div>
@@ -178,8 +178,8 @@ SPDX-License-Identifier: MPL-2.0
 					}
 				}}
 			>
-				<h2 class="text-center text-2xl">솔로 미리보기</h2>
-				<p>한 명의 플레이어가 공유 링크를 열어 자신의 속도로 풀 수 있습니다.</p>
+				<h2 class="text-center text-2xl">{$t('start_game.solo_mode')}</h2>
+				<p>{$t('start_game.solo_mode_description')}</p>
 			</div>
 		</div>
 		<div class="flex justify-center items-center my-auto">
@@ -187,7 +187,7 @@ SPDX-License-Identifier: MPL-2.0
 			<input
 				bind:value={custom_field}
 				class="cq-surface p-2 outline-hidden placeholder:italic"
-				placeholder="전화번호 또는 이메일"
+				placeholder={$t('start_game.custom_field_placeholder')}
 			/>
 		</div>
 		<div class="flex justify-center w-full my-auto">
@@ -207,11 +207,11 @@ SPDX-License-Identifier: MPL-2.0
 						target="_blank"
 						use:tippy={{
 							content:
-								'ClassQuizControllers는 ClassQuiz를 플레이하는 작은 물리 기기입니다. 자세히 알아보려면 클릭하세요.'
+								$t('start_game.controllers_tooltip')
 						}}
 						class="decoration-dashed underline cursor-help">ClassQuizControllers</a
 					>
-					상태: {cqcs_enabled ? '활성화됨' : '비활성화됨'}</span
+					{$t('start_game.controllers_status', { status: cqcs_enabled ? $t('start_game.enabled') : $t('start_game.disabled') })}</span
 				>
 			</label>
 		</div>

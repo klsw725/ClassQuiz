@@ -8,6 +8,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { browser } from '$app/environment';
 	import { fade } from 'svelte/transition';
 	import { thumbHashToDataURL } from 'thumbhash';
+	import { getLocalization } from '$lib/i18n';
 
 	interface Props {
 		src: string;
@@ -16,6 +17,8 @@ SPDX-License-Identifier: MPL-2.0
 		muted?: boolean;
 		allow_fullscreen?: boolean;
 	}
+
+	const { t } = getLocalization();
 
 	let {
 		src = $bindable(),
@@ -97,7 +100,7 @@ SPDX-License-Identifier: MPL-2.0
 		<img
 			in:fade|global={{ duration: 300 }}
 			src={img_data.data}
-			alt={img_data.alt_text ?? '사용할 수 없음'}
+			alt={img_data.alt_text ?? $t('media.not_available')}
 			class={css_classes}
 			onclick={() => open_fullscreen()}
 		/>
@@ -122,7 +125,7 @@ SPDX-License-Identifier: MPL-2.0
 		{#if allow_fullscreen}
 			<iframe
 				src={youtube_embed_src}
-				title="YouTube 동영상 플레이어"
+				title={$t('media.youtube_player')}
 				class={`aspect-video min-h-[200px] min-w-[200px] ${css_classes}`}
 				allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
 				allowfullscreen
@@ -132,13 +135,13 @@ SPDX-License-Identifier: MPL-2.0
 		{:else}
 			<div
 				class={`cq-surface-muted flex items-center justify-center text-cq-muted ${css_classes}`}
-				aria-label="YouTube 동영상"
+				aria-label={$t('media.youtube_video')}
 			>
 				YouTube
 			</div>
 		{/if}
 	{:else}
-		<p>알 수 없는 미디어 유형입니다</p>
+		<p>{$t('media.unknown_type')}</p>
 	{/if}
 {/await}
 
@@ -150,7 +153,7 @@ SPDX-License-Identifier: MPL-2.0
 	>
 		<img
 			src={img_data.data}
-			alt={img_data.alt_text ?? '사용할 수 없음'}
+			alt={img_data.alt_text ?? $t('media.not_available')}
 			class="object-cover rounded-lg m-auto max-h-full max-w-full"
 		/>
 	</div>

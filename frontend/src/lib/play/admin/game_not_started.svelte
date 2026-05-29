@@ -69,7 +69,7 @@ SPDX-License-Identifier: MPL-2.0
 		</div>
 		<img
 			onclick={() => (fullscreen_open = true)}
-			alt="게임 참가용 QR 코드"
+			alt={$t('play_page.join_qr_alt')}
 			src="/api/v1/utils/qr/{game_pin}"
 			class="cq-card block mx-auto w-1/2 bg-white p-2 hover:cursor-pointer dark:bg-white"
 		/>
@@ -177,7 +177,7 @@ SPDX-License-Identifier: MPL-2.0
 		onclick={() => (fullscreen_open = false)}
 		tabindex="0"
 		role="button"
-		aria-label="모달 닫기"
+		aria-label={$t('words.close')}
 		onkeydown={(e) =>
 			e.key === 'Enter' || e.key === ' '
 				? () => {
@@ -186,7 +186,7 @@ SPDX-License-Identifier: MPL-2.0
 				: null}
 	>
 		<img
-			alt="게임 참가용 QR 코드"
+			alt={$t('play_page.join_qr_alt')}
 			src="/api/v1/utils/qr/{game_pin}"
 			class="cq-card object-contain m-auto h-full bg-white p-2"
 		/>

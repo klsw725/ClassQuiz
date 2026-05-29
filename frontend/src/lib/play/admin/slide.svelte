@@ -8,10 +8,13 @@ SPDX-License-Identifier: MPL-2.0
 	import type { Question } from '$lib/quiz_types';
 	import { onMount } from 'svelte';
 	import Pikaso from 'pikaso';
+	import { getLocalization } from '$lib/i18n';
 
 	interface Props {
 		question: Question;
 	}
+
+	const { t } = getLocalization();
 
 	let { question }: Props = $props();
 
@@ -40,6 +43,6 @@ SPDX-License-Identifier: MPL-2.0
 		<div bind:this={canvas_el} class="w-full h-full block"></div>
 	</div>
 	<div class="w-full h-full flex justify-center">
-		<img src={img_src} alt="슬라이드 이미지" />
+		<img src={img_src} alt={$t('admin_page.slide_image_alt')} />
 	</div>
 </div>

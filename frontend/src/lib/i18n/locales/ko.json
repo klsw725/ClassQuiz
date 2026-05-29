@@ -167,6 +167,7 @@
         "score": "점수",
         "slide": "슬라이드",
         "name": "이름",
+        "zone": "구역",
         "point": "점",
         "point_plural": "점",
         "back": "뒤로",
@@ -279,7 +280,13 @@
         "answers_submitted": "{{answer_count}}개의 답변 제출됨",
         "request_export_results": "결과 다운로드 요청",
         "download_export_results": "결과 다운로드",
-        "export_results": "결과 내보내기"
+        "export_results": "결과 내보내기",
+        "host_title": "호스트",
+        "answer_emoji": "답변 이모지",
+        "answer_icon": "아이콘",
+        "slide_image_alt": "슬라이드 이미지",
+        "hide_controls": "컨트롤 숨기기",
+        "show_controls": "컨트롤 보이기"
     },
     "password_reset_page": {
         "reset_password": "비밀번호 재설정"
@@ -323,7 +330,48 @@
         "players_waiting_plural": "{{count}}명의 플레이어가 기다리고 있습니다",
         "answer_submitted": "답변이 제출되었습니다",
         "please_wait": "잠시 기다려 주세요",
-        "waiting_for_results": "다른 플레이어와 결과를 기다리는 중입니다..."
+        "waiting_for_results": "다른 플레이어와 결과를 기다리는 중입니다...",
+        "participant_already_connected": "이 게임은 이미 다른 탭이나 기기에서 열려 있습니다. 활성 세션을 사용하거나 닫은 뒤 다시 연결하세요.",
+        "username_already_exists": "이미 사용 중인 이름입니다!",
+        "kicked": "강퇴되었습니다",
+        "captcha_failed": "캡차 인증에 실패했습니다!",
+        "join_qr_alt": "게임 참가용 QR 코드"
+    },
+    "solo_page": {
+        "meta": {
+            "title": "솔로"
+        },
+        "host_meta": {
+            "title": "솔로 호스트"
+        },
+        "preview": "솔로 미리보기",
+        "play_at_your_pace": "내 속도로 풀기",
+        "share_link": "솔로 링크 공유",
+        "copy_share_link": "공유 링크 복사",
+        "copy_player_link": "플레이어 링크 복사",
+        "player_link": "플레이어 링크",
+        "player_link_qr_alt": "솔로 플레이어 링크 QR 코드",
+        "share_this_game": "이 솔로 게임 공유",
+        "copy_player_link_help": "플레이어 링크를 복사해서 참가자에게 보내세요.",
+        "no_player_link": "사용 가능한 솔로 플레이어 링크가 없습니다.",
+        "back_to_dashboard": "대시보드로 돌아가기",
+        "start_attempt": "솔로 시도 시작",
+        "game_not_found": "솔로 게임을 찾을 수 없습니다.",
+        "start_attempt_failed": "솔로 시도를 시작할 수 없습니다.",
+        "submit_failed": "이 답변을 제출할 수 없습니다.",
+        "next_question_failed": "다음 문제를 불러올 수 없습니다.",
+        "final_score": "최종 점수",
+        "completed_message": "{{username}}님, 솔로 시도가 완료되었습니다.",
+        "question_progress": "문제 {{current}} / {{total}}",
+        "points_added": "+{{score}}점",
+        "total_score": "총점: {{score}}",
+        "solution": "해설",
+        "voting_no_correct_answer": "투표 문제에는 정답이 없습니다.",
+        "view_final_score": "최종 점수 보기",
+        "next_question": "다음 문제",
+        "move_up": "위로 이동",
+        "move_down": "아래로 이동",
+        "submit_order": "순서 제출"
     },
     "editor_page": {
         "add_an_answer": "답변 추가",
@@ -443,6 +491,15 @@
         "normal_mode_description": "문제와 답변은 관리자 화면에만 표시됩니다. 플레이어는 관리자 화면의 기호와 일치하는 색상 버튼만 보게 됩니다.",
         "old_school_mode": "올드 스쿨",
         "old_school_mode_description": "문제와 이미지는 관리자 화면과 플레이어 화면 모두에 표시됩니다",
+        "enabled": "활성화됨",
+        "disabled": "비활성화됨",
+        "captcha_status": "캡차 {{status}}",
+        "solo_mode": "솔로 미리보기",
+        "solo_mode_description": "한 명의 플레이어가 공유 링크를 열어 자신의 속도로 풀 수 있습니다.",
+        "custom_field_placeholder": "전화번호 또는 이메일",
+        "controllers_tooltip": "ClassQuizControllers는 ClassQuiz를 플레이하는 작은 물리 기기입니다. 자세히 알아보려면 클릭하세요.",
+        "controllers_status": "상태: {{status}}",
+        "start_failed": "게임 시작에 실패했습니다",
         "randomize_answers": "답변 순서 섞기",
         "randomize_answers_same_for_all": "모두에게 같은 순서",
         "randomize_answers_per_participant": "참가자마다 다른 순서",
@@ -479,7 +536,8 @@
     },
     "components": {
         "popover": {
-            "copied_to_clipboard": "클립보드에 복사되었습니다!"
+            "copied_to_clipboard": "클립보드에 복사되었습니다!",
+            "copy_failed": "복사에 실패했습니다"
         }
     },
     "public_user_page": {
@@ -502,6 +560,12 @@
         "filename_word": "파일 이름",
         "alt_text": "대체 텍스트 / 캡션",
         "storage_usage": "{{total}} MiB 저장 공간 중 {{used}} MiB를 사용했습니다. 이는 저장 공간의 {{percent}}%에 해당합니다."
+    },
+    "media": {
+        "not_available": "사용할 수 없음",
+        "youtube_player": "YouTube 동영상 플레이어",
+        "youtube_video": "YouTube 동영상",
+        "unknown_type": "알 수 없는 미디어 유형입니다"
     },
     "video_uploader": {
         "time_elapsed": "경과 시간",

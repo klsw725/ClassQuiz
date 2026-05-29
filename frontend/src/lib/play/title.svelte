@@ -5,11 +5,15 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
+	import { getLocalization } from '$lib/i18n';
+
 	interface Props {
 		title: string;
 		description: string;
 		cover_image: string | undefined;
 	}
+
+	const { t } = getLocalization();
 
 	let { title, description, cover_image }: Props = $props();
 </script>
@@ -27,7 +31,7 @@ SPDX-License-Identifier: MPL-2.0
 				<img
 					class="block max-h-[30vh] max-w-full"
 					src="/api/v1/storage/download/{cover_image}"
-					alt="제공되지 않음"
+					alt={$t('media.not_available')}
 				/>
 			</div>
 		{/if}

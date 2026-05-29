@@ -80,13 +80,13 @@ SPDX-License-Identifier: MPL-2.0
 					quiz_data.questions[selected_question].type === QuizQuestionType.ABCD}
 			>
 				{#if answer.emoji}
-					<span class="w-14 pl-4 text-4xl leading-none" aria-label="답변 이모지"
+					<span class="w-14 pl-4 text-4xl leading-none" aria-label={$t('admin_page.answer_emoji')}
 						>{answer.emoji}</span
 					>
 				{:else}
 					<img
 						class="w-14 inline-block pl-4"
-						alt="아이콘"
+						alt={$t('admin_page.answer_icon')}
 						style="color: {get_foreground_color(answer.color ?? default_colors[i])}"
 						src={kahoot_icons[i]}
 					/>

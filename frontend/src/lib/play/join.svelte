@@ -98,7 +98,7 @@ SPDX-License-Identifier: MPL-2.0
                 body: 'The game pin you entered seems invalid.'
             });*/
 			if (browser) {
-				alert('게임을 찾을 수 없습니다');
+				alert($t('admin_page.game_not_found'));
 			}
 			game_pin = '';
 			return;
@@ -109,7 +109,7 @@ SPDX-License-Identifier: MPL-2.0
                 body: `Unknown error with response-code ${res.status}`,
                 title: 'Unknown Error'
             });*/
-			alert('알 수 없는 오류가 발생했습니다');
+			alert($t('admin_page.error'));
 			return;
 		}
 	};
@@ -149,7 +149,7 @@ SPDX-License-Identifier: MPL-2.0
                         body: "The captcha failed, which is normal, but most of the time it's fixed by reloading!",
                         title: 'Captcha failed'
                     });*/
-					alert('캡차 인증에 실패했습니다!');
+					alert($t('play_page.captcha_failed'));
 					window.location.reload();
 				}
 			} else if (import.meta.env.VITE_RECAPTCHA) {
@@ -182,7 +182,7 @@ SPDX-License-Identifier: MPL-2.0
 	socket.on('game_not_found', () => {
 		game_pin = '';
 		if (browser) {
-			alert('게임을 찾을 수 없습니다');
+			alert($t('admin_page.game_not_found'));
 		}
 	});
 	$effect(() => {
@@ -234,7 +234,7 @@ SPDX-License-Identifier: MPL-2.0
 				bind:value={username}
 				maxlength="17"
 			/>
-			<h1 class="text-lg font-semibold text-cq-text">구역</h1>
+			<h1 class="text-lg font-semibold text-cq-text">{$t('words.zone')}</h1>
 			<select
 				class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
 				bind:value={zone}

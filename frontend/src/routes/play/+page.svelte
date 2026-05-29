@@ -183,9 +183,7 @@ SPDX-License-Identifier: MPL-2.0
 	});
 
 	socket.on('participant_already_connected', () => {
-		window.alert(
-			'이 게임은 이미 다른 탭이나 기기에서 열려 있습니다. 활성 세션을 사용하거나 닫은 뒤 다시 연결하세요.'
-		);
+		window.alert($t('play_page.participant_already_connected'));
 	});
 
 	socket.on('game_not_found', () => {
@@ -218,11 +216,11 @@ SPDX-License-Identifier: MPL-2.0
 	});
 
 	socket.on('username_already_exists', () => {
-		window.alert('이미 사용 중인 이름입니다!');
+		window.alert($t('play_page.username_already_exists'));
 	});
 
 	socket.on('kick', () => {
-		window.alert('강퇴되었습니다');
+		window.alert($t('play_page.kicked'));
 		preventReload = false;
 		game_pin = '';
 		username = '';
@@ -248,7 +246,7 @@ SPDX-License-Identifier: MPL-2.0
 
 <svelte:window onbeforeunload={confirmUnload} />
 <svelte:head>
-	<title>ClassQuiz - 플레이</title>
+	<title>ClassQuiz - {$t('words.play')}</title>
 </svelte:head>
 <div
 	class="min-h-screen min-w-full"

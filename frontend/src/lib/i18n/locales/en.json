@@ -167,6 +167,7 @@
         "score": "Score",
         "slide": "Slide",
         "name": "Name",
+        "zone": "Zone",
         "point": "Point",
         "point_plural": "Points",
         "back": "Back",
@@ -281,7 +282,13 @@
         "answers_submitted": "{{answer_count}} Answers submitted",
         "request_export_results": "Request result download",
         "download_export_results": "Download results",
-        "export_results": "Export results"
+        "export_results": "Export results",
+        "host_title": "Host",
+        "answer_emoji": "Answer emoji",
+        "answer_icon": "Answer icon",
+        "slide_image_alt": "Slide image",
+        "hide_controls": "Hide controls",
+        "show_controls": "Show controls"
     },
     "password_reset_page": {
         "reset_password": "Reset password"
@@ -325,7 +332,48 @@
         "players_waiting_plural": "{{count}} players are waiting",
         "answer_submitted": "Answer submitted",
         "please_wait": "Please wait",
-        "waiting_for_results": "Waiting for other players and results..."
+        "waiting_for_results": "Waiting for other players and results...",
+        "participant_already_connected": "This game is already open in another tab or device. Use the active session or close it before connecting again.",
+        "username_already_exists": "This name is already taken!",
+        "kicked": "You were kicked",
+        "captcha_failed": "Captcha verification failed!",
+        "join_qr_alt": "QR code for joining the game"
+    },
+    "solo_page": {
+        "meta": {
+            "title": "Solo"
+        },
+        "host_meta": {
+            "title": "Solo Host"
+        },
+        "preview": "Solo Preview",
+        "play_at_your_pace": "Play at your own pace",
+        "share_link": "Share solo link",
+        "copy_share_link": "Copy share link",
+        "copy_player_link": "Copy player link",
+        "player_link": "Player link",
+        "player_link_qr_alt": "QR code for the solo player link",
+        "share_this_game": "Share this solo game",
+        "copy_player_link_help": "Copy the player link and send it to participants.",
+        "no_player_link": "No solo player link is available.",
+        "back_to_dashboard": "Back to dashboard",
+        "start_attempt": "Start solo attempt",
+        "game_not_found": "Solo game not found.",
+        "start_attempt_failed": "Unable to start the solo attempt.",
+        "submit_failed": "Unable to submit this answer.",
+        "next_question_failed": "Unable to load the next question.",
+        "final_score": "Final score",
+        "completed_message": "{{username}}, your solo attempt is complete.",
+        "question_progress": "Question {{current}} / {{total}}",
+        "points_added": "+{{score}} points",
+        "total_score": "Total score: {{score}}",
+        "solution": "Solution",
+        "voting_no_correct_answer": "Voting questions do not have a correct answer.",
+        "view_final_score": "View final score",
+        "next_question": "Next question",
+        "move_up": "Move up",
+        "move_down": "Move down",
+        "submit_order": "Submit order"
     },
     "editor_page": {
         "add_an_answer": "Add an answer",
@@ -448,6 +496,15 @@
         "normal_mode_description": "Question and answer will only be shown on admins screen. The players will only have colored buttons with symbols matching these on the screen of the admin.",
         "old_school_mode": "Old-School",
         "old_school_mode_description": "Questions and images will be shown on both admins screen and on the screen of the players",
+        "enabled": "enabled",
+        "disabled": "disabled",
+        "captcha_status": "Captcha {{status}}",
+        "solo_mode": "Solo Preview",
+        "solo_mode_description": "One player can open a shared link and play at their own pace.",
+        "custom_field_placeholder": "Phone number or e-mail",
+        "controllers_tooltip": "ClassQuizControllers are small physical devices for playing ClassQuiz. Click to learn more.",
+        "controllers_status": "Status: {{status}}",
+        "start_failed": "Failed to start game",
         "randomize_answers": "Randomize answers",
         "randomize_answers_same_for_all": "Same order for everyone",
         "randomize_answers_per_participant": "Different order per participant",
@@ -484,7 +541,8 @@
     },
     "components": {
         "popover": {
-            "copied_to_clipboard": "Copied to clipboard!"
+            "copied_to_clipboard": "Copied to clipboard!",
+            "copy_failed": "Copy failed"
         }
     },
     "public_user_page": {
@@ -507,6 +565,12 @@
         "filename_word": "Filename",
         "alt_text": "Alt(ernate) text / Caption",
         "storage_usage": "You've used {{used}} MiB out of {{total}} MiB of storage. That's equivalent to {{percent}}% of your storage."
+    },
+    "media": {
+        "not_available": "Not available",
+        "youtube_player": "YouTube video player",
+        "youtube_video": "YouTube video",
+        "unknown_type": "Unknown media type"
     },
     "video_uploader": {
         "time_elapsed": "Time elapsed",

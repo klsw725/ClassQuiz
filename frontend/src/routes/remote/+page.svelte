@@ -200,7 +200,7 @@ SPDX-License-Identifier: MPL-2.0
 	{#if selected_question + 1 === game_data.questions.length && ((timer_res === '0' && question_results !== null) || game_data?.questions?.[selected_question]?.type === QuizQuestionType.SLIDE)}
 		{#if JSON.stringify(final_results) === JSON.stringify([null])}
 			<button onclick={get_final_results} class="accent-button m-4 w-fit"
-				>최종 결과 보기
+				>{$t('admin_page.get_final_results')}
 			</button>
 		{:else}
 			<div class="w-screen flex justify-center mt-16">
@@ -216,7 +216,7 @@ SPDX-License-Identifier: MPL-2.0
 					set_question_number(selected_question + 1);
 				}}
 				class="accent-button m-4 w-fit"
-				>다음 문제 ({selected_question + 2})
+				>{$t('admin_page.next_question', { question: selected_question + 2 })}
 			</button>
 		{/if}
 		{#if question_results === null && selected_question !== -1}
@@ -226,11 +226,11 @@ SPDX-License-Identifier: MPL-2.0
 						set_question_number(selected_question + 1);
 					}}
 					class="accent-button m-4 w-fit"
-					>다음 문제 ({selected_question + 2})
+					>{$t('admin_page.next_question', { question: selected_question + 2 })}
 				</button>
 			{:else}
 				<button onclick={get_question_results} class="action-button m-4 w-fit"
-					>결과 보기
+					>{$t('admin_page.show_results')}
 				</button>
 			{/if}
 		{/if}
@@ -241,11 +241,11 @@ SPDX-License-Identifier: MPL-2.0
 					set_question_number(selected_question + 1);
 				}}
 				class="accent-button m-4 w-fit"
-				>다음 문제 ({selected_question + 2})
+				>{$t('admin_page.next_question', { question: selected_question + 2 })}
 			</button>
 		{:else}
 			<button onclick={show_solutions} class="action-button m-4 w-fit"
-				>시간을 멈추고 해설 보기
+				>{$t('admin_page.stop_time_and_solutions')}
 			</button>
 		{/if}
 	{/if}
@@ -295,7 +295,7 @@ SPDX-License-Identifier: MPL-2.0
 								translate="no"
 							>
 								{#if answer.emoji}
-									<span class="mr-2" aria-label="답변 이모지"
+									<span class="mr-2" aria-label={$t('admin_page.answer_emoji')}
 										>{answer.emoji}</span
 									>
 								{/if}
@@ -324,9 +324,9 @@ SPDX-License-Identifier: MPL-2.0
 {:else}
 	<div class="flex min-h-screen items-center justify-center px-4 text-cq-text">
 		<div class="cq-card w-full max-w-md p-6 text-center">
-			<button onclick={start_game} class="accent-button w-fit">게임 시작!</button>
+			<button onclick={start_game} class="accent-button w-fit">{$t('admin_page.start_game')}</button>
 
-			<h2 class="mt-6 text-xl font-semibold text-cq-text">플레이어:</h2>
+			<h2 class="mt-6 text-xl font-semibold text-cq-text">{$t('words.player_plural')}:</h2>
 			{#await get_already_joined_players()}
 				<Spinner my_20={false} />
 			{:then _}
@@ -358,7 +358,7 @@ SPDX-License-Identifier: MPL-2.0
 			onclick={() => {
 				socket.emit('set_control_visibility', { visible: false });
 			}}
-			>컨트롤 숨기기
+			>{$t('admin_page.hide_controls')}
 		</button>
 	{:else}
 		<button
@@ -366,7 +366,7 @@ SPDX-License-Identifier: MPL-2.0
 			onclick={() => {
 				socket.emit('set_control_visibility', { visible: true });
 			}}
-			>컨트롤 보이기
+			>{$t('admin_page.show_controls')}
 		</button>
 	{/if}
 </div>
@@ -375,5 +375,5 @@ SPDX-License-Identifier: MPL-2.0
 	onclick={request_answer_export}
 	href="#"
 	bind:this={dataexport_download_a}
-	class="absolute -top-3/4 -left-3/4 opacity-0 hidden">다운로드</a
+	class="absolute -top-3/4 -left-3/4 opacity-0 hidden">{$t('words.download')}</a
 >
