@@ -11,7 +11,6 @@ export async function load({ parent, url }) {
 	}
 	const token = url.searchParams.get('token');
 	const pin = url.searchParams.get('pin');
-	const resume = url.searchParams.get('resume') !== null;
 	let auto_connect = url.searchParams.get('connect') !== null;
 	if (token === null || pin === null) {
 		auto_connect = false;
@@ -19,7 +18,6 @@ export async function load({ parent, url }) {
 	return {
 		game_pin: pin === null ? '' : pin,
 		game_token: token === null ? '' : token,
-		auto_connect,
-		resume
+		auto_connect
 	};
 }

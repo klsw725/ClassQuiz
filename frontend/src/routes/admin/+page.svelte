@@ -113,13 +113,17 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	let { data }: Props = $props();
-	let { auto_connect, game_token, resume } = $state(data);
+	let { auto_connect, game_token } = $state(data);
 	const game_pin = data.game_pin;
 	let errorMessage = $state('');
+	let socketConnectionMessage = $state('');
+	let socketErrorMessage = $state('');
 	let success = $state(false);
 	let dataexport_download_a = $state();
 	let warnToLeave = true;
 	let export_token = $state(undefined);
+	let shouldRegisterWhenConnected = false;
+	let registerAsAdminInProgress = false;
 
 	const socket_game_controls: SocketGameControls = new SocketGameControls(socket);
 	let game_state: GameState = $state(new GameState(game_token));
@@ -136,12 +140,36 @@ SPDX-License-Identifier: MPL-2.0
 	let player_display_names = $derived(getPlayerDisplayNames(game_state.players));
 
 	const connect = async () => {
-		socket.emit('register_as_admin', {
-			game_pin: game_pin,
-			game_id: game_token,
-			resume
-		});
-		await fetch(`/api/v1/quiz/play/check_captcha/${game_pin}`);
+		if (success || registerAsAdminInProgress) {
+			return;
+		}
+
+		if (!socket.connected) {
+			shouldRegisterWhenConnected = true;
+			socketConnectionMessage = $t('admin_page.connecting_to_socket');
+			socket.connect();
+			return;
+		}
+
+		shouldRegisterWhenConnected = false;
+		registerAsAdminInProgress = true;
+		socketErrorMessage = '';
+		socketConnectionMessage = $t('admin_page.checking_host_session');
+		try {
+			socket.emit('register_as_admin', {
+				game_pin: game_pin,
+				game_id: game_token
+			});
+			await fetch(`/api/v1/quiz/play/check_captcha/${game_pin}`);
+		} catch (e) {
+			console.error('Failed to check game state while connecting as admin', e);
+			if (!success && errorMessage === '') {
+				socketErrorMessage = $t('admin_page.unable_to_check_game_info');
+				socketConnectionMessage = $t('admin_page.check_network_and_retry');
+			}
+		} finally {
+			registerAsAdminInProgress = false;
+		}
 	};
 
 	const hydrateGameState = (data: RegisteredAsAdminPayload) => {
@@ -176,13 +204,60 @@ SPDX-License-Identifier: MPL-2.0
 		}
 	};
 	onMount(() => {
+		const handleSocketConnect = () => {
+			socketErrorMessage = '';
+			socketConnectionMessage = '';
+			if (shouldRegisterWhenConnected && !success) {
+				void connect();
+			}
+		};
+		const handleSocketConnectError = () => {
+			if (success || (!auto_connect && !shouldRegisterWhenConnected)) {
+				return;
+			}
+			socketErrorMessage = $t('admin_page.unable_to_connect_socket');
+			socketConnectionMessage = $t('admin_page.retry_when_reconnected');
+		};
+		const handleSocketDisconnect = () => {
+			registerAsAdminInProgress = false;
+			if (success || (!auto_connect && !shouldRegisterWhenConnected)) {
+				return;
+			}
+			shouldRegisterWhenConnected = true;
+			socketErrorMessage = '';
+			socketConnectionMessage = $t('admin_page.socket_disconnected_reconnecting');
+		};
+
+		const handleGameNotFound = () => {
+			shouldRegisterWhenConnected = false;
+			errorMessage = $t('admin_page.game_not_found');
+		};
+		const handleSocketError = () => {
+			shouldRegisterWhenConnected = false;
+			errorMessage = $t('admin_page.error');
+		};
+
+		socket.on('connect', handleSocketConnect);
+		socket.on('connect_error', handleSocketConnectError);
+		socket.on('disconnect', handleSocketDisconnect);
+		socket.on('game_not_found', handleGameNotFound);
+		socket.on('error', handleSocketError);
+
 		if (auto_connect) {
-			connect();
+			void connect();
 		}
 		tinykeys(window, {
 			Enter: next_action,
 			Space: next_action
 		});
+
+		return () => {
+			socket.off('connect', handleSocketConnect);
+			socket.off('connect_error', handleSocketConnectError);
+			socket.off('disconnect', handleSocketDisconnect);
+			socket.off('game_not_found', handleGameNotFound);
+			socket.off('error', handleSocketError);
+		};
 	});
 	socket.on('session_id', (_d) => {});
 
@@ -191,6 +266,9 @@ SPDX-License-Identifier: MPL-2.0
 		game_state.game_started = Boolean(game_state.quiz_data.started);
 		hydrateGameState(data);
 		console.log(game_state.quiz_data);
+		socketConnectionMessage = '';
+		socketErrorMessage = '';
+		shouldRegisterWhenConnected = false;
 		success = true;
 	});
 	socket.on('player_joined', (int_data) => {
@@ -203,11 +281,11 @@ SPDX-License-Identifier: MPL-2.0
 		);
 	});
 	socket.on('already_registered_as_admin', () => {
+		shouldRegisterWhenConnected = false;
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
 		errorMessage = $t('admin_page.already_registered_as_admin');
 	});
-
 	socket.on('start_game', (_) => {
 		game_state.game_started = true;
 	});
@@ -357,6 +435,24 @@ SPDX-License-Identifier: MPL-2.0
 	{#if !success}
 		{#if errorMessage !== ''}
 			<p class="text-red-700">{errorMessage}</p>
+		{:else if socketErrorMessage !== ''}
+			<div class="flex min-h-screen items-center justify-center px-4 text-cq-text">
+				<div class="cq-card w-full max-w-md p-6 text-center">
+					<p class="text-xl font-semibold text-cq-text">{socketErrorMessage}</p>
+					<p class="mt-2 text-cq-muted">{socketConnectionMessage}</p>
+				</div>
+			</div>
+		{:else if auto_connect}
+			<div class="flex min-h-screen items-center justify-center px-4 text-cq-text">
+				<div class="cq-card w-full max-w-md p-6 text-center">
+					<p class="text-xl font-semibold text-cq-text">
+						{$t('admin_page.connecting_to_host_session')}
+					</p>
+					<p class="mt-2 text-cq-muted">
+						{socketConnectionMessage || $t('admin_page.please_wait')}
+					</p>
+				</div>
+			</div>
 		{/if}
 	{:else if !game_state.game_started}
 		<GameNotStarted
