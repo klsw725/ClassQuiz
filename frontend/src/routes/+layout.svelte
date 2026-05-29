@@ -32,10 +32,10 @@ SPDX-License-Identifier: MPL-2.0
 			document.documentElement.classList.remove('dark');
 		}
 	}
-	let start_language = 'en';
+	let start_language = 'ko';
 	if (browser) {
 		const saved_language = localStorage.getItem('language');
-		start_language = saved_language ?? (window.location.pathname === '/play' ? 'ko' : 'en');
+		start_language = saved_language ?? 'ko';
 	}
 	initLocalizationContext(start_language);
 </script>

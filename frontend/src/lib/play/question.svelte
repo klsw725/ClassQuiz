@@ -330,7 +330,7 @@ SPDX-License-Identifier: MPL-2.0
 					style="width: {(100 / parseInt(question.time)) * parseInt(timer_res)}vw"
 				></span>
 				<div class="flex justify-center mt-10">
-					<p class="text-cq-text">Enter your answer</p>
+					<p class="text-cq-text">{$t('editor.enter_answer')}</p>
 				</div>
 				<div class="flex justify-center m-2">
 					<input
