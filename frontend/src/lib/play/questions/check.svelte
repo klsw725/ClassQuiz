@@ -81,7 +81,7 @@ SPDX-License-Identifier: MPL-2.0
 						<img class="h-2/3 inline-block m-auto" alt="Icon" src={kahoot_icons[i]} />
 					{/if}
 				{:else}
-					<p class="m-auto">{answer.answer}</p>
+					<p class="m-auto notranslate" translate="no">{answer.answer}</p>
 				{/if}
 			</button>
 		{/each}

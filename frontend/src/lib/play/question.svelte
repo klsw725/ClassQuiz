@@ -198,7 +198,10 @@ SPDX-License-Identifier: MPL-2.0
 				)}
 			style="height: {get_question_area_height()}%"
 		>
-			<h1 class="lg:text-2xl text-lg text-center text-cq-text mt-2 break-normal mb-2">
+			<h1
+				class="lg:text-2xl text-lg text-center text-cq-text mt-2 break-normal mb-2 notranslate"
+				translate="no"
+			>
 				{@html question.question}
 			</h1>
 			{#if solution !== undefined}
@@ -218,7 +221,8 @@ SPDX-License-Identifier: MPL-2.0
 						<ul class="flex flex-col gap-2" aria-label="{$t('words.correct')} {$t('words.answer')}">
 							{#each revealed_answers as answer, i (i)}
 								<li
-									class="cq-card cq-surface-muted border-2 border-cq-border px-4 py-3 text-xl font-semibold text-cq-text"
+									class="cq-card cq-surface-muted border-2 border-cq-border px-4 py-3 text-xl font-semibold text-cq-text notranslate"
+									translate="no"
 								>
 									{answer}
 								</li>
@@ -289,7 +293,7 @@ SPDX-License-Identifier: MPL-2.0
 									/>
 								{/if}
 							{:else}
-								<p class="m-auto">{answer.answer}</p>
+								<p class="m-auto notranslate" translate="no">{answer.answer}</p>
 							{/if}
 						</button>
 					{/each}
@@ -396,7 +400,9 @@ SPDX-License-Identifier: MPL-2.0
 								/>
 							</svg>
 						</button>
-						<p class="w-full text-center p-2 text-2xl text-cq-text">{answer.answer}</p>
+						<p class="w-full text-center p-2 text-2xl text-cq-text notranslate" translate="no">
+							{answer.answer}
+						</p>
 
 						<button
 							onclick={() => {
