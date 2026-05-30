@@ -292,6 +292,17 @@ SPDX-License-Identifier: MPL-2.0
 										src={kahoot_icons[i]}
 									/>
 								{/if}
+							{:else if game_mode === 'normal'}
+								<div class="m-auto flex items-center justify-center gap-3">
+									{#if answer.emoji}
+										<span class="text-4xl leading-none" aria-label={$t('admin_page.answer_emoji')}
+											>{answer.emoji}</span
+										>
+									{:else if kahoot_icons[i]}
+										<img class="h-12" alt={$t('admin_page.answer_icon')} src={kahoot_icons[i]} />
+									{/if}
+									<p class="notranslate" translate="no">{answer.answer}</p>
+								</div>
 							{:else}
 								<p class="m-auto notranslate" translate="no">{answer.answer}</p>
 							{/if}
