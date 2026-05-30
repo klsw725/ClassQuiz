@@ -68,6 +68,19 @@ SPDX-License-Identifier: MPL-2.0
 			});
 		}
 	};
+
+	const getSelectedQuestionAfterDelete = (deletedIndex: number, nextLength: number): number => {
+		if (nextLength === 0) {
+			return -1;
+		}
+		if (selected_question === deletedIndex) {
+			return deletedIndex === 0 ? 0 : deletedIndex - 1;
+		}
+		if (deletedIndex < selected_question) {
+			return Math.max(-1, Math.min(selected_question - 1, nextLength - 1));
+		}
+		return Math.max(-1, Math.min(selected_question, nextLength - 1));
+	};
 	/*	onMount(() => {
             propertyCard.scrollIntoView({
                 behavior: 'smooth'
@@ -250,9 +263,13 @@ SPDX-License-Identifier: MPL-2.0
 				<button
 					class="rounded-full absolute -top-3 -right-3 opacity-70 hover:opacity-100 transition"
 					type="button"
-					onclick={() => {
+					onclick={(event) => {
+						event.stopPropagation();
 						if (confirm('Do you really want to delete this Question?')) {
-							selected_question = -1;
+							selected_question = getSelectedQuestionAfterDelete(
+								index,
+								data.questions.length - 1
+							);
 							data.questions.splice(index, 1);
 							data.questions = data.questions;
 						}

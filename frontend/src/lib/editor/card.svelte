@@ -251,37 +251,39 @@ SPDX-License-Identifier: MPL-2.0
 					<p>{type_to_name[String(data.questions[selected_question].type)]}</p>
 				</div>
 				<div class="flex justify-center w-full">
-					{#if type === QuizQuestionType.ABCD || type === QuizQuestionType.CHECK}
-						{#await import('$lib/editor/ABCDEditorPart.svelte')}
-							<Spinner my_20={false} />
-						{:then c}
-							<c.default
-								bind:data
-								bind:selected_question
-								check_choice={type === QuizQuestionType.CHECK}
-							/>
-						{/await}
-					{:else if type === QuizQuestionType.RANGE}
-						<RangeEditor bind:selected_question bind:data />
-					{:else if type === QuizQuestionType.VOTING}
-						{#await import('$lib/editor/VotingEditorPart.svelte')}
-							<Spinner my_20={false} />
-						{:then c}
-							<c.default bind:data bind:selected_question />
-						{/await}
-					{:else if type === QuizQuestionType.TEXT}
-						{#await import('$lib/editor/TextEditorPart.svelte')}
-							<Spinner my_20={false} />
-						{:then c}
-							<c.default bind:data bind:selected_question />
-						{/await}
-					{:else if type === QuizQuestionType.ORDER}
-						{#await import('$lib/editor/OrderEditorPart.svelte')}
-							<Spinner my_20={false} />
-						{:then c}
-							<c.default bind:data bind:selected_question />
-						{/await}
-					{/if}
+					{#key selected_question}
+						{#if type === QuizQuestionType.ABCD || type === QuizQuestionType.CHECK}
+							{#await import('$lib/editor/ABCDEditorPart.svelte')}
+								<Spinner my_20={false} />
+							{:then c}
+								<c.default
+									bind:data
+									bind:selected_question
+									check_choice={type === QuizQuestionType.CHECK}
+								/>
+							{/await}
+						{:else if type === QuizQuestionType.RANGE}
+							<RangeEditor bind:selected_question bind:data />
+						{:else if type === QuizQuestionType.VOTING}
+							{#await import('$lib/editor/VotingEditorPart.svelte')}
+								<Spinner my_20={false} />
+							{:then c}
+								<c.default bind:data bind:selected_question />
+							{/await}
+						{:else if type === QuizQuestionType.TEXT}
+							{#await import('$lib/editor/TextEditorPart.svelte')}
+								<Spinner my_20={false} />
+							{:then c}
+								<c.default bind:data bind:selected_question />
+							{/await}
+						{:else if type === QuizQuestionType.ORDER}
+							{#await import('$lib/editor/OrderEditorPart.svelte')}
+								<Spinner my_20={false} />
+							{:then c}
+								<c.default bind:data bind:selected_question />
+							{/await}
+						{/if}
+					{/key}
 				</div>
 			</div>
 		{/if}
