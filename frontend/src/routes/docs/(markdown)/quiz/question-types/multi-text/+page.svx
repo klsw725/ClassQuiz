@@ -13,6 +13,7 @@ SPDX-License-Identifier: MPL-2.0
 - Players can receive partial score when only some inputs match
 - Case sensitivity can be set per answer slot
 - Whitespace can optionally be ignored when checking submitted text
+- Answer order can optionally be required for slot-by-slot matching
 
 ## Use case
 
