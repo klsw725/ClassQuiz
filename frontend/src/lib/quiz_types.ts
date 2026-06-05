@@ -79,12 +79,16 @@ export interface BaseQuestion {
 	image?: string;
 	hide_results?: boolean;
 	ignore_whitespace?: boolean;
+	multi_text_order_sensitive?: boolean;
 }
 
 export type Question =
 	| (BaseQuestion & { type: QuizQuestionType.RANGE; answers: RangeQuizAnswer })
 	| (BaseQuestion & { type: QuizQuestionType.SLIDE; answers: string })
-	| (BaseQuestion & { type: QuizQuestionType.TEXT | QuizQuestionType.MULTI_TEXT; answers: TextQuizAnswer[] })
+	| (BaseQuestion & {
+			type: QuizQuestionType.TEXT | QuizQuestionType.MULTI_TEXT;
+			answers: TextQuizAnswer[];
+	  })
 	| (BaseQuestion & { type: QuizQuestionType.ORDER; answers: OrderQuizAnswer[] })
 	| (BaseQuestion & {
 			type: QuizQuestionType.ABCD | QuizQuestionType.CHECK;

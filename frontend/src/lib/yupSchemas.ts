@@ -73,6 +73,11 @@ export const dataSchema = yup.object({
 					then: (schema) => schema.default(false).required(),
 					otherwise: (schema) => schema.optional()
 				}),
+				multi_text_order_sensitive: yup.boolean().when('type', {
+					is: (type: string | undefined) => type === 'MULTI_TEXT',
+					then: (schema) => schema.default(false).required(),
+					otherwise: (schema) => schema.optional()
+				}),
 				answers: yup.lazy((v) => {
 					if (Array.isArray(v)) {
 						if (typeof v[0].right === 'boolean') {

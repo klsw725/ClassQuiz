@@ -98,6 +98,7 @@ SPDX-License-Identifier: MPL-2.0
 				question: '',
 				image: undefined,
 				ignore_whitespace: false,
+				multi_text_order_sensitive: false,
 				answers: []
 			}
 		},
