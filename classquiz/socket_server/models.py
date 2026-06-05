@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from pydantic import BaseModel, field_validator, ValidationInfo
+from pydantic import BaseModel, Field, field_validator, ValidationInfo
 from classquiz.db.models import QuizQuestion, QuizQuestionType, VotingQuizAnswer
 
 
@@ -74,8 +74,22 @@ class SubmitAnswerDataOrderType(BaseModel):
 
 class SubmitAnswerData(BaseModel):
     question_index: int
-    answer: str | int
-    complex_answer: list[SubmitAnswerDataOrderType] | None = None
+    answer: str | int | None = None
+    complex_answer: list[SubmitAnswerDataOrderType] | None = Field(default=None, max_length=100)
+
+    @field_validator("answer")
+    def answer_is_bounded(cls, v: str | int | None):
+        if isinstance(v, str) and len(v) > 1000:
+            raise ValueError("answer must be 1000 characters or fewer")
+        return v
+
+    @field_validator("complex_answer")
+    def complex_answer_items_are_bounded(cls, v: list[SubmitAnswerDataOrderType] | None):
+        if v is not None:
+            for item in v:
+                if len(item.answer) > 1000:
+                    raise ValueError("complex answer items must be 1000 characters or fewer")
+        return v
 
 
 class KickPlayerInput(BaseModel):
