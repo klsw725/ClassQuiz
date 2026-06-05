@@ -101,7 +101,7 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 		{/each}
 	</div>
-{:else if quiz_data.questions[selected_question].type === QuizQuestionType.TEXT}
+{:else if quiz_data.questions[selected_question].type === QuizQuestionType.TEXT || quiz_data.questions[selected_question].type === QuizQuestionType.MULTI_TEXT}
 	{#if timer_res === '0'}
 		<div class="grid grid-cols-2 gap-2 w-full p-4">
 			{#each quiz_data.questions[selected_question].answers as answer, _i}

@@ -31,11 +31,14 @@ SPDX-License-Identifier: MPL-2.0
 	let visible_answer_count = $state(RESULT_TABLE_PAGE_SIZE);
 	let visible_answers = $derived(answers.slice(0, visible_answer_count));
 	let hidden_answer_count = $derived(Math.max(answers.length - visible_answers.length, 0));
+	let free_text_question = $derived(
+		question.type === QuizQuestionType.TEXT || question.type === QuizQuestionType.MULTI_TEXT
+	);
 	const playerDisplayName = (answer: PlayerAnswer): string =>
 		answer.zone ? `${answer.zone}-${answer.username}` : answer.username;
 
 	const get_answer_for_comparison = (answer: string): string => {
-		if (question.type === QuizQuestionType.TEXT && question.ignore_whitespace) {
+		if (free_text_question && question.ignore_whitespace) {
 			return answer.replace(/\s/g, '');
 		}
 		return answer;
@@ -53,7 +56,7 @@ SPDX-License-Identifier: MPL-2.0
 		let count = 0;
 		let answer_id = 0;
 		const answer_for_comparison =
-			question.type === QuizQuestionType.TEXT
+			free_text_question
 				? get_text_answer_for_comparison(answer.answer, answer.case_sensitive)
 				: get_answer_for_comparison(answer.answer);
 		if (question.type === QuizQuestionType.CHECK) {
@@ -72,7 +75,7 @@ SPDX-License-Identifier: MPL-2.0
 				if (a.answer.includes(String(answer_id))) {
 					count++;
 				}
-			} else if (question.type === QuizQuestionType.TEXT) {
+			} else if (free_text_question) {
 				if (
 					get_text_answer_for_comparison(a.answer, answer.case_sensitive) ===
 					answer_for_comparison
@@ -89,7 +92,7 @@ SPDX-License-Identifier: MPL-2.0
 
 <div class="flex justify-center">
 	<div class="cq-surface-muted p-2 w-10/12">
-		{#if question.type !== QuizQuestionType.ORDER && question.type !== QuizQuestionType.RANGE && question.type !== QuizQuestionType.SLIDE}
+		{#if question.type !== QuizQuestionType.ORDER && question.type !== QuizQuestionType.RANGE && question.type !== QuizQuestionType.SLIDE && !free_text_question}
 			<div class="flex flex-col mb-4">
 				{#each question.answers as answer, i (i)}
 					<div class="grid grid-cols-4">
@@ -104,7 +107,7 @@ SPDX-License-Identifier: MPL-2.0
 								></span>
 							</div>
 							<p>{get_answer_count_for_answer(answer)}</p>
-							{#if question.type !== QuizQuestionType.VOTING && question.type !== QuizQuestionType.TEXT}
+							{#if question.type !== QuizQuestionType.VOTING}
 								<p class="ml-1">
 									{#if answer.right}✅{:else}❌{/if}
 								</p>

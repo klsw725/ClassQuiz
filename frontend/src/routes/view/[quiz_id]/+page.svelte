@@ -317,7 +317,7 @@ SPDX-License-Identifier: MPL-2.0
 								</li>
 							{/each}
 						</ul>
-					{:else if question.type === QuizQuestionType.VOTING || question.type === QuizQuestionType.TEXT}
+					{:else if question.type === QuizQuestionType.VOTING || question.type === QuizQuestionType.TEXT || question.type === QuizQuestionType.MULTI_TEXT}
 						<div class="grid grid-cols-2 gap-4 m-4 p-6">
 							{#each question.answers as answer}
 								<div class="cq-surface-muted p-1 rounded-lg py-4">
