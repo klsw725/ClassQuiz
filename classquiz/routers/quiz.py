@@ -29,6 +29,9 @@ settings = settings()
 
 router = APIRouter()
 
+GAME_TTL_SECONDS = 18000
+SOLO_GAME_TTL_SECONDS = 30 * 24 * 60 * 60
+
 
 @router.get("/get/{quiz_id}")
 async def get_quiz_from_id(quiz_id: str, user: User | None = Depends(get_current_user)):
@@ -141,10 +144,11 @@ async def start_quiz(
     if cqcs_enabled and game_mode != "solo":
         code = generate_code(6)
         await redis.set(f"game:cqc:code:{code}", game_pin, ex=3600)
-    await redis.set(f"game:{str(game.game_pin)}", game.model_dump_json(), ex=18000)
+    game_ttl = SOLO_GAME_TTL_SECONDS if game_mode == "solo" else GAME_TTL_SECONDS
+    await redis.set(f"game:{str(game.game_pin)}", game.model_dump_json(), ex=game_ttl)
 
     if game_mode != "solo":
-        await redis.set(f"game_pin:{user.id}:{quiz_id}", game_pin, ex=18000)
+        await redis.set(f"game_pin:{user.id}:{quiz_id}", game_pin, ex=GAME_TTL_SECONDS)
         await redis.set(
             f"game_in_lobby:{user.id.hex}",
             GameInLobby(game_id=game.game_id, game_pin=str(game_pin), quiz_title=quiz.title).model_dump_json(),

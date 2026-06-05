@@ -404,6 +404,8 @@ class TestPlayQuiz:
         assert redis.get(live_alias_key) == live_alias_before
         stored_game = json.loads(redis.get(f"game:{ValueStorage.solo_game_pin}"))
         assert stored_game["solo_token"] == ValueStorage.solo_token
+        solo_game_ttl = redis.ttl(f"game:{ValueStorage.solo_game_pin}")
+        assert 29 * 24 * 60 * 60 < solo_game_ttl <= 30 * 24 * 60 * 60
         assert redis.get(f"game_session:{ValueStorage.solo_game_pin}") is None
 
     @pytest.mark.asyncio
