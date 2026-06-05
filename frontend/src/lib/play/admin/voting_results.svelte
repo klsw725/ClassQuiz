@@ -8,74 +8,115 @@ SPDX-License-Identifier: MPL-2.0
 	import type { Answer, Question, VotingAnswer } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 
+	interface ResultAnswer {
+		answer: string;
+	}
+
+	interface AnswerBar {
+		answer: string;
+		count: number;
+		color?: string;
+		right: boolean;
+	}
+
 	interface Props {
-		data: any;
+		data: unknown;
 		question: Question;
 	}
 
 	let { data, question }: Props = $props();
 
-	let quiz_answers = [];
-	let quiz_colors = [];
-	let answer_correct: boolean[] = [];
+	let uses_submitted_answers = $derived(
+		[QuizQuestionType.TEXT, QuizQuestionType.MULTI_TEXT].includes(question.type)
+	);
+	let show_correctness = $derived(question.type === QuizQuestionType.ABCD);
+	let data_items = $derived(Array.isArray(data) ? (data as ResultAnswer[]) : []);
+	let answer_counts = $derived.by((): Array<{ answer: string; count: number }> => {
+		const counts: Array<{ answer: string; count: number }> = [];
+		for (const result of data_items) {
+			if (uses_submitted_answers && result.answer.trim() === '') {
+				continue;
+			}
+			const answer_count = counts.find((count) => count.answer === result.answer);
+			if (answer_count) {
+				answer_count.count += 1;
+			} else {
+				counts.push({ answer: result.answer, count: 1 });
+			}
+		}
+		return counts;
+	});
+	let answer_bars = $derived.by((): AnswerBar[] => {
+		if (uses_submitted_answers) {
+			return answer_counts
+				.map((answer_count) => ({
+					...answer_count,
+					right: false
+				}))
+				.sort((a, b) => b.count - a.count);
+		}
 
-	const answer_options = Array.isArray(question.answers)
-		? (question.answers as Array<Answer | VotingAnswer>)
-		: [];
-	for (const i of answer_options) {
-		quiz_answers.push(i.answer);
-		quiz_colors.push(i.color);
-		answer_correct.push(i.right ?? false);
-	}
+		const answer_options = Array.isArray(question.answers)
+			? (question.answers as Array<Answer | VotingAnswer>)
+			: [];
+		return answer_options.map((answer) => ({
+			answer: answer.answer,
+			count: answer_counts.find((count) => count.answer === answer.answer)?.count ?? 0,
+			color: answer.color,
+			right: answer.right ?? false
+		}));
+	});
+	let total_answer_count = $derived(
+		uses_submitted_answers
+			? answer_counts.reduce((total, answer_count) => total + answer_count.count, 0)
+			: data_items.length
+	);
 
-	let sorted_data = $state({});
-	for (const i of quiz_answers) {
-		sorted_data[i] = 0;
-	}
-	for (const i of data) {
-		sorted_data[i.answer] += 1;
-	}
+	const get_bar_height = (count: number): number =>
+		total_answer_count === 0 ? 0 : (count * 24) / total_answer_count;
 </script>
 
 <div class="flex justify-center w-full overflow-x-auto px-2 pb-12">
 	<div
 		class="cq-card m-auto w-fit gap-6 p-6 md:gap-8 md:p-8 flex flex-col"
-		style="grid-template-columns: repeat({quiz_answers.length}, minmax(0, 1fr));"
+		style="grid-template-columns: repeat({answer_bars.length}, minmax(0, 1fr));"
 	>
 		<div class="flex gap-8 sm:gap-12 lg:gap-16">
-			{#each quiz_answers as answer}
+			{#each answer_bars as answer_bar, i (i)}
 				<span class="text-center self-end mx-auto text-2xl font-semibold md:text-4xl"
-					>{#if sorted_data[answer] > 0}{sorted_data[answer]}{/if}</span
+					>{#if answer_bar.count > 0}{answer_bar.count}{/if}</span
 				>
 			{/each}
 		</div>
 		<div class="flex gap-8 sm:gap-12 lg:gap-16">
-			{#each quiz_answers as answer, i}
+			{#each answer_bars as answer_bar, i (i)}
 				<div
 					class="cq-surface w-24 self-end flex justify-center rounded-t-lg border-2 border-cq-border shadow-2xl sm:w-28 lg:w-32"
-					class:shadow-blue-500={answer_correct[i] &&
-						question.type !== QuizQuestionType.VOTING}
-					class:shadow-yellow-500={!answer_correct[i] &&
-						question.type !== QuizQuestionType.VOTING}
-					class:opacity-70={!answer_correct[i] &&
-						question.type !== QuizQuestionType.VOTING}
-					style="height: {(sorted_data[answer] * 24) /
-						data.length}rem; background-color: {quiz_colors[i]
-						? quiz_colors[i]
+					class:shadow-blue-500={show_correctness && answer_bar.right}
+					class:shadow-yellow-500={show_correctness && !answer_bar.right}
+					class:opacity-70={show_correctness && !answer_bar.right}
+					style="height: {get_bar_height(
+						answer_bar.count
+					)}rem; background-color: {answer_bar.color
+						? answer_bar.color
 						: 'var(--cq-accent)'}"
 				></div>
 			{/each}
 		</div>
 		<div class="flex gap-8 sm:gap-12 lg:gap-16">
-			{#each quiz_answers as answer, i}
+			{#each answer_bars as answer_bar, i (i)}
 				<div class="w-24 sm:w-28 lg:w-32">
 					<p
 						class="cq-surface-muted -rotate-45 rounded-lg px-3 py-2 text-2xl md:text-3xl text-str notranslate"
 						translate="no"
-						class:line-through={!answer_correct[i] &&
-							question.type !== QuizQuestionType.VOTING}
+						class:line-through={show_correctness && !answer_bar.right}
 					>
-						{@html answer}
+						{#if uses_submitted_answers}
+							{answer_bar.answer}
+						{:else}
+							<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+							{@html answer_bar.answer}
+						{/if}
 					</p>
 				</div>
 			{/each}
