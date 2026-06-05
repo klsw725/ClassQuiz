@@ -9,9 +9,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
 from classquiz.config import ALLOWED_TAGS_FOR_QUIZ, redis
-from classquiz.db.models import AnswerData, PlayGame, QuizQuestion, QuizQuestionType
+from classquiz.db.models import AnswerData, PlayGame, QuizQuestion, QuizQuestionType, TextQuizAnswer, TextAnswerDetail
 from classquiz.scoring import calculate_answer_score
-from classquiz.socket_server.helpers import check_answer
+from classquiz.socket_server.helpers import build_multi_text_answer_details, check_answer, get_submitted_text_answers
 from classquiz.socket_server.models import ALLOWED_ZONES, ReturnQuestion, SubmitAnswerData, SubmitAnswerDataOrderType
 
 router = APIRouter()
@@ -85,6 +85,7 @@ class SoloAttemptSubmitResponse(BaseModel):
     total_score: int
     completed: bool
     solution: dict[str, object] | None = None
+    answer_details: list[TextAnswerDetail] | None = None
 
 
 def _attempt_key(attempt_id: str) -> str:
@@ -228,6 +229,7 @@ async def submit_attempt(attempt_id: str, data: SubmitSoloAttemptRequest):
     answer: str | int = ""
     score = 0
     solution: dict[str, object] | None = None
+    answer_details: list[TextAnswerDetail] | None = None
     elapsed_ms = (now - attempt.question_started_at).total_seconds() * 1000
     has_answer = (data.answer is not None or data.complex_answer is not None) and question.type != QuizQuestionType.SLIDE
     if has_answer:
@@ -237,6 +239,12 @@ async def submit_attempt(attempt_id: str, data: SubmitSoloAttemptRequest):
             complex_answer=data.complex_answer,
         )
         answer_right, answer, score_credit = check_answer(game, submit_data)
+        if question.type == QuizQuestionType.MULTI_TEXT:
+            answer_details = build_multi_text_answer_details(
+                get_submitted_text_answers(submit_data),
+                cast(list[TextQuizAnswer], question.answers),
+                question.ignore_whitespace,
+            )
         score = calculate_answer_score(
             score_credit,
             game.time_based_scoring,
@@ -256,6 +264,7 @@ async def submit_attempt(attempt_id: str, data: SubmitSoloAttemptRequest):
             time_taken=elapsed_ms,
             score=score,
             zone=attempt.zone,
+            answer_details=answer_details,
         )
     )
     if attempt.current_question >= len(game.questions) - 1:
@@ -271,6 +280,7 @@ async def submit_attempt(attempt_id: str, data: SubmitSoloAttemptRequest):
         total_score=attempt.total_score,
         completed=attempt.completed,
         solution=solution,
+        answer_details=answer_details,
     )
 
 

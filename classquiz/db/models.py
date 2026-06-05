@@ -146,6 +146,11 @@ class TextQuizAnswer(BaseModel):
     case_sensitive: bool
 
 
+class TextAnswerDetail(BaseModel):
+    answer: str
+    matched: bool
+
+
 class QuizQuestion(BaseModel):
     question: str
     time: str  # in Secs
@@ -335,6 +340,7 @@ class AnswerData(BaseModel):
     time_taken: float  # In milliseconds
     score: int
     zone: str | None = None
+    answer_details: list[TextAnswerDetail] | None = None
 
 
 class AnswerDataList(RootModel):

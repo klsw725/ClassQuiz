@@ -40,11 +40,17 @@ SPDX-License-Identifier: MPL-2.0
 		question: Question | null;
 	}
 
+	interface AnswerDetail {
+		answer: string;
+		matched: boolean;
+	}
+
 	interface SoloSubmitResult {
 		right: boolean;
 		score: number;
 		total_score: number;
 		completed: boolean;
+		answer_details?: AnswerDetail[];
 		solution?: Question | null;
 	}
 
@@ -312,7 +318,10 @@ SPDX-License-Identifier: MPL-2.0
 			const answer = solution.answers as RangeQuizAnswer;
 			return [`${answer.min_correct} - ${answer.max_correct}`];
 		}
-		if (solution.type === QuizQuestionType.TEXT || solution.type === QuizQuestionType.MULTI_TEXT) {
+		if (
+			solution.type === QuizQuestionType.TEXT ||
+			solution.type === QuizQuestionType.MULTI_TEXT
+		) {
 			return (solution.answers as TextQuizAnswer[]).map((answer) => answer.answer);
 		}
 		if (solution.type === QuizQuestionType.ORDER) {
@@ -346,7 +355,9 @@ SPDX-License-Identifier: MPL-2.0
 					<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
 						{$t('solo_page.preview')}
 					</p>
-					<h1 class="mt-2 text-3xl font-bold text-cq-text">{$t('solo_page.play_at_your_pace')}</h1>
+					<h1 class="mt-2 text-3xl font-bold text-cq-text">
+						{$t('solo_page.play_at_your_pace')}
+					</h1>
 				</div>
 
 				<label class="flex flex-col gap-2 text-left font-semibold text-cq-text">
@@ -401,7 +412,9 @@ SPDX-License-Identifier: MPL-2.0
 					type="submit"
 					disabled={loading || !game_pin || !token || username.length < 1}
 				>
-					{#if loading}<Spinner my_20={false} />{:else}{$t('solo_page.start_attempt')}{/if}
+					{#if loading}<Spinner my_20={false} />{:else}{$t(
+							'solo_page.start_attempt'
+						)}{/if}
 				</BrownButton>
 			</form>
 		</div>
@@ -412,7 +425,9 @@ SPDX-License-Identifier: MPL-2.0
 					{$t('solo_page.final_score')}
 				</p>
 				<h1 class="text-4xl font-bold text-cq-text">{attempt.total_score}</h1>
-				<p class="text-cq-muted">{$t('solo_page.completed_message', { username: attempt.username })}</p>
+				<p class="text-cq-muted">
+					{$t('solo_page.completed_message', { username: attempt.username })}
+				</p>
 				<div class="cq-surface-muted p-3 text-sm text-cq-muted">
 					<p class="font-semibold text-cq-text">PIN {attempt.game_pin}</p>
 					<p class="break-all">{share_url}</p>
@@ -421,249 +436,295 @@ SPDX-License-Identifier: MPL-2.0
 		</section>
 	{:else if current_question}
 		{#key current_question_index}
-		<div class="mx-auto flex w-full max-w-5xl flex-col gap-4">
-			<header
-				class="cq-card flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between"
-			>
-				<div>
-					<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
-						{$t('solo_page.question_progress', { current: current_question_index + 1, total: attempt.question_count })}
-					</p>
-					<h1 class="notranslate text-2xl font-bold text-cq-text" translate="no">
-						{@html attempt.title}
-					</h1>
-					{#if attempt.description}<p class="notranslate text-cq-muted" translate="no">
-							{@html attempt.description}
-						</p>{/if}
-				</div>
-				<div class="cq-surface-muted p-3 text-sm text-cq-muted">
-					<p class="font-semibold text-cq-text">PIN {attempt.game_pin}</p>
-					<p>{$t('play_page.your_score', { score: attempt.total_score })}</p>
-				</div>
-			</header>
-
-			<section class="cq-card flex flex-col gap-5 p-5">
-				<div class="flex flex-col gap-3 text-center">
-					<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
-						{current_question.type ?? QuizQuestionType.ABCD}
-					</p>
-					<h2 class="notranslate text-3xl font-bold text-cq-text" translate="no">
-						{@html current_question.question}
-					</h2>
-					{#if current_question.image}
-						<MediaComponent
-							src={current_question.image}
-							css_classes="mx-auto max-h-72 w-auto object-contain"
-						/>
-					{/if}
-					{#if !submit_result}
-						<div
-							class="cq-surface-muted overflow-hidden p-1"
-							aria-label={$t('admin_page.time_left')}
-						>
-							<div
-								class="h-3 rounded-sm bg-cq-brand transition-all"
-								style="width: {time_progress}%"
-							></div>
-						</div>
-						<p class="text-cq-muted">{timer_res}s</p>
-					{/if}
-				</div>
-
-				{#if submit_result}
-					<div
-						class="cq-surface-muted flex flex-col gap-4 p-4 text-center"
-						aria-live="polite"
-					>
-						<p class="text-3xl font-bold text-cq-text">
-							{submit_result.right ? $t('words.correct') : $t('words.result')}
+			<div class="mx-auto flex w-full max-w-5xl flex-col gap-4">
+				<header
+					class="cq-card flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between"
+				>
+					<div>
+						<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
+							{$t('solo_page.question_progress', {
+								current: current_question_index + 1,
+								total: attempt.question_count
+							})}
 						</p>
-						<p class="text-xl text-cq-text">{$t('solo_page.points_added', { score: submit_result.score })}</p>
-						<p class="text-cq-muted">{$t('solo_page.total_score', { score: submit_result.total_score })}</p>
-
-						{#if submit_result.solution}
-							<div class="cq-card flex flex-col gap-2 p-4">
-								<p class="font-semibold text-cq-text">{$t('solo_page.solution')}</p>
-								{#if submit_result.solution.type === QuizQuestionType.VOTING}
-									<p class="text-cq-muted">
-										{$t('solo_page.voting_no_correct_answer')}
-									</p>
-								{:else}
-									{#each solution_answers(submit_result.solution) as answer, index (index)}
-										<p class="cq-surface-muted notranslate p-2 text-cq-text" translate="no">
-											{answer}
-										</p>
-									{/each}
-								{/if}
-							</div>
-						{/if}
-
-						{#if submit_result.completed}
-							<BrownButton
-								onclick={() => {
-									submit_result = undefined;
-									attempt = { ...attempt, completed: true };
-								}}
-							>
-								{$t('solo_page.view_final_score')}
-							</BrownButton>
-						{:else}
-							<BrownButton onclick={show_next_question} disabled={loading}
-								>{$t('solo_page.next_question')}</BrownButton
-							>
-						{/if}
-					</div>
-				{:else if current_question.type === QuizQuestionType.ABCD || !current_question.type}
-					{@const answers = current_question.answers as Answer[]}
-					<div class="grid gap-3 md:grid-cols-2">
-						{#each answers as answer, index (index)}
-							<button
-								type="button"
-								class="cq-surface-muted cq-card-interactive notranslate p-4 text-center text-cq-text disabled:opacity-60"
+						<h1 class="notranslate text-2xl font-bold text-cq-text" translate="no">
+							{@html attempt.title}
+						</h1>
+						{#if attempt.description}<p
+								class="notranslate text-cq-muted"
 								translate="no"
-								onclick={() => submit_answer(answer.answer)}
-								disabled={loading}
 							>
-								{answer.answer}
-							</button>
-						{/each}
+								{@html attempt.description}
+							</p>{/if}
 					</div>
-				{:else if current_question.type === QuizQuestionType.CHECK}
-					{@const answers = current_question.answers as Answer[]}
-					<div class="flex flex-col gap-3">
-						{#each answers as answer, index (index)}
-							<button
-								type="button"
-								class="cq-surface-muted cq-card-interactive notranslate p-4 text-center text-cq-text opacity-60"
-								translate="no"
-								class:opacity-100={selected_check_answers[index]}
-								onclick={() => {
-									selected_check_answers[index] = !selected_check_answers[index];
-								}}
-							>
-								{answer.answer}
-							</button>
-						{/each}
-						<BrownButton onclick={submit_check_answer} disabled={loading}
-							>{$t('words.submit')}</BrownButton
-						>
+					<div class="cq-surface-muted p-3 text-sm text-cq-muted">
+						<p class="font-semibold text-cq-text">PIN {attempt.game_pin}</p>
+						<p>{$t('play_page.your_score', { score: attempt.total_score })}</p>
 					</div>
-				{:else if current_question.type === QuizQuestionType.RANGE}
-					{@const range_answer = current_question.answers as RangeQuizAnswer}
-					<div class="flex flex-col gap-5">
-						{#await import('svelte-range-slider-pips')}
-							<Spinner />
-						{:then slider}
-							<slider.default
-								bind:values={range_value}
-								bind:min={range_answer.min}
-								bind:max={range_answer.max}
-								pips
-								float
-								all="label"
+				</header>
+
+				<section class="cq-card flex flex-col gap-5 p-5">
+					<div class="flex flex-col gap-3 text-center">
+						<p class="text-sm font-semibold uppercase tracking-wide text-cq-muted">
+							{current_question.type ?? QuizQuestionType.ABCD}
+						</p>
+						<h2 class="notranslate text-3xl font-bold text-cq-text" translate="no">
+							{@html current_question.question}
+						</h2>
+						{#if current_question.image}
+							<MediaComponent
+								src={current_question.image}
+								css_classes="mx-auto max-h-72 w-auto object-contain"
 							/>
-						{/await}
-						<BrownButton
-							onclick={() => submit_answer(range_value[0])}
-							disabled={loading}>{$t('words.submit')}</BrownButton
-						>
-					</div>
-				{:else if current_question.type === QuizQuestionType.TEXT || current_question.type === QuizQuestionType.MULTI_TEXT}
-					<div class="flex flex-col gap-3">
-						{#each text_inputs as _text_input, index (index)}
-							<input
-								class="cq-surface-muted w-full p-3 text-center outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand"
-								bind:value={text_inputs[index]}
-							/>
-						{/each}
-						<BrownButton
-							onclick={submit_text_answer}
-							disabled={loading || !has_text_answer}>{$t('words.submit')}</BrownButton
-						>
-					</div>
-				{:else if current_question.type === QuizQuestionType.ORDER}
-					{@const answers = current_question.answers as OrderQuizAnswer[]}
-					<div class="flex flex-col gap-3">
-						{#each answers as answer, index (answer.id)}
+						{/if}
+						{#if !submit_result}
 							<div
-								class="cq-surface-muted flex flex-col gap-2 p-3"
-								animate:flip={{ duration: 100 }}
+								class="cq-surface-muted overflow-hidden p-1"
+								aria-label={$t('admin_page.time_left')}
 							>
-								<p
-									class="notranslate text-center text-xl font-semibold text-cq-text"
+								<div
+									class="h-3 rounded-sm bg-cq-brand transition-all"
+									style="width: {time_progress}%"
+								></div>
+							</div>
+							<p class="text-cq-muted">{timer_res}s</p>
+						{/if}
+					</div>
+
+					{#if submit_result}
+						<div
+							class="cq-surface-muted flex flex-col gap-4 p-4 text-center"
+							aria-live="polite"
+						>
+							<p class="text-3xl font-bold text-cq-text">
+								{submit_result.right
+									? $t('words.correct')
+									: $t('play_page.latest_question_incorrect')}
+							</p>
+							<p class="text-xl text-cq-text">
+								{$t('solo_page.points_added', { score: submit_result.score })}
+							</p>
+							<p class="text-cq-muted">
+								{$t('solo_page.total_score', { score: submit_result.total_score })}
+							</p>
+
+							{#if submit_result.answer_details?.length}
+								<div class="cq-card flex flex-col gap-2 p-4 text-left">
+									<p class="font-semibold text-cq-text">{$t('words.answer')}</p>
+									{#each submit_result.answer_details as detail, index (index)}
+										<div
+											class="cq-surface-muted flex items-center justify-between gap-3 p-2 text-sm"
+										>
+											<span
+												class="notranslate break-words text-cq-text"
+												translate="no"
+											>
+												{detail.answer || '-'}
+											</span>
+											<span
+												class="shrink-0 font-semibold"
+												class:text-cq-brand={detail.matched}
+												class:text-cq-accent={!detail.matched}
+											>
+												{#if detail.matched}✅ {$t(
+														'words.correct'
+													)}{:else}❌{/if}
+											</span>
+										</div>
+									{/each}
+								</div>
+							{/if}
+
+							{#if submit_result.solution && submit_result.solution.type !== QuizQuestionType.MULTI_TEXT}
+								<div class="cq-card flex flex-col gap-2 p-4">
+									<p class="font-semibold text-cq-text">
+										{$t('solo_page.solution')}
+									</p>
+									{#if submit_result.solution.type === QuizQuestionType.VOTING}
+										<p class="text-cq-muted">
+											{$t('solo_page.voting_no_correct_answer')}
+										</p>
+									{:else}
+										{#each solution_answers(submit_result.solution) as answer, index (index)}
+											<p
+												class="cq-surface-muted notranslate p-2 text-cq-text"
+												translate="no"
+											>
+												{answer}
+											</p>
+										{/each}
+									{/if}
+								</div>
+							{/if}
+
+							{#if submit_result.completed}
+								<BrownButton
+									onclick={() => {
+										submit_result = undefined;
+										attempt = { ...attempt, completed: true };
+									}}
+								>
+									{$t('solo_page.view_final_score')}
+								</BrownButton>
+							{:else}
+								<BrownButton onclick={show_next_question} disabled={loading}
+									>{$t('solo_page.next_question')}</BrownButton
+								>
+							{/if}
+						</div>
+					{:else if current_question.type === QuizQuestionType.ABCD || !current_question.type}
+						{@const answers = current_question.answers as Answer[]}
+						<div class="grid gap-3 md:grid-cols-2">
+							{#each answers as answer, index (index)}
+								<button
+									type="button"
+									class="cq-surface-muted cq-card-interactive notranslate p-4 text-center text-cq-text disabled:opacity-60"
 									translate="no"
+									onclick={() => submit_answer(answer.answer)}
+									disabled={loading}
 								>
 									{answer.answer}
-								</p>
-								<div class="grid grid-cols-2 gap-2">
-									<GrayButton
-										disabled={index === 0}
-										onclick={() => {
-											current_question.answers = swap_array_elements(
-												current_question.answers as OrderQuizAnswer[],
-												index,
-												index - 1
-											);
-										}}
-									>
-										{$t('solo_page.move_up')}
-									</GrayButton>
-									<GrayButton
-										disabled={index === current_question.answers.length - 1}
-										onclick={() => {
-											current_question.answers = swap_array_elements(
-												current_question.answers as OrderQuizAnswer[],
-												index,
-												index + 1
-											);
-										}}
-									>
-										{$t('solo_page.move_down')}
-									</GrayButton>
-								</div>
-							</div>
-						{/each}
-						<BrownButton onclick={submit_order_answer} disabled={loading}
-							>{$t('solo_page.submit_order')}</BrownButton
-						>
-					</div>
-				{:else if current_question.type === QuizQuestionType.VOTING}
-					{@const answers = current_question.answers as Answer[]}
-					<div class="grid gap-3 md:grid-cols-2">
-						{#each answers as answer, index (index)}
-							<button
-								type="button"
-								class="cq-surface-muted cq-card-interactive notranslate p-4 text-center text-cq-text disabled:opacity-60"
-								translate="no"
-								onclick={() => submit_answer(answer.answer)}
-								disabled={loading}
+								</button>
+							{/each}
+						</div>
+					{:else if current_question.type === QuizQuestionType.CHECK}
+						{@const answers = current_question.answers as Answer[]}
+						<div class="flex flex-col gap-3">
+							{#each answers as answer, index (index)}
+								<button
+									type="button"
+									class="cq-surface-muted cq-card-interactive notranslate p-4 text-center text-cq-text opacity-60"
+									translate="no"
+									class:opacity-100={selected_check_answers[index]}
+									onclick={() => {
+										selected_check_answers[index] =
+											!selected_check_answers[index];
+									}}
+								>
+									{answer.answer}
+								</button>
+							{/each}
+							<BrownButton onclick={submit_check_answer} disabled={loading}
+								>{$t('words.submit')}</BrownButton
 							>
-								{answer.answer}
-							</button>
-						{/each}
-					</div>
-				{:else if current_question.type === QuizQuestionType.SLIDE}
-					<div class="notranslate flex flex-col gap-4" translate="no">
-						{#await import('$lib/play/admin/slide.svelte')}
-							<Spinner my_20={false} />
-						{:then slide}
-							<div class="mx-auto max-h-[70vh] max-w-full overflow-hidden">
-								<slide.default question={current_question} />
-							</div>
-						{/await}
-						<BrownButton onclick={() => submit_answer()} disabled={loading}
-							>{$t('words.continue')}</BrownButton
-						>
-					</div>
-				{/if}
+						</div>
+					{:else if current_question.type === QuizQuestionType.RANGE}
+						{@const range_answer = current_question.answers as RangeQuizAnswer}
+						<div class="flex flex-col gap-5">
+							{#await import('svelte-range-slider-pips')}
+								<Spinner />
+							{:then slider}
+								<slider.default
+									bind:values={range_value}
+									bind:min={range_answer.min}
+									bind:max={range_answer.max}
+									pips
+									float
+									all="label"
+								/>
+							{/await}
+							<BrownButton
+								onclick={() => submit_answer(range_value[0])}
+								disabled={loading}>{$t('words.submit')}</BrownButton
+							>
+						</div>
+					{:else if current_question.type === QuizQuestionType.TEXT || current_question.type === QuizQuestionType.MULTI_TEXT}
+						<div class="flex flex-col gap-3">
+							{#each text_inputs as _text_input, index (index)}
+								<input
+									class="cq-surface-muted w-full p-3 text-center outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand"
+									bind:value={text_inputs[index]}
+								/>
+							{/each}
+							<BrownButton
+								onclick={submit_text_answer}
+								disabled={loading || !has_text_answer}
+								>{$t('words.submit')}</BrownButton
+							>
+						</div>
+					{:else if current_question.type === QuizQuestionType.ORDER}
+						{@const answers = current_question.answers as OrderQuizAnswer[]}
+						<div class="flex flex-col gap-3">
+							{#each answers as answer, index (answer.id)}
+								<div
+									class="cq-surface-muted flex flex-col gap-2 p-3"
+									animate:flip={{ duration: 100 }}
+								>
+									<p
+										class="notranslate text-center text-xl font-semibold text-cq-text"
+										translate="no"
+									>
+										{answer.answer}
+									</p>
+									<div class="grid grid-cols-2 gap-2">
+										<GrayButton
+											disabled={index === 0}
+											onclick={() => {
+												current_question.answers = swap_array_elements(
+													current_question.answers as OrderQuizAnswer[],
+													index,
+													index - 1
+												);
+											}}
+										>
+											{$t('solo_page.move_up')}
+										</GrayButton>
+										<GrayButton
+											disabled={index === current_question.answers.length - 1}
+											onclick={() => {
+												current_question.answers = swap_array_elements(
+													current_question.answers as OrderQuizAnswer[],
+													index,
+													index + 1
+												);
+											}}
+										>
+											{$t('solo_page.move_down')}
+										</GrayButton>
+									</div>
+								</div>
+							{/each}
+							<BrownButton onclick={submit_order_answer} disabled={loading}
+								>{$t('solo_page.submit_order')}</BrownButton
+							>
+						</div>
+					{:else if current_question.type === QuizQuestionType.VOTING}
+						{@const answers = current_question.answers as Answer[]}
+						<div class="grid gap-3 md:grid-cols-2">
+							{#each answers as answer, index (index)}
+								<button
+									type="button"
+									class="cq-surface-muted cq-card-interactive notranslate p-4 text-center text-cq-text disabled:opacity-60"
+									translate="no"
+									onclick={() => submit_answer(answer.answer)}
+									disabled={loading}
+								>
+									{answer.answer}
+								</button>
+							{/each}
+						</div>
+					{:else if current_question.type === QuizQuestionType.SLIDE}
+						<div class="notranslate flex flex-col gap-4" translate="no">
+							{#await import('$lib/play/admin/slide.svelte')}
+								<Spinner my_20={false} />
+							{:then slide}
+								<div class="mx-auto max-h-[70vh] max-w-full overflow-hidden">
+									<slide.default question={current_question} />
+								</div>
+							{/await}
+							<BrownButton onclick={() => submit_answer()} disabled={loading}
+								>{$t('words.continue')}</BrownButton
+							>
+						</div>
+					{/if}
 
-				{#if error_message}
-					<p class="cq-surface-muted p-3 text-center text-cq-text" role="alert">
-						{error_message}
-					</p>
-				{/if}
-			</section>
-		</div>
+					{#if error_message}
+						<p class="cq-surface-muted p-3 text-center text-cq-text" role="alert">
+							{error_message}
+						</p>
+					{/if}
+				</section>
+			</div>
 		{/key}
 	{/if}
 </div>

@@ -20,11 +20,17 @@ SPDX-License-Identifier: MPL-2.0
 		return ret;
 	}
 
+	interface AnswerDetail {
+		answer: string;
+		matched: boolean;
+	}
+
 	interface Props {
 		scores: any;
 		question_results: Array<{
 			username: string;
 			answer: string;
+			answer_details?: AnswerDetail[];
 			right: boolean;
 			time_taken: number;
 			score: number;
@@ -93,6 +99,25 @@ SPDX-License-Identifier: MPL-2.0
 					? $t('play_page.latest_question_correct')
 					: $t('play_page.latest_question_incorrect')}
 			</p>
+			{#if currentPlayerResult.answer_details?.length}
+				<div class="cq-surface-muted flex flex-col gap-2 p-3 text-left">
+					<p class="text-sm font-semibold text-cq-muted">{$t('words.answer')}</p>
+					{#each currentPlayerResult.answer_details as detail, index (index)}
+						<div class="cq-surface flex items-center justify-between gap-3 p-2 text-sm">
+							<span class="notranslate break-words text-cq-text" translate="no">
+								{detail.answer || '-'}
+							</span>
+							<span
+								class="shrink-0 font-semibold"
+								class:text-cq-brand={detail.matched}
+								class:text-cq-accent={!detail.matched}
+							>
+								{#if detail.matched}✅ {$t('words.correct')}{:else}❌{/if}
+							</span>
+						</div>
+					{/each}
+				</div>
+			{/if}
 		{/if}
 	</div>
 </div>

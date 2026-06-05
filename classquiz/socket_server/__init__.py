@@ -20,6 +20,7 @@ from classquiz.db.models import (
     QuizQuestionType,
     GameSession,
     GamePlayer,
+    TextQuizAnswer,
     VotingQuizAnswer,
     AnswerDataList,
     AnswerData,
@@ -28,8 +29,10 @@ from pydantic import BaseModel, ValidationError
 from datetime import datetime
 
 from classquiz.socket_server.helpers import (
+    build_multi_text_answer_details,
     check_answer,
     check_captcha,
+    get_submitted_text_answers,
     has_already_answered,
 )
 from .models import (
@@ -509,6 +512,13 @@ async def submit_answer(sid: str, data: dict):
     if game_data.questions[question_index].type == QuizQuestionType.CHECK:
         await remap_player_randomized_check_answer(session["game_pin"], session["username"], session.get("zone"), data)
     answer_right, answer, score_credit = check_answer(game_data, data)
+    answer_details = None
+    if game_data.questions[question_index].type == QuizQuestionType.MULTI_TEXT:
+        answer_details = build_multi_text_answer_details(
+            get_submitted_text_answers(data),
+            cast(list[TextQuizAnswer], game_data.questions[question_index].answers),
+            game_data.questions[question_index].ignore_whitespace,
+        )
     latency = int(float(session["ping"]))
     time_q_started = datetime.fromisoformat(await redis.get(f"game:{session['game_pin']}:current_time"))
     diff = (time_q_started - now).total_seconds() * 1000  # - timedelta(milliseconds=latency)
@@ -531,6 +541,7 @@ async def submit_answer(sid: str, data: dict):
         time_taken=abs(diff) - latency,
         score=score,
         zone=session.get("zone"),
+        answer_details=answer_details,
     )
     answers = await redis.get(f"game_session:{session['game_pin']}:{data.question_index}")
     answers = await set_answer(

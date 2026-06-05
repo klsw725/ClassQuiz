@@ -9,6 +9,7 @@ from classquiz.db.models import (
     PlayGame,
     QuizQuestionType,
     TextQuizAnswer,
+    TextAnswerDetail,
     ABCDQuizAnswer,
     VotingQuizAnswer,
     RangeQuizAnswer,
@@ -151,6 +152,16 @@ def count_text_matches(
     answers: list[TextQuizAnswer],
     ignore_whitespace: bool = False,
 ) -> int:
+    submitted_answers = submitted_answers[: len(answers)]
+    matches = match_text_answers(submitted_answers, answers, ignore_whitespace)
+    return sum(match is not None for match in matches)
+
+
+def match_text_answers(
+    submitted_answers: list[str],
+    answers: list[TextQuizAnswer],
+    ignore_whitespace: bool = False,
+) -> list[int | None]:
     matches: list[int | None] = [None] * len(submitted_answers)
 
     def assign_answer(answer_index: int, seen_submissions: set[int]) -> bool:
@@ -168,7 +179,22 @@ def count_text_matches(
                 return True
         return False
 
-    return sum(assign_answer(answer_index, set()) for answer_index in range(len(answers)))
+    for answer_index in range(len(answers)):
+        assign_answer(answer_index, set())
+    return matches
+
+
+def build_multi_text_answer_details(
+    submitted_answers: list[str],
+    answers: list[TextQuizAnswer],
+    ignore_whitespace: bool = False,
+) -> list[TextAnswerDetail]:
+    submitted_answers = submitted_answers[: len(answers)]
+    matches = match_text_answers(submitted_answers, answers, ignore_whitespace)
+    return [
+        TextAnswerDetail(answer=submitted_answer, matched=matches[index] is not None)
+        for index, submitted_answer in enumerate(submitted_answers)
+    ]
 
 
 def check_text_question(
@@ -186,7 +212,6 @@ def check_multi_text_question(
 ) -> tuple[bool, float]:
     if not answers:
         return False, 0
-    submitted_answers = submitted_answers[: len(answers)]
     match_count = count_text_matches(submitted_answers, answers, ignore_whitespace)
     score_credit = match_count / len(answers)
     return match_count == len(answers), score_credit

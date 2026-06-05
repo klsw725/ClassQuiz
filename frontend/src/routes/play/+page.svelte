@@ -50,9 +50,15 @@ SPDX-License-Identifier: MPL-2.0
 		question_index: string;
 	}
 
+	interface AnswerDetail {
+		answer: string;
+		matched: boolean;
+	}
+
 	interface QuestionResult {
 		username: string;
 		answer: string;
+		answer_details?: AnswerDetail[];
 		right: boolean;
 		time_taken: number;
 		score: number;

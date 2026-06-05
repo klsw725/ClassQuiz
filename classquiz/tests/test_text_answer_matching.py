@@ -3,13 +3,20 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import uuid
+from datetime import datetime
 
 import pytest
 from pydantic import ValidationError
 
-from classquiz.db.models import TextQuizAnswer
+from classquiz.db.models import TextAnswerDetail, TextQuizAnswer
 from classquiz.db.models import PlayGame, QuizQuestion, QuizQuestionType
-from classquiz.socket_server.helpers import check_answer, check_multi_text_question, check_text_question
+from classquiz.routers import solo
+from classquiz.socket_server.helpers import (
+    build_multi_text_answer_details,
+    check_answer,
+    check_multi_text_question,
+    check_text_question,
+)
 from classquiz.socket_server.models import SubmitAnswerData, SubmitAnswerDataOrderType
 
 
@@ -95,6 +102,61 @@ def test_multi_text_answer_matches_required_answers_order_insensitively():
 
     assert right
     assert credit == 1
+
+
+def test_multi_text_answer_feedback_marks_each_partial_submission():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+        TextQuizAnswer(answer="gamma", case_sensitive=False),
+    ]
+
+    answer_details = build_multi_text_answer_details(["gamma", "wrong", "alpha"], answers)
+
+    assert [detail.model_dump() for detail in answer_details] == [
+        {"answer": "gamma", "matched": True},
+        {"answer": "wrong", "matched": False},
+        {"answer": "alpha", "matched": True},
+    ]
+
+
+def test_multi_text_answer_feedback_marks_all_wrong_submissions_false():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+    ]
+
+    answer_details = build_multi_text_answer_details(["wrong", "still wrong"], answers)
+
+    assert [detail.matched for detail in answer_details] == [False, False]
+
+
+def test_multi_text_answer_feedback_uses_one_to_one_matching_for_duplicate_submissions():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+    ]
+
+    answer_details = build_multi_text_answer_details(["alpha", "alpha"], answers)
+
+    assert [detail.model_dump() for detail in answer_details] == [
+        {"answer": "alpha", "matched": True},
+        {"answer": "alpha", "matched": False},
+    ]
+
+
+def test_multi_text_answer_feedback_truncates_extra_submissions_to_required_count():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+    ]
+
+    answer_details = build_multi_text_answer_details(["alpha", "beta", "extra"], answers)
+
+    assert [detail.model_dump() for detail in answer_details] == [
+        {"answer": "alpha", "matched": True},
+        {"answer": "beta", "matched": True},
+    ]
 
 
 def test_multi_text_answer_awards_partial_credit_for_matched_required_answers():
@@ -187,6 +249,59 @@ def test_check_answer_multi_text_falls_back_to_single_answer():
     assert right
     assert answer == "Alpha"
     assert credit == 1
+
+
+@pytest.mark.asyncio
+async def test_solo_submit_attempt_returns_answer_details_for_multi_text(monkeypatch):
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+    ]
+    game = make_text_game(answers, question_type=QuizQuestionType.MULTI_TEXT)
+    game.questions[0].hide_results = False
+    attempt = solo.SoloAttempt(
+        game_pin="123456",
+        username="Player",
+        zone="1구역",
+        question_started_at=datetime.now(),
+    )
+
+    async def fake_get_attempt(_attempt_id: str):
+        return attempt
+
+    async def fake_get_solo_game(_game_pin: str):
+        return game
+
+    async def fake_save_attempt(_attempt_id: str, _attempt: solo.SoloAttempt):
+        return None
+
+    monkeypatch.setattr(solo, "_get_attempt", fake_get_attempt)
+    monkeypatch.setattr(solo, "_get_solo_game", fake_get_solo_game)
+    monkeypatch.setattr(solo, "_save_attempt", fake_save_attempt)
+    monkeypatch.setattr(solo, "calculate_answer_score", lambda *args, **kwargs: 42)
+
+    response = await solo.submit_attempt(
+        "attempt-id",
+        solo.SubmitSoloAttemptRequest(
+            question_index=0,
+            complex_answer=[
+                SubmitAnswerDataOrderType(answer="beta"),
+                SubmitAnswerDataOrderType(answer="wrong"),
+                SubmitAnswerDataOrderType(answer="alpha"),
+            ],
+        ),
+    )
+
+    assert response.answer_details == [
+        TextAnswerDetail(answer="beta", matched=True),
+        TextAnswerDetail(answer="wrong", matched=False),
+    ]
+    assert attempt.answers[0].answer_details == response.answer_details
+    assert response.solution is not None
+    assert response.solution["answers"] == [
+        {"answer": "", "case_sensitive": False},
+        {"answer": "", "case_sensitive": False},
+    ]
 
 
 def test_submit_answer_data_bounds_text_payloads():
