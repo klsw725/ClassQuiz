@@ -237,7 +237,11 @@
         "ignore_whitespace_toggle": "공백 무시 전환",
         "ignore_whitespace_tooltip": "공백을 무시할까요?",
         "ignore_whitespace_on": "공백 무시: 켜짐",
-        "ignore_whitespace_off": "공백 무시: 꺼짐"
+        "ignore_whitespace_off": "공백 무시: 꺼짐",
+        "multi_text_order_sensitive_toggle": "멀티 텍스트 순서 채점 전환",
+        "multi_text_order_sensitive_tooltip": "설정한 순서대로 답해야 정답 처리할까요?",
+        "multi_text_order_sensitive_on": "정답 순서: 필요",
+        "multi_text_order_sensitive_off": "정답 순서: 자유"
     },
     "import_page": {
         "need_help": "도움이 필요하신가요?",

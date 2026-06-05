@@ -52,6 +52,9 @@ SPDX-License-Identifier: MPL-2.0
 	);
 	set_text_answers(answers);
 	data.questions[selected_question].ignore_whitespace ??= false;
+	if (get_text_question_type() === QuizQuestionType.MULTI_TEXT) {
+		data.questions[selected_question].multi_text_order_sensitive ??= false;
+	}
 
 	const tippy = createTippy({
 		arrow: true,
@@ -67,7 +70,7 @@ SPDX-License-Identifier: MPL-2.0
 </script>
 
 <div class="flex w-full flex-col gap-3">
-	<div class="flex justify-center px-10">
+	<div class="flex flex-wrap justify-center gap-2 px-10">
 		<button
 			class="cq-surface cq-card-interactive flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition"
 			type="button"
@@ -115,6 +118,55 @@ SPDX-License-Identifier: MPL-2.0
 					: $t('editor.ignore_whitespace_off')}
 			</span>
 		</button>
+		{#if get_text_question_type() === QuizQuestionType.MULTI_TEXT}
+			<button
+				class="cq-surface cq-card-interactive flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition"
+				type="button"
+				aria-label={$t('editor.multi_text_order_sensitive_toggle')}
+				onclick={() => {
+					data.questions[selected_question].multi_text_order_sensitive =
+						!data.questions[selected_question].multi_text_order_sensitive;
+				}}
+				use:tippy={{ content: $t('editor.multi_text_order_sensitive_tooltip'), placement: 'top' }}
+			>
+				{#if data.questions[selected_question].multi_text_order_sensitive}
+					<svg
+						class="w-5 h-5 inline-block"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M7 7h10M7 12h10M7 17h10"
+						/>
+					</svg>
+				{:else}
+					<svg
+						class="w-5 h-5 inline-block"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M7 7h10M7 12h7M7 17h4"
+						/>
+					</svg>
+				{/if}
+				<span>
+					{data.questions[selected_question].multi_text_order_sensitive
+						? $t('editor.multi_text_order_sensitive_on')
+						: $t('editor.multi_text_order_sensitive_off')}
+				</span>
+			</button>
+		{/if}
 	</div>
 
 	<div class="grid grid-cols-2 gap-4 w-full px-10">

@@ -239,7 +239,11 @@
         "ignore_whitespace_toggle": "Toggle whitespace ignoring",
         "ignore_whitespace_tooltip": "Ignore whitespace?",
         "ignore_whitespace_on": "Ignore whitespace: On",
-        "ignore_whitespace_off": "Ignore whitespace: Off"
+        "ignore_whitespace_off": "Ignore whitespace: Off",
+        "multi_text_order_sensitive_toggle": "Toggle ordered multi text matching",
+        "multi_text_order_sensitive_tooltip": "Require answers in the configured order?",
+        "multi_text_order_sensitive_on": "Answer order: Required",
+        "multi_text_order_sensitive_off": "Answer order: Any"
     },
     "import_page": {
         "need_help": "Need help?",
