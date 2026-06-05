@@ -244,6 +244,7 @@ async def submit_attempt(attempt_id: str, data: SubmitSoloAttemptRequest):
                 get_submitted_text_answers(submit_data),
                 cast(list[TextQuizAnswer], question.answers),
                 question.ignore_whitespace,
+                question.multi_text_order_sensitive,
             )
         score = calculate_answer_score(
             score_credit,

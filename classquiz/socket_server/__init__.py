@@ -518,6 +518,7 @@ async def submit_answer(sid: str, data: dict):
             get_submitted_text_answers(data),
             cast(list[TextQuizAnswer], game_data.questions[question_index].answers),
             game_data.questions[question_index].ignore_whitespace,
+            game_data.questions[question_index].multi_text_order_sensitive,
         )
     latency = int(float(session["ping"]))
     time_q_started = datetime.fromisoformat(await redis.get(f"game:{session['game_pin']}:current_time"))

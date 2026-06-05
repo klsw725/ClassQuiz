@@ -140,6 +140,8 @@ async def start_quiz(
                 continue
             if question["type"] == QuizQuestionType.SLIDE:
                 continue
+            if question["type"] == QuizQuestionType.MULTI_TEXT and question.get("multi_text_order_sensitive"):
+                continue
             random.shuffle(question["answers"])
 
     solo_token = secrets.token_urlsafe(32) if game_mode == "solo" else None
