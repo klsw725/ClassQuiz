@@ -409,7 +409,7 @@ class TestPlayQuiz:
         assert redis.get(f"game_session:{ValueStorage.solo_game_pin}") is None
 
     @pytest.mark.asyncio
-    async def test_solo_text_question_does_not_expose_answer_before_submit(self, test_client: TestClient):  # noqa : F811
+    async def test_solo_multi_text_question_does_not_expose_answer_before_submit(self, test_client: TestClient):  # noqa : F811
         redis = Redis().from_url(settings().redis)
         solo_text_game_pin = "654321"
         solo_text_token = "solo-text-token"
@@ -418,7 +418,7 @@ class TestPlayQuiz:
         stored_game["solo_token"] = solo_text_token
         stored_game["questions"] = [
             {
-                "type": "TEXT",
+                "type": "MULTI_TEXT",
                 "question": "Type the secret",
                 "time": 10,
                 "answers": [{"answer": "secret answer", "case_sensitive": False}],
@@ -437,7 +437,7 @@ class TestPlayQuiz:
         )
         assert resp.status_code == 200
         data = resp.json()
-        assert data["question"]["answers"] == []
+        assert data["question"]["answers"] == [{"answer": "", "case_sensitive": False}]
         assert "secret answer" not in json.dumps(data["question"])
 
         resp = test_client.post(
@@ -445,7 +445,8 @@ class TestPlayQuiz:
             json={"question_index": 0, "answer": "secret answer"},
         )
         assert resp.status_code == 200
-        assert resp.json()["solution"]["answers"][0]["answer"] == "secret answer"
+        assert resp.json()["solution"]["answers"] == [{"answer": "", "case_sensitive": False}]
+        assert "secret answer" not in json.dumps(resp.json()["solution"])
 
     @pytest.mark.asyncio
     async def test_reject_solo_game_in_live_rest_endpoints(self, test_client: TestClient):  # noqa : F811

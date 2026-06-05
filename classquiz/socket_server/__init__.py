@@ -105,6 +105,12 @@ def build_return_question(game_data: PlayGame, question_index: int, shuffle_answ
             temp_return["answers"][i] = VotingQuizAnswer(**temp_return["answers"][i])
     temp_return["type"] = question.type
     answer_order = list(range(len(temp_return["answers"]))) if isinstance(temp_return.get("answers"), list) else []
+    if question.type == QuizQuestionType.TEXT:
+        temp_return["answers"] = []
+        return temp_return, answer_order
+    if question.type == QuizQuestionType.MULTI_TEXT:
+        temp_return["answers"] = [{"answer": "", "case_sensitive": False} for _answer in answer_order]
+        return temp_return, answer_order
     if shuffle_answers and can_randomize_question_answers(question.type) and answer_order:
         indexed_answers = list(zip(answer_order, temp_return["answers"]))
         random.shuffle(indexed_answers)
@@ -484,7 +490,7 @@ async def submit_answer(sid: str, data: dict):
         await sio.emit("error", room=sid)
         print(e)
         return
-    data.answer = str(data.answer)
+    data.answer = "" if data.answer is None else str(data.answer)
     session = await get_session(sid, sio)
     question_index = int(float(data.question_index))
     game_data = await PlayGame.get_from_redis(session["game_pin"])
@@ -502,12 +508,12 @@ async def submit_answer(sid: str, data: dict):
 
     if game_data.questions[question_index].type == QuizQuestionType.CHECK:
         await remap_player_randomized_check_answer(session["game_pin"], session["username"], session.get("zone"), data)
-    answer_right, answer = check_answer(game_data, data)
+    answer_right, answer, score_credit = check_answer(game_data, data)
     latency = int(float(session["ping"]))
     time_q_started = datetime.fromisoformat(await redis.get(f"game:{session['game_pin']}:current_time"))
     diff = (time_q_started - now).total_seconds() * 1000  # - timedelta(milliseconds=latency)
     score = calculate_answer_score(
-        answer_right,
+        score_credit,
         game_data.time_based_scoring,
         abs(diff) - latency,
         int(float(game_data.questions[question_index].time)),
@@ -570,9 +576,15 @@ async def show_solutions(sid: str, _data: dict):
     game_data = await PlayGame.get_from_redis(session["game_pin"])
     if not session["admin"]:
         return
+    question = game_data.questions[game_data.current_question]
+    question_data = question.model_dump()
+    if question.type == QuizQuestionType.MULTI_TEXT and isinstance(question_data.get("answers"), list):
+        question_data["answers"] = [
+            {"answer": "", "case_sensitive": False} for _answer in question_data["answers"]
+        ]
     await sio.emit(
         "solutions",
-        game_data.questions[game_data.current_question].model_dump(),
+        question_data,
         room=session["game_pin"],
     )
 

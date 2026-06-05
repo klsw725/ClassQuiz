@@ -67,6 +67,16 @@ class PublicQuizResponse(Quiz.get_pydantic(exclude={"questions"})):
     plays: int
 
 
+def practice_question(question: QuizQuestion) -> QuizQuestion:
+    if question.type != QuizQuestionType.MULTI_TEXT:
+        return question
+    question_data = question.model_dump()
+    question_data["answers"] = [
+        {"answer": "", "case_sensitive": False} for _answer in question_data["answers"]
+    ]
+    return QuizQuestion(**question_data)
+
+
 @router.get("/get/public/{quiz_id}")
 async def get_public_quiz(quiz_id: uuid.UUID):
     quiz = await Quiz.objects.select_related("user_id").get_or_none(id=quiz_id)
@@ -76,6 +86,18 @@ async def get_public_quiz(quiz_id: uuid.UUID):
         quiz.views += 1
         await quiz.update()
         return PublicQuizResponse(**quiz.model_dump())
+
+
+@router.get("/get/public/{quiz_id}/practice")
+async def get_public_quiz_for_practice(quiz_id: uuid.UUID):
+    quiz = await Quiz.objects.select_related("user_id").get_or_none(id=quiz_id)
+    if quiz is None:
+        return JSONResponse(status_code=404, content={"detail": "quiz not found"})
+    quiz.views += 1
+    await quiz.update()
+    quiz_data = quiz.model_dump()
+    quiz_data["questions"] = [practice_question(question) for question in quiz.questions]
+    return PublicQuizResponse(**quiz_data)
 
 
 @router.post("/start/{quiz_id}")

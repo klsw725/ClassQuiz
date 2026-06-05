@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field, field_validator
 
 from classquiz.config import ALLOWED_TAGS_FOR_QUIZ, redis
-from classquiz.db.models import AnswerData, PlayGame, QuizQuestionType
+from classquiz.db.models import AnswerData, PlayGame, QuizQuestion, QuizQuestionType
 from classquiz.scoring import calculate_answer_score
 from classquiz.socket_server.helpers import check_answer
 from classquiz.socket_server.models import ALLOWED_ZONES, ReturnQuestion, SubmitAnswerData, SubmitAnswerDataOrderType
@@ -118,14 +118,27 @@ def _safe_question(game: PlayGame, question_index: int) -> dict[str, object]:
     if question.type == QuizQuestionType.TEXT:
         question_data["answers"] = []
         return _strip_solution_data(question_data)
+    if question.type == QuizQuestionType.MULTI_TEXT:
+        answers = question_data.get("answers")
+        answer_count = len(answers) if isinstance(answers, list) else 0
+        question_data["answers"] = [{"answer": "", "case_sensitive": False} for _answer in range(answer_count)]
+        return _strip_solution_data(question_data)
     if question.type == QuizQuestionType.ORDER and isinstance(question_data["answers"], list):
         random.shuffle(question_data["answers"])
     try:
         return _strip_solution_data(cast(dict[str, object], ReturnQuestion(**question_data).model_dump()))
     except ValueError:
-        if question.type == QuizQuestionType.TEXT:
+        if question.type in [QuizQuestionType.TEXT, QuizQuestionType.MULTI_TEXT]:
             question_data["answers"] = []
         return _strip_solution_data(question_data)
+
+
+def _solution_question(question: QuizQuestion) -> dict[str, object]:
+    question_data = cast(dict[str, object], question.model_dump())
+    answers = question_data.get("answers")
+    if question.type == QuizQuestionType.MULTI_TEXT and isinstance(answers, list):
+        question_data["answers"] = [{"answer": "", "case_sensitive": False} for _answer in answers]
+    return question_data
 
 
 async def _get_solo_game(game_pin: str) -> PlayGame:
@@ -216,24 +229,23 @@ async def submit_attempt(attempt_id: str, data: SubmitSoloAttemptRequest):
     score = 0
     solution: dict[str, object] | None = None
     elapsed_ms = (now - attempt.question_started_at).total_seconds() * 1000
-    has_answer = data.answer is not None and question.type != QuizQuestionType.SLIDE
+    has_answer = (data.answer is not None or data.complex_answer is not None) and question.type != QuizQuestionType.SLIDE
     if has_answer:
         submit_data = SubmitAnswerData(
             question_index=data.question_index,
-            answer=data.answer,
+            answer="" if data.answer is None else data.answer,
             complex_answer=data.complex_answer,
         )
-        answer_right_raw, answer = check_answer(game, submit_data)
-        answer_right = bool(answer_right_raw)
+        answer_right, answer, score_credit = check_answer(game, submit_data)
         score = calculate_answer_score(
-            answer_right,
+            score_credit,
             game.time_based_scoring,
             elapsed_ms,
             int(float(question.time)),
             question.points,
         )
         if not question.hide_results:
-            solution = cast(dict[str, object], question.model_dump())
+            solution = _solution_question(question)
 
     attempt.total_score += score
     attempt.answers.append(
