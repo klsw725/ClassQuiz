@@ -10,5 +10,6 @@ SPDX-License-Identifier: MPL-2.0
 - [Multiple Choice](/docs/quiz/question-types/multiple-choice)
 - [Voting](/docs/quiz/question-types/voting)
 - [Text](/docs/quiz/question-types/text)
+- [Multi Text](/docs/quiz/question-types/multi-text)
 - [Order](/docs/quiz/question-types/order)
 - [Check Choice](/docs/quiz/question-types/check-choice)

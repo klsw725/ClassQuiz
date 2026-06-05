@@ -1,0 +1,20 @@
+<!--
+SPDX-FileCopyrightText: 2023 Marlon W (Mawoka)
+
+SPDX-License-Identifier: MPL-2.0
+-->
+
+# Multi Text
+
+## Summary
+
+- Players enter multiple text answers
+- Each configured answer is shown as its own required text input during play
+- Players can receive partial score when only some inputs match
+- Case sensitivity can be set per answer slot
+- Whitespace can optionally be ignored when checking submitted text
+
+## Use case
+
+- Ask for several names, terms, or facts that must each be entered separately
+- Award partial credit when players know some, but not all, required text answers

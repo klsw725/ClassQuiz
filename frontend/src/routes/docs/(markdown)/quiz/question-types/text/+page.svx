@@ -7,9 +7,14 @@ SPDX-License-Identifier: MPL-2.0
 # Text
 
 ## Summary
+
 - Players can enter text
-- 4 different correct solutions can be given
-- case sensitivity can be set per answer
+- Players see one text input during play
+- Multiple configured answers are accepted alternatives for that one input
+- Case sensitivity can be set per accepted answer
+- Whitespace can optionally be ignored when checking the submitted text
 
 ## Use case
-- Test if a name is remembered correctly
+
+- Accept a short typed answer when spelling or wording matters
+- Add several accepted alternatives when the same answer can be written in multiple ways
