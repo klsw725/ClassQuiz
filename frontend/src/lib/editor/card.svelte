@@ -90,6 +90,7 @@ SPDX-License-Identifier: MPL-2.0
 		ABCD: $t('words.multiple_choice'),
 		VOTING: $t('words.voting'),
 		TEXT: $t('words.text'),
+		MULTI_TEXT: $t('words.multi_text'),
 		ORDER: $t('words.order'),
 		CHECK: $t('words.check_choice')
 	};
@@ -270,7 +271,7 @@ SPDX-License-Identifier: MPL-2.0
 							{:then c}
 								<c.default bind:data bind:selected_question />
 							{/await}
-						{:else if type === QuizQuestionType.TEXT}
+						{:else if type === QuizQuestionType.TEXT || type === QuizQuestionType.MULTI_TEXT}
 							{#await import('$lib/editor/TextEditorPart.svelte')}
 								<Spinner my_20={false} />
 							{:then c}

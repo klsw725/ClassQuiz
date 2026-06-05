@@ -35,6 +35,7 @@ export enum QuizQuestionType {
 	VOTING = 'VOTING', // eslint-disable-line no-unused-vars
 	SLIDE = 'SLIDE', // eslint-disable-line no-unused-vars
 	TEXT = 'TEXT', // eslint-disable-line no-unused-vars
+	MULTI_TEXT = 'MULTI_TEXT', // eslint-disable-line no-unused-vars
 	ORDER = 'ORDER', // eslint-disable-line no-unused-vars
 	CHECK = 'CHECK' // eslint-disable-line no-unused-vars
 }
@@ -83,7 +84,7 @@ export interface BaseQuestion {
 export type Question =
 	| (BaseQuestion & { type: QuizQuestionType.RANGE; answers: RangeQuizAnswer })
 	| (BaseQuestion & { type: QuizQuestionType.SLIDE; answers: string })
-	| (BaseQuestion & { type: QuizQuestionType.TEXT; answers: TextQuizAnswer[] })
+	| (BaseQuestion & { type: QuizQuestionType.TEXT | QuizQuestionType.MULTI_TEXT; answers: TextQuizAnswer[] })
 	| (BaseQuestion & { type: QuizQuestionType.ORDER; answers: OrderQuizAnswer[] })
 	| (BaseQuestion & {
 			type: QuizQuestionType.ABCD | QuizQuestionType.CHECK;

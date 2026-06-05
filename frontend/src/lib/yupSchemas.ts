@@ -69,7 +69,7 @@ export const dataSchema = yup.object({
 				time: yup.number().required().positive('The time has to be positive'),
 				image: yup.string().nullable().lowercase(),
 				ignore_whitespace: yup.boolean().when('type', {
-					is: 'TEXT',
+					is: (type: string | undefined) => type === 'TEXT' || type === 'MULTI_TEXT',
 					then: (schema) => schema.default(false).required(),
 					otherwise: (schema) => schema.optional()
 				}),

@@ -102,6 +102,19 @@ SPDX-License-Identifier: MPL-2.0
 			}
 		},
 		{
+			name: $t('words.multi_text'),
+			description: $t('editor.multi_text_description'),
+			question: {
+				type: QuizQuestionType.MULTI_TEXT,
+				time: '20',
+				points: 1000,
+				question: '',
+				image: undefined,
+				ignore_whitespace: false,
+				answers: []
+			}
+		},
+		{
 			name: $t('words.range'),
 			description: $t('editor.range_description'),
 			question: {

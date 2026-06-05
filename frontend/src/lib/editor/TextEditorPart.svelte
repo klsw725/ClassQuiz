@@ -22,11 +22,17 @@ SPDX-License-Identifier: MPL-2.0
 
 	const { t } = getLocalization();
 
+	const get_text_question_type = () =>
+		data.questions[selected_question].type === QuizQuestionType.MULTI_TEXT
+			? QuizQuestionType.MULTI_TEXT
+			: QuizQuestionType.TEXT;
+	let max_text_answers = $derived(get_text_question_type() === QuizQuestionType.MULTI_TEXT ? 16 : 4);
+
 	const set_text_answers = (new_answers: TextQuizAnswer[]) => {
 		answers = new_answers;
 		data.questions[selected_question] = {
 			...data.questions[selected_question],
-			type: QuizQuestionType.TEXT,
+			type: get_text_question_type(),
 			answers
 		};
 	};
@@ -194,7 +200,7 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 			{/each}
 		{/if}
-		{#if answers.length < 4}
+		{#if answers.length < max_text_answers}
 			<button
 				class="cq-surface cq-card-interactive p-4 rounded-lg transition"
 				type="button"

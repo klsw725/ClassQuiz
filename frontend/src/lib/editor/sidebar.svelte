@@ -353,7 +353,7 @@ SPDX-License-Identifier: MPL-2.0
 						and {range_answer.max_correct} are correct, where numbers between {range_answer.min}
 						and {range_answer.max} can be selected.
 					</p>
-				{:else if question.type === QuizQuestionType.VOTING || question.type === QuizQuestionType.TEXT}
+				{:else if question.type === QuizQuestionType.VOTING || question.type === QuizQuestionType.TEXT || question.type === QuizQuestionType.MULTI_TEXT}
 					{#if Array.isArray(question.answers)}
 						<div class="grid grid-cols-2 gap-2">
 							{#each question.answers as answer}
