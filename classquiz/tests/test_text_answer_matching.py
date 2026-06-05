@@ -24,6 +24,7 @@ def make_text_game(
     answers: list[TextQuizAnswer],
     ignore_whitespace: bool = False,
     question_type: QuizQuestionType = QuizQuestionType.TEXT,
+    multi_text_order_sensitive: bool = False,
 ) -> PlayGame:
     return PlayGame(
         quiz_id=uuid.uuid4(),
@@ -37,6 +38,7 @@ def make_text_game(
                 type=question_type,
                 answers=answers,
                 ignore_whitespace=ignore_whitespace,
+                multi_text_order_sensitive=multi_text_order_sensitive,
             )
         ],
         game_id=uuid.uuid4(),
@@ -104,6 +106,65 @@ def test_multi_text_answer_matches_required_answers_order_insensitively():
     assert credit == 1
 
 
+def test_multi_text_question_order_sensitive_defaults_to_false():
+    answers = [TextQuizAnswer(answer="alpha", case_sensitive=False)]
+
+    game = make_text_game(answers, question_type=QuizQuestionType.MULTI_TEXT)
+
+    assert not game.questions[0].multi_text_order_sensitive
+
+
+def test_multi_text_answer_can_require_matching_slot_order():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+        TextQuizAnswer(answer="gamma", case_sensitive=False),
+    ]
+
+    right, credit = check_multi_text_question(
+        ["gamma", "Alpha", "beta"],
+        answers,
+        order_sensitive=True,
+    )
+
+    assert not right
+    assert credit == 0
+
+
+def test_multi_text_answer_order_sensitive_awards_matching_slots_only():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+        TextQuizAnswer(answer="gamma", case_sensitive=False),
+    ]
+
+    right, credit = check_multi_text_question(
+        ["alpha", "wrong", "Gamma"],
+        answers,
+        order_sensitive=True,
+    )
+
+    assert not right
+    assert credit == 2 / 3
+
+
+def test_multi_text_answer_order_sensitive_still_respects_text_matching_options():
+    answers = [
+        TextQuizAnswer(answer="Class Quiz", case_sensitive=True),
+        TextQuizAnswer(answer="대한민국", case_sensitive=False),
+    ]
+
+    right, credit = check_multi_text_question(
+        ["ClassQuiz", "대 한 민 국"],
+        answers,
+        ignore_whitespace=True,
+        order_sensitive=True,
+    )
+
+    assert right
+    assert credit == 1
+
+
 def test_multi_text_answer_feedback_marks_each_partial_submission():
     answers = [
         TextQuizAnswer(answer="alpha", case_sensitive=False),
@@ -156,6 +217,24 @@ def test_multi_text_answer_feedback_truncates_extra_submissions_to_required_coun
     assert [detail.model_dump() for detail in answer_details] == [
         {"answer": "alpha", "matched": True},
         {"answer": "beta", "matched": True},
+    ]
+
+
+def test_multi_text_answer_feedback_can_require_matching_slot_order():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+    ]
+
+    answer_details = build_multi_text_answer_details(
+        ["beta", "alpha"],
+        answers,
+        order_sensitive=True,
+    )
+
+    assert [detail.model_dump() for detail in answer_details] == [
+        {"answer": "beta", "matched": False},
+        {"answer": "alpha", "matched": False},
     ]
 
 
@@ -213,6 +292,29 @@ def test_check_answer_multi_text_uses_complex_answer_and_returns_joined_submissi
     assert not right
     assert answer == "beta, wrong"
     assert credit == 0.5
+
+
+def test_check_answer_multi_text_respects_order_sensitive_question_option():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+    ]
+    game = make_text_game(
+        answers,
+        question_type=QuizQuestionType.MULTI_TEXT,
+        multi_text_order_sensitive=True,
+    )
+    data = SubmitAnswerData(
+        question_index=0,
+        answer="",
+        complex_answer=[SubmitAnswerDataOrderType(answer="beta"), SubmitAnswerDataOrderType(answer="alpha")],
+    )
+
+    right, answer, credit = check_answer(game, data)
+
+    assert not right
+    assert answer == "beta, alpha"
+    assert credit == 0
 
 
 def test_check_answer_multi_text_bounds_extra_complex_answer_guesses():

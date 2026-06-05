@@ -92,6 +92,7 @@ def check_answer(game_data: PlayGame, data: SubmitAnswerData) -> AnswerCheckResu
             submitted_answers,
             text_answers,
             game_data.questions[q_i].ignore_whitespace,
+            game_data.questions[q_i].multi_text_order_sensitive,
         )
         return AnswerCheckResult(answer_right, ", ".join(submitted_answers), score_credit)
 
@@ -151,9 +152,10 @@ def count_text_matches(
     submitted_answers: list[str],
     answers: list[TextQuizAnswer],
     ignore_whitespace: bool = False,
+    order_sensitive: bool = False,
 ) -> int:
     submitted_answers = submitted_answers[: len(answers)]
-    matches = match_text_answers(submitted_answers, answers, ignore_whitespace)
+    matches = match_text_answers(submitted_answers, answers, ignore_whitespace, order_sensitive)
     return sum(match is not None for match in matches)
 
 
@@ -161,8 +163,14 @@ def match_text_answers(
     submitted_answers: list[str],
     answers: list[TextQuizAnswer],
     ignore_whitespace: bool = False,
+    order_sensitive: bool = False,
 ) -> list[int | None]:
     matches: list[int | None] = [None] * len(submitted_answers)
+    if order_sensitive:
+        for submitted_index, submitted_answer in enumerate(submitted_answers[: len(answers)]):
+            if text_answer_matches(submitted_answer, answers[submitted_index], ignore_whitespace):
+                matches[submitted_index] = submitted_index
+        return matches
 
     def assign_answer(answer_index: int, seen_submissions: set[int]) -> bool:
         for submitted_index, submitted_answer in enumerate(submitted_answers):
@@ -188,9 +196,10 @@ def build_multi_text_answer_details(
     submitted_answers: list[str],
     answers: list[TextQuizAnswer],
     ignore_whitespace: bool = False,
+    order_sensitive: bool = False,
 ) -> list[TextAnswerDetail]:
     submitted_answers = submitted_answers[: len(answers)]
-    matches = match_text_answers(submitted_answers, answers, ignore_whitespace)
+    matches = match_text_answers(submitted_answers, answers, ignore_whitespace, order_sensitive)
     return [
         TextAnswerDetail(answer=submitted_answer, matched=matches[index] is not None)
         for index, submitted_answer in enumerate(submitted_answers)
@@ -209,10 +218,11 @@ def check_multi_text_question(
     submitted_answers: list[str],
     answers: list[TextQuizAnswer],
     ignore_whitespace: bool = False,
+    order_sensitive: bool = False,
 ) -> tuple[bool, float]:
     if not answers:
         return False, 0
-    match_count = count_text_matches(submitted_answers, answers, ignore_whitespace)
+    match_count = count_text_matches(submitted_answers, answers, ignore_whitespace, order_sensitive)
     score_credit = match_count / len(answers)
     return match_count == len(answers), score_credit
 
