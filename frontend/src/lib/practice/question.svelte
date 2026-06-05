@@ -5,7 +5,7 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { OrderQuizAnswer, Question, RangeQuizAnswer } from '$lib/quiz_types';
+	import type { OrderQuizAnswer, Question, RangeQuizAnswer, TextQuizAnswer } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { fly } from 'svelte/transition';
 	import { getLocalization } from '$lib/i18n';
@@ -49,7 +49,11 @@ SPDX-License-Identifier: MPL-2.0
 		slider_values = [range_answer.min_correct ?? 0, range_answer.max_correct ?? 0];
 	}
 
-	let text_input = $state();
+	const text_input_count =
+		question.type === QuizQuestionType.MULTI_TEXT && Array.isArray(question.answers)
+			? Math.max((question.answers as TextQuizAnswer[]).length, 1)
+			: 1;
+	let text_inputs = $state<string[]>(Array(text_input_count).fill(''));
 	timer(question.time);
 
 	let check_choice_selected = $state([false, false, false, false]);
@@ -115,7 +119,7 @@ SPDX-License-Identifier: MPL-2.0
 	{#if question.type === QuizQuestionType.ABCD}
 		{#if show_results}
 			<div>
-				{#each question.answers as answer, _i}
+				{#each question.answers as answer, i}
 					<button
 						disabled
 						class:bg-green-500={question.answers[i].right}
@@ -219,30 +223,42 @@ SPDX-License-Identifier: MPL-2.0
 				<c.default {question} />
 			</div>
 		{/await}
-	{:else if question.type === QuizQuestionType.TEXT}
+	{:else if question.type === QuizQuestionType.TEXT || question.type === QuizQuestionType.MULTI_TEXT}
 		{#if timer_res === '0'}
-			{#each question.answers as answer, _i}
-				<div
-					class="cq-surface-muted p-2 flex justify-center w-full transition my-5 text-cq-text"
-				>
-					{answer.answer}
+			{#if question.type === QuizQuestionType.TEXT}
+				{#each question.answers as answer}
+					<div
+						class="cq-surface-muted p-2 flex justify-center w-full transition my-5 text-cq-text"
+					>
+						{answer.answer}
+					</div>
+				{/each}
+			{:else}
+				{#each text_inputs as _text_input, i}
+					<div
+						class="cq-surface-muted p-2 flex justify-center w-full transition my-5 text-cq-text"
+					>
+						{text_inputs[i]}
+					</div>
+				{/each}
+			{/if}
+		{:else}
+			{#each text_inputs as _text_input, i}
+				<div class="flex justify-center mt-2">
+					<input
+						type="text"
+						bind:value={text_inputs[i]}
+						class="cq-surface-muted block w-full p-2 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand"
+					/>
 				</div>
 			{/each}
-		{:else}
-			<div class="flex justify-center mt-2">
-				<input
-					type="text"
-					bind:value={text_input}
-					class="cq-surface-muted block w-full p-2 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand"
-				/>
-			</div>
 			<div class="flex justify-center">
 				<button
 					type="button"
-					disabled={!text_input}
+					disabled={!text_inputs.some((text_input) => text_input.trim())}
 					class="accent-button my-2 w-1/3 text-3xl disabled:opacity-60"
 					onclick={() => {
-						selected_answer = text_input;
+						selected_answer = text_inputs.join(', ');
 						timer_res = '0';
 					}}>{$t('words.submit')}</button
 				>

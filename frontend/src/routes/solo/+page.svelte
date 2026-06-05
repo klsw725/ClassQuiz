@@ -69,7 +69,7 @@ SPDX-License-Identifier: MPL-2.0
 	let error_message = $state('');
 	let timer_res = $state('0');
 	let timer_interval: ReturnType<typeof setInterval> | undefined = undefined;
-	let text_input = $state('');
+	let text_inputs = $state<string[]>([]);
 	let range_value = $state([0]);
 	let selected_check_answers = $state<boolean[]>([]);
 	let copy_status = $state('');
@@ -97,6 +97,21 @@ SPDX-License-Identifier: MPL-2.0
 		}
 		return Math.max(0, Math.min(100, (remaining_time / total_time) * 100));
 	});
+	let has_text_answer = $derived(text_inputs.some((answer) => answer.trim().length > 0));
+
+	const create_text_inputs = (question: Question | null): string[] => {
+		if (
+			!question ||
+			question.type !== QuizQuestionType.MULTI_TEXT ||
+			!Array.isArray(question.answers)
+		) {
+			return [''];
+		}
+		return Array.from(
+			{ length: Math.max((question.answers as TextQuizAnswer[]).length, 1) },
+			() => ''
+		);
+	};
 
 	const clear_timer = () => {
 		if (timer_interval) {
@@ -121,7 +136,14 @@ SPDX-License-Identifier: MPL-2.0
 			if (seconds <= 0) {
 				clear_timer();
 				if (!submit_result) {
-					submit_answer();
+					if (
+						current_question?.type === QuizQuestionType.TEXT ||
+						current_question?.type === QuizQuestionType.MULTI_TEXT
+					) {
+						submit_text_answer();
+					} else {
+						submit_answer();
+					}
 				}
 			}
 		}, 1000);
@@ -131,7 +153,7 @@ SPDX-License-Identifier: MPL-2.0
 		current_question = question;
 		current_question_index = question_index;
 		submit_result = undefined;
-		text_input = '';
+		text_inputs = create_text_inputs(question);
 		selected_check_answers = [];
 		if (!question) {
 			clear_timer();
@@ -232,6 +254,20 @@ SPDX-License-Identifier: MPL-2.0
 		submit_answer('a', complex_answer);
 	};
 
+	const submit_text_answer = () => {
+		if (!current_question) {
+			return;
+		}
+		if (current_question.type === QuizQuestionType.MULTI_TEXT) {
+			submit_answer(
+				text_inputs.join(', '),
+				text_inputs.map((answer) => ({ answer }))
+			);
+			return;
+		}
+		submit_answer(text_inputs[0] ?? '');
+	};
+
 	const show_next_question = async () => {
 		if (!attempt || !submit_result || loading) {
 			return;
@@ -276,7 +312,7 @@ SPDX-License-Identifier: MPL-2.0
 			const answer = solution.answers as RangeQuizAnswer;
 			return [`${answer.min_correct} - ${answer.max_correct}`];
 		}
-		if (solution.type === QuizQuestionType.TEXT) {
+		if (solution.type === QuizQuestionType.TEXT || solution.type === QuizQuestionType.MULTI_TEXT) {
 			return (solution.answers as TextQuizAnswer[]).map((answer) => answer.answer);
 		}
 		if (solution.type === QuizQuestionType.ORDER) {
@@ -532,15 +568,17 @@ SPDX-License-Identifier: MPL-2.0
 							disabled={loading}>{$t('words.submit')}</BrownButton
 						>
 					</div>
-				{:else if current_question.type === QuizQuestionType.TEXT}
+				{:else if current_question.type === QuizQuestionType.TEXT || current_question.type === QuizQuestionType.MULTI_TEXT}
 					<div class="flex flex-col gap-3">
-						<input
-							class="cq-surface-muted w-full p-3 text-center outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand"
-							bind:value={text_input}
-						/>
+						{#each text_inputs as _text_input, index (index)}
+							<input
+								class="cq-surface-muted w-full p-3 text-center outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand"
+								bind:value={text_inputs[index]}
+							/>
+						{/each}
 						<BrownButton
-							onclick={() => submit_answer(text_input)}
-							disabled={loading || !text_input}>{$t('words.submit')}</BrownButton
+							onclick={submit_text_answer}
+							disabled={loading || !has_text_answer}>{$t('words.submit')}</BrownButton
 						>
 					</div>
 				{:else if current_question.type === QuizQuestionType.ORDER}

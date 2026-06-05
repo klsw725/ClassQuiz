@@ -16,7 +16,7 @@ SPDX-License-Identifier: MPL-2.0
 	let selected_question = $state(-1);
 
 	const get_quiz = async () => {
-		const res = await fetch(`/api/v1/quiz/get/public/${page.url.searchParams.get('quiz_id')}`);
+		const res = await fetch(`/api/v1/quiz/get/public/${page.url.searchParams.get('quiz_id')}/practice`);
 		if (!res.ok) {
 			throw res.status;
 		}

@@ -92,7 +92,48 @@ SPDX-License-Identifier: MPL-2.0
 		});
 	};
 
-	let text_input = $state('');
+	let text_inputs = $state<string[]>([]);
+
+	const text_answer_count = $derived.by(() => {
+		if (question.type !== QuizQuestionType.MULTI_TEXT || !Array.isArray(question.answers)) {
+			return 1;
+		}
+		return Math.max((question.answers as TextQuizAnswer[]).length, 1);
+	});
+
+	$effect(() => {
+		if (question.type !== QuizQuestionType.TEXT && question.type !== QuizQuestionType.MULTI_TEXT) {
+			return;
+		}
+		if (text_inputs.length === text_answer_count) {
+			return;
+		}
+		text_inputs = Array.from(
+			{ length: text_answer_count },
+			(_, index) => text_inputs[index] ?? ''
+		);
+	});
+
+	let has_text_answer = $derived(text_inputs.some((answer) => answer.trim().length > 0));
+
+	const submit_text_answer = () => {
+		const answer =
+			question.type === QuizQuestionType.MULTI_TEXT ? text_inputs.join(', ') : (text_inputs[0] ?? '');
+		const payload: {
+			question_index: string | number;
+			answer: string;
+			complex_answer?: { answer: string }[];
+		} = {
+			question_index: question_index,
+			answer
+		};
+		if (question.type === QuizQuestionType.MULTI_TEXT) {
+			payload.complex_answer = text_inputs.map((answer) => ({ answer }));
+		}
+		selected_answer = answer;
+		answer_submitted = true;
+		socket.emit('submit_answer', payload);
+	};
 
 	let slider_value = $state([0]);
 	if (question.type === QuizQuestionType.RANGE) {
@@ -164,7 +205,7 @@ SPDX-License-Identifier: MPL-2.0
 			return [`${answer.min_correct} - ${answer.max_correct}`];
 		}
 
-		if (solution_type === QuizQuestionType.TEXT) {
+		if (solution_type === QuizQuestionType.TEXT || solution_type === QuizQuestionType.MULTI_TEXT) {
 			return (solution.answers as TextQuizAnswer[]).map((answer) => answer.answer);
 		}
 
@@ -193,9 +234,7 @@ SPDX-License-Identifier: MPL-2.0
 		<div
 			class="flex flex-col justify-start"
 			class:mt-10={solution === undefined &&
-				[QuizQuestionType.RANGE, QuizQuestionType.ORDER, QuizQuestionType.TEXT].includes(
-					question.type
-				)}
+				[QuizQuestionType.RANGE, QuizQuestionType.ORDER, QuizQuestionType.TEXT, QuizQuestionType.MULTI_TEXT].includes(question.type)}
 			style="height: {get_question_area_height()}%"
 		>
 			<h1
@@ -338,7 +377,7 @@ SPDX-License-Identifier: MPL-2.0
 					</div>
 				</div>
 			{/await}
-		{:else if question.type === QuizQuestionType.TEXT}
+		{:else if question.type === QuizQuestionType.TEXT || question.type === QuizQuestionType.MULTI_TEXT}
 			<div>
 				<span
 					class="fixed top-0 bg-red-500 h-8 transition-all"
@@ -347,23 +386,25 @@ SPDX-License-Identifier: MPL-2.0
 				<div class="flex justify-center mt-10">
 					<p class="text-cq-text">{$t('editor.enter_answer')}</p>
 				</div>
-				<div class="flex justify-center m-2">
-					<input
-						type="text"
-						bind:value={text_input}
-						disabled={selected_answer !== undefined}
-						class="cq-surface-muted block w-full p-2 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand disabled:cursor-not-allowed disabled:opacity-50"
-					/>
+				<div class="m-2 flex flex-col gap-2">
+					{#each text_inputs as _text_input, i (i)}
+						<div class="flex justify-center">
+							<input
+								type="text"
+								bind:value={text_inputs[i]}
+								disabled={selected_answer !== undefined}
+								class="cq-surface-muted block w-full p-2 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition focus:ring-cq-brand disabled:cursor-not-allowed disabled:opacity-50"
+							/>
+						</div>
+					{/each}
 				</div>
 
 				<div class="flex justify-center mt-2">
 					<div class="w-1/3">
 						<BrownButton
 							type="button"
-							disabled={!text_input || text_input.length === 0}
-							onclick={() => {
-								selectAnswer(text_input);
-							}}
+							disabled={selected_answer !== undefined || !has_text_answer}
+							onclick={submit_text_answer}
 						>
 							{$t('words.submit')}
 						</BrownButton>
