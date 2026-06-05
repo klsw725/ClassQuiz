@@ -27,3 +27,11 @@ def test_wrong_answers_score_zero_in_both_modes():
 def test_time_based_scoring_uses_question_points():
     assert calculate_score(10000, 20, 500) == 250
     assert calculate_answer_score(True, True, 10000, 20, 500) == 250
+
+
+def test_fixed_scoring_accepts_partial_credit():
+    assert calculate_answer_score(0.5, False, 15000, 20, 500) == 250
+
+
+def test_time_based_scoring_accepts_partial_credit():
+    assert calculate_answer_score(0.5, True, 10000, 20, 500) == 125

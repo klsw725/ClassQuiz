@@ -136,6 +136,7 @@ class QuizQuestionType(str, Enum):
     VOTING = "VOTING"
     SLIDE = "SLIDE"
     TEXT = "TEXT"
+    MULTI_TEXT = "MULTI_TEXT"
     ORDER = "ORDER"
     CHECK = "CHECK"
 
@@ -163,7 +164,7 @@ class QuizQuestion(BaseModel):
             raise ValueError("Answer must be from type RangeQuizAnswer if type is RANGE")
         if info.data["type"] == QuizQuestionType.VOTING and not isinstance(v[0], VotingQuizAnswer):
             raise ValueError("Answer must be from type VotingQuizAnswer if type is VOTING")
-        if info.data["type"] == QuizQuestionType.TEXT and not isinstance(v[0], TextQuizAnswer):
+        if info.data["type"] in [QuizQuestionType.TEXT, QuizQuestionType.MULTI_TEXT] and not isinstance(v[0], TextQuizAnswer):
             raise ValueError("Answer must be from type TextQuizAnswer if type is TEXT")
         if info.data["type"] == QuizQuestionType.ORDER and not isinstance(v[0], VotingQuizAnswer):
             raise ValueError("Answer must be from type VotingQuizAnswer if type is ORDER")

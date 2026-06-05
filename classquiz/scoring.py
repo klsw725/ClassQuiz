@@ -12,14 +12,15 @@ def calculate_score(elapsed_ms: float, question_time_seconds: int, max_score: in
 
 
 def calculate_answer_score(
-    answer_right: bool,
+    answer_right: bool | int | float,
     time_based_scoring: bool,
     elapsed_ms: float,
     question_time_seconds: int,
     max_score: int = MAX_SCORE,
 ) -> int:
-    if not answer_right:
+    score_credit = float(answer_right)
+    if score_credit == 0:
         return 0
     if not time_based_scoring:
-        return max_score
-    return min(calculate_score(elapsed_ms, question_time_seconds, max_score), max_score)
+        return int(max_score * score_credit)
+    return int(min(calculate_score(elapsed_ms, question_time_seconds, max_score), max_score) * score_credit)
