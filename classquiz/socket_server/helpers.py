@@ -87,7 +87,7 @@ def check_answer(game_data: PlayGame, data: SubmitAnswerData) -> AnswerCheckResu
         return AnswerCheckResult(answer_right, q_answer, float(answer_right))
     elif q_type == QuizQuestionType.MULTI_TEXT:
         text_answers = cast(list[TextQuizAnswer], q_answers)
-        submitted_answers = get_submitted_text_answers(data)[: len(text_answers)]
+        submitted_answers = bound_submitted_text_answers(get_submitted_text_answers(data), text_answers)
         answer_right, score_credit = check_multi_text_question(
             submitted_answers,
             text_answers,
@@ -154,9 +154,15 @@ def count_text_matches(
     ignore_whitespace: bool = False,
     order_sensitive: bool = False,
 ) -> int:
-    submitted_answers = submitted_answers[: len(answers)]
+    submitted_answers = bound_submitted_text_answers(submitted_answers, answers)
     matches = match_text_answers(submitted_answers, answers, ignore_whitespace, order_sensitive)
     return sum(match is not None for match in matches)
+
+
+def bound_submitted_text_answers(submitted_answers: list[str], answers: list[TextQuizAnswer]) -> list[str]:
+    if not answers:
+        return submitted_answers
+    return submitted_answers[: len(answers)]
 
 
 def match_text_answers(
@@ -198,7 +204,7 @@ def build_multi_text_answer_details(
     ignore_whitespace: bool = False,
     order_sensitive: bool = False,
 ) -> list[TextAnswerDetail]:
-    submitted_answers = submitted_answers[: len(answers)]
+    submitted_answers = bound_submitted_text_answers(submitted_answers, answers)
     matches = match_text_answers(submitted_answers, answers, ignore_whitespace, order_sensitive)
     return [
         TextAnswerDetail(answer=submitted_answer, matched=matches[index] is not None)

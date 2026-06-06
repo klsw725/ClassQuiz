@@ -16,6 +16,9 @@ from classquiz.db.models import (
     GameSession,
     PlayGame,
     QuizQuestion,
+    QuizQuestionType,
+    TextAnswerDetail,
+    TextQuizAnswer,
     User,
 )
 from classquiz.socket_server import register_as_admin
@@ -490,6 +493,59 @@ async def test_submit_answer_scores_same_username_different_zones_separately(rec
     assert set(scores) == {participant_key("alice", "1구역"), participant_key("alice", "2구역")}
     answers = AnswerDataList.model_validate_json(fake_redis.values["game_session:123456:0"])
     assert [(answer.username, answer.zone) for answer in answers] == [("alice", "1구역"), ("alice", "2구역")]
+
+
+@pytest.mark.asyncio
+async def test_submit_answer_scores_ordered_multi_text_partial_credit(recovery_context):
+    fake_redis, _fake_sio, sessions = recovery_context
+    question = QuizQuestion(
+        question="Question",
+        time="30",
+        type=QuizQuestionType.MULTI_TEXT,
+        answers=[
+            TextQuizAnswer(answer="alpha", case_sensitive=False),
+            TextQuizAnswer(answer="beta", case_sensitive=False),
+            TextQuizAnswer(answer="gamma", case_sensitive=False),
+        ],
+        multi_text_order_sensitive=True,
+    )
+    game = make_game(uuid.uuid4(), question_show=True, questions=[question], started=True)
+    game.time_based_scoring = False
+    fake_redis.values["game:123456"] = game.model_dump_json()
+    fake_redis.values["game:123456:current_time"] = datetime.now().isoformat()
+    add_registered_player(fake_redis, "123456", "alice", "alice-sid", zone="1구역")
+    sessions["alice-sid"] = {
+        "game_pin": "123456",
+        "username": "alice",
+        "sid_custom": "alice-sid",
+        "admin": False,
+        "zone": "1구역",
+        "ping": 0,
+    }
+
+    await socket_server.submit_answer(
+        "alice-sid",
+        {
+            "question_index": 0,
+            "complex_answer": [
+                {"answer": "alpha"},
+                {"answer": "wrong"},
+                {"answer": "Gamma"},
+            ],
+        },
+    )
+
+    scores = fake_redis.hashes["game_session:123456:player_scores"]
+    assert scores[participant_key("alice", "1구역")] == "666"
+    answers = AnswerDataList.model_validate_json(fake_redis.values["game_session:123456:0"])
+    assert answers.root[0].score == 666
+    assert answers.root[0].right is False
+    assert answers.root[0].answer == "alpha, wrong, Gamma"
+    assert answers.root[0].answer_details == [
+        TextAnswerDetail(answer="alpha", matched=True),
+        TextAnswerDetail(answer="wrong", matched=False),
+        TextAnswerDetail(answer="Gamma", matched=True),
+    ]
 
 
 @pytest.mark.asyncio

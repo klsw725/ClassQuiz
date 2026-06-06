@@ -8,9 +8,10 @@ from datetime import datetime
 import pytest
 from pydantic import ValidationError
 
-from classquiz.db.models import TextAnswerDetail, TextQuizAnswer
+from classquiz.db.models import AnswerData, AnswerDataList, TextAnswerDetail, TextQuizAnswer
 from classquiz.db.models import PlayGame, QuizQuestion, QuizQuestionType
 from classquiz.routers import solo
+from classquiz.scoring import calculate_answer_score
 from classquiz.socket_server.helpers import (
     build_multi_text_answer_details,
     check_answer,
@@ -220,6 +221,14 @@ def test_multi_text_answer_feedback_truncates_extra_submissions_to_required_coun
     ]
 
 
+def test_multi_text_answer_feedback_preserves_submissions_without_configured_answers():
+    answer_details = build_multi_text_answer_details(["alpha"], [])
+
+    assert [detail.model_dump() for detail in answer_details] == [
+        {"answer": "alpha", "matched": False},
+    ]
+
+
 def test_multi_text_answer_feedback_can_require_matching_slot_order():
     answers = [
         TextQuizAnswer(answer="alpha", case_sensitive=False),
@@ -317,6 +326,93 @@ def test_check_answer_multi_text_respects_order_sensitive_question_option():
     assert credit == 0
 
 
+def test_check_answer_multi_text_awards_order_sensitive_partial_credit():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+        TextQuizAnswer(answer="gamma", case_sensitive=False),
+    ]
+    game = make_text_game(
+        answers,
+        question_type=QuizQuestionType.MULTI_TEXT,
+        multi_text_order_sensitive=True,
+    )
+    data = SubmitAnswerData(
+        question_index=0,
+        answer="",
+        complex_answer=[
+            SubmitAnswerDataOrderType(answer="alpha"),
+            SubmitAnswerDataOrderType(answer="wrong"),
+            SubmitAnswerDataOrderType(answer="Gamma"),
+        ],
+    )
+
+    right, answer, credit = check_answer(game, data)
+
+    assert not right
+    assert answer == "alpha, wrong, Gamma"
+    assert credit == 2 / 3
+
+
+def test_live_multi_text_ordered_partial_credit_answer_data_serializes_details():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+        TextQuizAnswer(answer="gamma", case_sensitive=False),
+    ]
+    game = make_text_game(
+        answers,
+        question_type=QuizQuestionType.MULTI_TEXT,
+        multi_text_order_sensitive=True,
+    )
+    game.time_based_scoring = False
+    data = SubmitAnswerData(
+        question_index=0,
+        answer="",
+        complex_answer=[
+            SubmitAnswerDataOrderType(answer="alpha"),
+            SubmitAnswerDataOrderType(answer="wrong"),
+            SubmitAnswerDataOrderType(answer="Gamma"),
+        ],
+    )
+
+    answer_right, answer, score_credit = check_answer(game, data)
+    score = calculate_answer_score(
+        score_credit,
+        game.time_based_scoring,
+        0,
+        int(float(game.questions[0].time)),
+        game.questions[0].points,
+    )
+    answer_details = build_multi_text_answer_details(
+        [item.answer for item in data.complex_answer or []],
+        answers,
+        game.questions[0].ignore_whitespace,
+        game.questions[0].multi_text_order_sensitive,
+    )
+    answer_data = AnswerData(
+        username="Player",
+        answer=answer,
+        right=answer_right,
+        time_taken=0,
+        score=score,
+        zone="1구역",
+        answer_details=answer_details,
+    )
+
+    serialized_answers = AnswerDataList.model_validate_json(
+        AnswerDataList([answer_data]).model_dump_json()
+    )
+
+    assert not serialized_answers.root[0].right
+    assert serialized_answers.root[0].score > 0
+    assert serialized_answers.root[0].answer_details == [
+        TextAnswerDetail(answer="alpha", matched=True),
+        TextAnswerDetail(answer="wrong", matched=False),
+        TextAnswerDetail(answer="Gamma", matched=True),
+    ]
+
+
 def test_check_answer_multi_text_bounds_extra_complex_answer_guesses():
     answers = [
         TextQuizAnswer(answer="alpha", case_sensitive=False),
@@ -351,6 +447,37 @@ def test_check_answer_multi_text_falls_back_to_single_answer():
     assert right
     assert answer == "Alpha"
     assert credit == 1
+
+
+def test_check_answer_multi_text_preserves_submission_without_configured_answers():
+    question = QuizQuestion.model_construct(
+        question="",
+        time="20",
+        points=1000,
+        type=QuizQuestionType.MULTI_TEXT,
+        answers=[],
+        ignore_whitespace=False,
+        multi_text_order_sensitive=False,
+    )
+    game = PlayGame.model_construct(
+        quiz_id=uuid.uuid4(),
+        description="",
+        user_id=uuid.uuid4(),
+        title="",
+        questions=[question],
+        game_id=uuid.uuid4(),
+        game_pin="123456",
+    )
+    data = SubmitAnswerData(
+        question_index=0,
+        complex_answer=[SubmitAnswerDataOrderType(answer="alpha")],
+    )
+
+    right, answer, credit = check_answer(game, data)
+
+    assert not right
+    assert answer == "alpha"
+    assert credit == 0
 
 
 @pytest.mark.asyncio

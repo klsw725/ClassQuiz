@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import random
+from typing import cast
 
 import socketio
 from socketio.exceptions import ConnectionRefusedError
