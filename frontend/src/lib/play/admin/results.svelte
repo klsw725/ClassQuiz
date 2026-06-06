@@ -17,12 +17,18 @@ SPDX-License-Identifier: MPL-2.0
 	const { t } = getLocalization();
 	const LIVE_SCORE_VISIBLE_PLAYER_LIMIT = 4;
 
+	interface AnswerDetail {
+		answer: string;
+		matched: boolean;
+	}
+
 	interface Props {
 		data: any;
 		question: Question;
 		new_data: Array<{
 			username: string;
 			answer: string;
+			answer_details?: AnswerDetail[];
 			right: boolean;
 			time_taken: number;
 			score: number;

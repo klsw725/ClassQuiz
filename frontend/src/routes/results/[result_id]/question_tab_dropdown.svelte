@@ -13,9 +13,15 @@ SPDX-License-Identifier: MPL-2.0
 	const { t } = getLocalization();
 	const RESULT_TABLE_PAGE_SIZE = 100;
 
+	interface AnswerDetail {
+		answer: string;
+		matched: boolean;
+	}
+
 	interface PlayerAnswer {
 		username: string;
 		answer: string;
+		answer_details?: AnswerDetail[];
 		right: boolean;
 		time_taken: number;
 		score: number;
@@ -36,6 +42,9 @@ SPDX-License-Identifier: MPL-2.0
 	);
 	const playerDisplayName = (answer: PlayerAnswer): string =>
 		answer.zone ? `${answer.zone}-${answer.username}` : answer.username;
+	const hasMultiTextAnswerDetails = (answer: PlayerAnswer): boolean =>
+		question.type === QuizQuestionType.MULTI_TEXT && Boolean(answer.answer_details?.length);
+	const formatScore = (score: number): string => String(score ?? 0);
 
 	const get_answer_for_comparison = (answer: string): string => {
 		if (free_text_question && question.ignore_whitespace) {
@@ -55,10 +64,9 @@ SPDX-License-Identifier: MPL-2.0
 	const get_answer_count_for_answer = (answer: GeneralQuizAnswer): number => {
 		let count = 0;
 		let answer_id = 0;
-		const answer_for_comparison =
-			free_text_question
-				? get_text_answer_for_comparison(answer.answer, answer.case_sensitive)
-				: get_answer_for_comparison(answer.answer);
+		const answer_for_comparison = free_text_question
+			? get_text_answer_for_comparison(answer.answer, answer.case_sensitive)
+			: get_answer_for_comparison(answer.answer);
 		if (question.type === QuizQuestionType.CHECK) {
 			const answer_options = question.answers as QuizAnswer[];
 			for (let i = 0; i < answer_options.length; i++) {
@@ -150,12 +158,40 @@ SPDX-License-Identifier: MPL-2.0
 								>{playerDisplayName(answer)}</td
 							>
 							{#if question.type !== QuizQuestionType.VOTING}
-								<td class="border-r p-1 border-cq-border">{answer.score}</td>
+								<td class="border-r p-1 border-cq-border"
+									>{formatScore(answer.score)}</td
+								>
 							{/if}
 							<td class="border-r p-1 border-cq-border"
 								>{(answer.time_taken / 1000).toFixed(3)}s
 							</td>
-							<td class="p-1">{answer.answer}</td>
+							<td class="p-1">
+								{#if hasMultiTextAnswerDetails(answer)}
+									<div class="flex flex-col gap-1">
+										{#each answer.answer_details ?? [] as detail, index (index)}
+											<div
+												class="cq-surface-muted flex items-center justify-between gap-2 p-1 text-sm"
+											>
+												<span
+													class="notranslate break-words"
+													translate="no"
+												>
+													{detail.answer || '-'}
+												</span>
+												<span
+													class="shrink-0 font-semibold"
+													class:text-cq-brand={detail.matched}
+													class:text-cq-accent={!detail.matched}
+												>
+													{#if detail.matched}✅{:else}❌{/if}
+												</span>
+											</div>
+										{/each}
+									</div>
+								{:else}
+									{answer.answer}
+								{/if}
+							</td>
 							{#if question.type !== QuizQuestionType.VOTING}
 								<td class="p-1 border-l border-cq-border">
 									{#if answer.right}✅{:else}❌{/if}

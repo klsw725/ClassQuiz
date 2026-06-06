@@ -8,8 +8,14 @@ SPDX-License-Identifier: MPL-2.0
 	import type { Answer, Question, VotingAnswer } from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 
+	interface AnswerDetail {
+		answer: string;
+		matched: boolean;
+	}
+
 	interface ResultAnswer {
 		answer: string;
+		answer_details?: AnswerDetail[];
 	}
 
 	interface AnswerBar {
@@ -71,6 +77,11 @@ SPDX-License-Identifier: MPL-2.0
 			? answer_counts.reduce((total, answer_count) => total + answer_count.count, 0)
 			: data_items.length
 	);
+	let multi_text_answer_details = $derived(
+		question.type === QuizQuestionType.MULTI_TEXT
+			? data_items.flatMap((result) => result.answer_details ?? [])
+			: []
+	);
 
 	const get_bar_height = (count: number): number =>
 		total_answer_count === 0 ? 0 : (count * 24) / total_answer_count;
@@ -121,5 +132,23 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 			{/each}
 		</div>
+		{#if multi_text_answer_details.length}
+			<div class="cq-surface-muted flex flex-col gap-2 p-3 text-left">
+				{#each multi_text_answer_details as detail, index (index)}
+					<div class="cq-surface flex items-center justify-between gap-3 p-2 text-sm">
+						<span class="notranslate break-words text-cq-text" translate="no">
+							{detail.answer || '-'}
+						</span>
+						<span
+							class="shrink-0 font-semibold"
+							class:text-cq-brand={detail.matched}
+							class:text-cq-accent={!detail.matched}
+						>
+							{#if detail.matched}✅{:else}❌{/if}
+						</span>
+					</div>
+				{/each}
+			</div>
+		{/if}
 	</div>
 </div>
