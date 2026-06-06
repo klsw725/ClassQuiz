@@ -19,6 +19,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { kahoot_icons } from './kahoot_mode_assets/kahoot_icons';
 	import CircularTimer from '$lib/play/circular_progress.svelte';
 	import { flip } from 'svelte/animate';
+	import { tick } from 'svelte';
 	import BrownButton from '$lib/components/buttons/brown.svelte';
 	import { get_foreground_color } from '../helpers';
 	import MediaComponent from '$lib/editor/MediaComponent.svelte';
@@ -48,6 +49,56 @@ SPDX-License-Identifier: MPL-2.0
 	let timer_res = $state(question.time);
 	let selected_answer: string = $state();
 	let answer_submitted = $state(false);
+	let question_title_element = $state<HTMLHeadingElement>();
+	let normal_mobile_question_title_size = $state(2.75);
+
+	const normal_mobile_question_title_max_size = 2.75;
+	const normal_mobile_question_title_min_size = 0.8;
+	const normal_mobile_question_title_step = 0.05;
+
+	const normal_mobile_question_title_overflows = (
+		element: HTMLHeadingElement,
+		question_area: HTMLElement
+	): boolean => {
+		const title_styles = getComputedStyle(element);
+		const question_area_styles = getComputedStyle(question_area);
+		const title_vertical_margin =
+			parseFloat(title_styles.marginTop) + parseFloat(title_styles.marginBottom);
+		const question_area_vertical_padding =
+			parseFloat(question_area_styles.paddingTop) +
+			parseFloat(question_area_styles.paddingBottom);
+		const available_height = question_area.clientHeight - question_area_vertical_padding;
+		const rendered_height = element.getBoundingClientRect().height + title_vertical_margin;
+
+		return (
+			rendered_height > available_height + 1 ||
+			element.scrollHeight > element.clientHeight + 1 ||
+			element.scrollWidth > element.clientWidth + 1
+		);
+	};
+
+	const update_normal_mobile_question_title_size = (element: HTMLHeadingElement) => {
+		const question_area = element.parentElement;
+		if (!question_area) {
+			return;
+		}
+
+		let next_size = normal_mobile_question_title_max_size;
+		element.style.setProperty('--normal-mobile-question-title-size', `${next_size}rem`);
+
+		while (
+			next_size > normal_mobile_question_title_min_size &&
+			normal_mobile_question_title_overflows(element, question_area)
+		) {
+			next_size = Math.max(
+				normal_mobile_question_title_min_size,
+				Number((next_size - normal_mobile_question_title_step).toFixed(2))
+			);
+			element.style.setProperty('--normal-mobile-question-title-size', `${next_size}rem`);
+		}
+
+		normal_mobile_question_title_size = next_size;
+	};
 
 	// Stop the timer if the question is answered
 	const timer = (time: string) => {
@@ -73,6 +124,62 @@ SPDX-License-Identifier: MPL-2.0
 		if (solution !== undefined) {
 			timer_res = '0';
 		}
+	});
+
+	$effect(() => {
+		question.question;
+
+		const element = question_title_element;
+		const is_normal_mobile_question_title =
+			solution === undefined && game_mode === 'normal' && !question.image;
+
+		if (!element || !is_normal_mobile_question_title) {
+			normal_mobile_question_title_size = normal_mobile_question_title_max_size;
+			return;
+		}
+
+		let disposed = false;
+		let animation_frame: number | undefined;
+		const mobile_query = window.matchMedia('(max-width: 639px)');
+		const question_area = element.parentElement;
+
+		if (!question_area) {
+			return;
+		}
+
+		const schedule_update = async () => {
+			await tick();
+			if (disposed) {
+				return;
+			}
+			if (animation_frame !== undefined) {
+				cancelAnimationFrame(animation_frame);
+			}
+			animation_frame = requestAnimationFrame(() => {
+				if (disposed) {
+					return;
+				}
+				if (!mobile_query.matches) {
+					normal_mobile_question_title_size = normal_mobile_question_title_max_size;
+					return;
+				}
+				update_normal_mobile_question_title_size(element);
+			});
+		};
+
+		const resize_observer = new ResizeObserver(schedule_update);
+		resize_observer.observe(question_area);
+		mobile_query.addEventListener('change', schedule_update);
+		schedule_update();
+
+		return () => {
+			disposed = true;
+			resize_observer.disconnect();
+			mobile_query.removeEventListener('change', schedule_update);
+			if (animation_frame !== undefined) {
+				cancelAnimationFrame(animation_frame);
+			}
+		};
 	});
 
 	const selectAnswer = (answer: string) => {
@@ -281,7 +388,9 @@ SPDX-License-Identifier: MPL-2.0
 			style="--question-area-height: {get_question_area_height()}%"
 		>
 			<h1
+				bind:this={question_title_element}
 				class="question-title lg:text-2xl text-lg text-center text-cq-text mt-2 break-normal mb-2 notranslate"
+				style:--normal-mobile-question-title-size={`${normal_mobile_question_title_size}rem`}
 				translate="no"
 			>
 				{@html question.question}
@@ -681,8 +790,8 @@ SPDX-License-Identifier: MPL-2.0
 			overflow-wrap: anywhere;
 			margin-top: 0.5rem;
 			margin-bottom: 0.5rem;
-			font-size: clamp(0.8rem, 3.4vw, 1rem);
-			line-height: 1.2;
+			font-size: var(--normal-mobile-question-title-size, 2.75rem);
+			line-height: 1.12;
 		}
 
 		.normal-mobile-answer-area,
