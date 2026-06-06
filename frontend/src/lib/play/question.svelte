@@ -5,7 +5,13 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import type { Answer, OrderQuizAnswer, Question, RangeQuizAnswer, TextQuizAnswer } from '$lib/quiz_types';
+	import type {
+		Answer,
+		OrderQuizAnswer,
+		Question,
+		RangeQuizAnswer,
+		TextQuizAnswer
+	} from '$lib/quiz_types';
 	import { QuizQuestionType } from '$lib/quiz_types';
 	import { socket } from '$lib/socket';
 	import Spinner from '../Spinner.svelte';
@@ -102,7 +108,10 @@ SPDX-License-Identifier: MPL-2.0
 	});
 
 	$effect(() => {
-		if (question.type !== QuizQuestionType.TEXT && question.type !== QuizQuestionType.MULTI_TEXT) {
+		if (
+			question.type !== QuizQuestionType.TEXT &&
+			question.type !== QuizQuestionType.MULTI_TEXT
+		) {
 			return;
 		}
 		if (text_inputs.length === text_answer_count) {
@@ -118,7 +127,9 @@ SPDX-License-Identifier: MPL-2.0
 
 	const submit_text_answer = () => {
 		const answer =
-			question.type === QuizQuestionType.MULTI_TEXT ? text_inputs.join(', ') : (text_inputs[0] ?? '');
+			question.type === QuizQuestionType.MULTI_TEXT
+				? text_inputs.join(', ')
+				: (text_inputs[0] ?? '');
 		const payload: {
 			question_index: string | number;
 			answer: string;
@@ -205,7 +216,10 @@ SPDX-License-Identifier: MPL-2.0
 			return [`${answer.min_correct} - ${answer.max_correct}`];
 		}
 
-		if (solution_type === QuizQuestionType.TEXT || solution_type === QuizQuestionType.MULTI_TEXT) {
+		if (
+			solution_type === QuizQuestionType.TEXT ||
+			solution_type === QuizQuestionType.MULTI_TEXT
+		) {
 			return (solution.answers as TextQuizAnswer[]).map((answer) => answer.answer);
 		}
 
@@ -223,22 +237,51 @@ SPDX-License-Identifier: MPL-2.0
 	});
 
 	const is_voting_reveal = $derived(
-		solution !== undefined && (solution.type ?? QuizQuestionType.ABCD) === QuizQuestionType.VOTING
+		solution !== undefined &&
+			(solution.type ?? QuizQuestionType.ABCD) === QuizQuestionType.VOTING
 	);
 
 	const default_colors = ['#D6EDC9', '#B07156', '#7F7057', '#4E6E58'];
 </script>
 
-<div class="h-screen w-screen">
+<div
+	class="h-screen w-screen"
+	class:normal-mobile-play-screen={solution === undefined && game_mode === 'normal'}
+>
 	{#if solution !== undefined || game_mode === 'normal' || (game_mode === 'kahoot' && question.image)}
 		<div
-			class="flex flex-col justify-start"
+			class="question-area flex flex-col justify-start"
 			class:mt-10={solution === undefined &&
-				[QuizQuestionType.RANGE, QuizQuestionType.ORDER, QuizQuestionType.TEXT, QuizQuestionType.MULTI_TEXT].includes(question.type)}
-			style="height: {get_question_area_height()}%"
+				[
+					QuizQuestionType.RANGE,
+					QuizQuestionType.ORDER,
+					QuizQuestionType.TEXT,
+					QuizQuestionType.MULTI_TEXT
+				].includes(question.type)}
+			class:normal-mobile-question={solution === undefined &&
+				game_mode === 'normal' &&
+				!question.image &&
+				[
+					QuizQuestionType.ABCD,
+					QuizQuestionType.VOTING,
+					QuizQuestionType.CHECK,
+					QuizQuestionType.RANGE,
+					QuizQuestionType.ORDER,
+					QuizQuestionType.TEXT,
+					QuizQuestionType.MULTI_TEXT
+				].includes(question.type)}
+			class:normal-mobile-question-offset={solution === undefined &&
+				game_mode === 'normal' &&
+				[
+					QuizQuestionType.RANGE,
+					QuizQuestionType.ORDER,
+					QuizQuestionType.TEXT,
+					QuizQuestionType.MULTI_TEXT
+				].includes(question.type)}
+			style="--question-area-height: {get_question_area_height()}%"
 		>
 			<h1
-				class="lg:text-2xl text-lg text-center text-cq-text mt-2 break-normal mb-2 notranslate"
+				class="question-title lg:text-2xl text-lg text-center text-cq-text mt-2 break-normal mb-2 notranslate"
 				translate="no"
 			>
 				{@html question.question}
@@ -253,11 +296,16 @@ SPDX-License-Identifier: MPL-2.0
 						{/if}
 					</p>
 					{#if is_voting_reveal}
-						<div class="cq-card cq-surface-muted border-2 border-cq-border p-5 text-cq-text">
+						<div
+							class="cq-card cq-surface-muted border-2 border-cq-border p-5 text-cq-text"
+						>
 							<p class="text-2xl font-semibold">{$t('words.voting')}</p>
 						</div>
 					{:else}
-						<ul class="flex flex-col gap-2" aria-label="{$t('words.correct')} {$t('words.answer')}">
+						<ul
+							class="flex flex-col gap-2"
+							aria-label="{$t('words.correct')} {$t('words.answer')}"
+						>
 							{#each revealed_answers as answer, i (i)}
 								<li
 									class="cq-card cq-surface-muted border-2 border-cq-border px-4 py-3 text-xl font-semibold text-cq-text notranslate"
@@ -285,7 +333,9 @@ SPDX-License-Identifier: MPL-2.0
 			role="status"
 			aria-live="polite"
 		>
-			<div class="cq-card flex w-full max-w-md flex-col gap-3 p-6 text-center shadow-2xl md:p-8">
+			<div
+				class="cq-card flex w-full max-w-md flex-col gap-3 p-6 text-center shadow-2xl md:p-8"
+			>
 				<p class="text-2xl font-semibold text-cq-text md:text-3xl">
 					{#if answer_submitted}
 						{$t('play_page.answer_submitted')}
@@ -293,24 +343,37 @@ SPDX-License-Identifier: MPL-2.0
 						{$t('play_page.please_wait')}
 					{/if}
 				</p>
-				<p class="cq-surface-muted rounded-lg border-2 border-cq-border px-5 py-4 text-cq-muted">
+				<p
+					class="cq-surface-muted rounded-lg border-2 border-cq-border px-5 py-4 text-cq-muted"
+				>
 					{$t('play_page.waiting_for_results')}
 				</p>
 			</div>
 		</section>
 	{:else if timer_res !== '0'}
 		{#if question.type === QuizQuestionType.ABCD || question.type === QuizQuestionType.VOTING}
-			<div class="w-full relative h-full" style="height: {get_div_height()}%">
+			<div
+				class="answer-area w-full relative h-full"
+				class:normal-mobile-answer-area={game_mode === 'normal' && !question.image}
+				style="--answer-area-height: {get_div_height()}%"
+			>
 				<div
 					class="cq-surface absolute top-0 bottom-0 left-0 right-0 m-auto h-fit w-fit rounded-full border-2 border-cq-border shadow-2xl z-40"
+					class:normal-mobile-answer-timer={game_mode === 'normal'}
 				>
 					<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
 				</div>
 
-				<div class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-2 w-full p-4 h-full">
+				<div
+					class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-2 w-full p-4 h-full"
+					class:normal-mobile-answer-grid={game_mode === 'normal'}
+					class:normal-mobile-answer-grid-compact={game_mode === 'normal' &&
+						!question.image}
+				>
 					{#each question.answers as answer, i}
 						<button
-							class="rounded-lg h-full flex align-middle justify-center disabled:opacity-60 p-3 border-2 border-cq-border"
+							class="rounded-lg h-full flex min-w-0 overflow-hidden align-middle justify-center disabled:opacity-60 p-3 border-2 border-cq-border"
+							class:normal-mobile-answer-button={game_mode === 'normal'}
 							style="background-color: {answer.color ??
 								default_colors[i]}; color: {get_foreground_color(
 								answer.color ?? default_colors[i]
@@ -322,7 +385,8 @@ SPDX-License-Identifier: MPL-2.0
 								{#if answer.emoji}
 									<span
 										class="m-auto text-6xl leading-none"
-										aria-label={$t('admin_page.answer_emoji')}>{answer.emoji}</span
+										aria-label={$t('admin_page.answer_emoji')}
+										>{answer.emoji}</span
 									>
 								{:else}
 									<img
@@ -332,15 +396,28 @@ SPDX-License-Identifier: MPL-2.0
 									/>
 								{/if}
 							{:else if game_mode === 'normal'}
-								<div class="m-auto flex items-center justify-center gap-3">
+								<div
+									class="normal-mobile-answer-content m-auto flex min-w-0 max-w-full items-center justify-center gap-3"
+								>
 									{#if answer.emoji}
-										<span class="text-4xl leading-none" aria-label={$t('admin_page.answer_emoji')}
+										<span
+											class="normal-mobile-answer-emoji text-4xl leading-none"
+											aria-label={$t('admin_page.answer_emoji')}
 											>{answer.emoji}</span
 										>
 									{:else if kahoot_icons[i]}
-										<img class="h-12" alt={$t('admin_page.answer_icon')} src={kahoot_icons[i]} />
+										<img
+											class="normal-mobile-answer-icon h-12"
+											alt={$t('admin_page.answer_icon')}
+											src={kahoot_icons[i]}
+										/>
 									{/if}
-									<p class="notranslate" translate="no">{answer.answer}</p>
+									<p
+										class="normal-mobile-answer-text min-w-0 notranslate"
+										translate="no"
+									>
+										{answer.answer}
+									</p>
 								</div>
 							{:else}
 								<p class="m-auto notranslate" translate="no">{answer.answer}</p>
@@ -355,38 +432,43 @@ SPDX-License-Identifier: MPL-2.0
 				class="fixed top-0 bg-red-500 h-8 transition-all"
 				style="width: {(100 / parseInt(question.time)) * parseInt(timer_res)}vw"
 			></span>
-			{#await import('svelte-range-slider-pips')}
-				<Spinner />
-			{:then c}
-				<div class:pointer-events-none={selected_answer !== undefined} class="mt-24">
-					<c.default
-						bind:values={slider_value}
-						bind:min={range_answer.min}
-						bind:max={range_answer.max}
-						id="pips-slider"
-						pips
-						float
-						all="label"
-					/>
-				</div>
-				<div class="flex justify-center">
-					<div class="w-1/2">
-						<BrownButton onclick={() => selectAnswer(String(slider_value[0]))}
-							>{$t('words.submit')}
-						</BrownButton>
+			<div class:normal-mobile-range-answer={game_mode === 'normal' && !question.image}>
+				{#await import('svelte-range-slider-pips')}
+					<Spinner />
+				{:then c}
+					<div
+						class:pointer-events-none={selected_answer !== undefined}
+						class="mt-24 normal-mobile-range-slider"
+					>
+						<c.default
+							bind:values={slider_value}
+							bind:min={range_answer.min}
+							bind:max={range_answer.max}
+							id="pips-slider"
+							pips
+							float
+							all="label"
+						/>
 					</div>
-				</div>
-			{/await}
+					<div class="flex justify-center normal-mobile-range-submit">
+						<div class="w-1/2 normal-mobile-range-submit-width">
+							<BrownButton onclick={() => selectAnswer(String(slider_value[0]))}
+								>{$t('words.submit')}
+							</BrownButton>
+						</div>
+					</div>
+				{/await}
+			</div>
 		{:else if question.type === QuizQuestionType.TEXT || question.type === QuizQuestionType.MULTI_TEXT}
-			<div>
+			<div class:normal-mobile-text-answer={game_mode === 'normal' && !question.image}>
 				<span
 					class="fixed top-0 bg-red-500 h-8 transition-all"
 					style="width: {(100 / parseInt(question.time)) * parseInt(timer_res)}vw"
 				></span>
-				<div class="flex justify-center mt-10">
+				<div class="flex justify-center mt-10 normal-mobile-text-label">
 					<p class="text-cq-text">{$t('editor.enter_answer')}</p>
 				</div>
-				<div class="m-2 flex flex-col gap-2">
+				<div class="m-2 flex flex-col gap-2 normal-mobile-text-inputs">
 					{#each text_inputs as _text_input, i (i)}
 						<div class="flex justify-center">
 							<input
@@ -399,8 +481,8 @@ SPDX-License-Identifier: MPL-2.0
 					{/each}
 				</div>
 
-				<div class="flex justify-center mt-2">
-					<div class="w-1/3">
+				<div class="flex justify-center mt-2 normal-mobile-text-submit">
+					<div class="w-1/3 normal-mobile-text-submit-width">
 						<BrownButton
 							type="button"
 							disabled={selected_answer !== undefined || !has_text_answer}
@@ -419,7 +501,10 @@ SPDX-License-Identifier: MPL-2.0
 				class="fixed top-0 bg-red-500 h-8 transition-all"
 				style="width: {(100 / parseInt(question.time)) * parseInt(timer_res)}vw"
 			></span>
-			<div class="flex flex-col w-full h-full gap-4 px-4 py-6 mt-10">
+			<div
+				class="flex flex-col w-full h-full gap-4 px-4 py-6 mt-10"
+				class:normal-mobile-order-answer={game_mode === 'normal' && !question.image}
+			>
 				{#each question.answers as answer, i (answer.id)}
 					<div
 						class="cq-card w-full h-fit flex-row p-2 align-middle"
@@ -452,7 +537,10 @@ SPDX-License-Identifier: MPL-2.0
 								/>
 							</svg>
 						</button>
-						<p class="w-full text-center p-2 text-2xl text-cq-text notranslate" translate="no">
+						<p
+							class="w-full text-center p-2 text-2xl text-cq-text notranslate normal-mobile-order-text"
+							translate="no"
+						>
 							{answer.answer}
 						</p>
 
@@ -496,38 +584,263 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 			<!--{/if}-->
 		{:else if question.type === QuizQuestionType.CHECK}
-			{#await import('./questions/check.svelte')}
-				<Spinner />
-			{:then c}
-				<c.default
-					{question}
-					bind:selected_answer
-					{game_mode}
-					{timer_res}
-					{circular_progress}
-				/>
-				<div class="flex justify-center h-[5%]">
-					<div class="w-1/2">
-						<BrownButton
-							type="button"
-							disabled={selected_answer === undefined}
-							onclick={() => selectAnswer(selected_answer)}
-							>{$t('words.submit')}
-						</BrownButton>
+			<div class:normal-mobile-check-answer-area={game_mode === 'normal' && !question.image}>
+				{#await import('./questions/check.svelte')}
+					<Spinner />
+				{:then c}
+					<c.default
+						{question}
+						bind:selected_answer
+						{game_mode}
+						{timer_res}
+						{circular_progress}
+					/>
+					<div
+						class="flex justify-center h-[5%]"
+						class:normal-mobile-check-submit={game_mode === 'normal' && !question.image}
+					>
+						<div
+							class="w-1/2"
+							class:normal-mobile-check-submit-width={game_mode === 'normal' &&
+								!question.image}
+						>
+							<BrownButton
+								type="button"
+								disabled={selected_answer === undefined}
+								onclick={() => selectAnswer(selected_answer)}
+								>{$t('words.submit')}
+							</BrownButton>
+						</div>
 					</div>
-				</div>
-			{/await}
+				{/await}
+			</div>
 		{/if}
 	{:else if solution !== undefined}
-		<section class="flex h-1/2 items-center justify-center px-4 text-cq-text" aria-live="polite">
-			<div class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center shadow-2xl md:p-8">
+		<section
+			class="flex h-1/2 items-center justify-center px-4 text-cq-text"
+			aria-live="polite"
+		>
+			<div
+				class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center shadow-2xl md:p-8"
+			>
 				<p
 					class="cq-surface-muted rounded-lg border-2 border-cq-border px-5 py-4 text-2xl font-semibold text-cq-brand md:text-3xl"
 				>
-					{$t('words.score')} {$t('words.public')}
+					{$t('words.score')}
+					{$t('words.public')}
 				</p>
 				<p class="text-cq-muted">{$t('words.result')} {$t('words.public')}</p>
 			</div>
 		</section>
 	{/if}
 </div>
+
+<style>
+	.question-area {
+		height: var(--question-area-height);
+	}
+
+	.answer-area {
+		height: var(--answer-area-height);
+	}
+
+	.question-title {
+		white-space: pre-wrap;
+		overflow-wrap: anywhere;
+	}
+
+	@media (max-width: 639px) {
+		.normal-mobile-play-screen {
+			display: flex;
+			flex-direction: column;
+			height: 100svh;
+			overflow: hidden;
+		}
+
+		.normal-mobile-question {
+			flex: 0 0 33.333svh;
+			height: auto;
+			max-height: 33.333svh;
+			min-height: 0;
+			overflow: hidden;
+			justify-content: flex-end;
+			padding-inline: 0.75rem;
+		}
+
+		.normal-mobile-question-offset {
+			margin-top: 0;
+		}
+
+		.normal-mobile-question .question-title {
+			display: -webkit-box;
+			line-clamp: 5;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 5;
+			overflow: hidden;
+			white-space: pre-wrap;
+			overflow-wrap: anywhere;
+			margin-top: 0.5rem;
+			margin-bottom: 0.5rem;
+			font-size: clamp(0.8rem, 3.4vw, 1rem);
+			line-height: 1.2;
+		}
+
+		.normal-mobile-answer-area,
+		.normal-mobile-text-answer,
+		.normal-mobile-order-answer,
+		.normal-mobile-range-answer,
+		.normal-mobile-check-answer-area {
+			flex: 1 1 0;
+			height: auto;
+			max-height: 66.667svh;
+			min-height: 0;
+			overflow: hidden;
+		}
+
+		.normal-mobile-range-answer,
+		.normal-mobile-check-answer-area {
+			display: flex;
+			flex-direction: column;
+			width: 100%;
+		}
+
+		.normal-mobile-range-answer {
+			justify-content: flex-start;
+			gap: 1rem;
+			padding: 0.75rem 0.75rem 0.75rem;
+		}
+
+		.normal-mobile-range-slider {
+			margin-top: 1rem;
+			padding-inline: 0.75rem;
+		}
+
+		.normal-mobile-range-answer .normal-mobile-range-slider {
+			margin-top: 0;
+			padding-inline: 0;
+			width: 100%;
+		}
+
+		.normal-mobile-range-submit {
+			margin-top: 1rem;
+		}
+
+		.normal-mobile-range-answer .normal-mobile-range-submit {
+			flex: 0 0 auto;
+			margin-top: 0;
+		}
+
+		.normal-mobile-range-submit-width {
+			width: 100%;
+			max-width: 20rem;
+		}
+
+		.normal-mobile-order-answer {
+			overflow-y: auto;
+			gap: 0.5rem;
+			margin-top: 0;
+			padding: 0.5rem 0.75rem 0.75rem;
+		}
+
+		.normal-mobile-order-text {
+			display: -webkit-box;
+			line-clamp: 3;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 3;
+			overflow: hidden;
+			overflow-wrap: anywhere;
+			font-size: clamp(0.7rem, 3vw, 0.875rem);
+			line-height: 1.2;
+		}
+
+		.normal-mobile-answer-timer {
+			top: 0.5rem;
+			right: auto;
+			bottom: auto;
+			left: 50%;
+			margin: 0;
+			transform: translateX(-50%) scale(0.55);
+			transform-origin: top center;
+		}
+
+		.normal-mobile-answer-grid {
+			grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+			gap: 0.5rem;
+			height: 100%;
+			padding: 5rem 0.5rem 0.5rem;
+		}
+
+		.normal-mobile-answer-grid-compact {
+			padding-top: 3.5rem;
+		}
+
+		.normal-mobile-answer-button {
+			padding: 0.5rem;
+		}
+
+		.normal-mobile-answer-content {
+			flex-direction: column;
+			gap: 0.25rem;
+			text-align: center;
+		}
+
+		.normal-mobile-answer-emoji {
+			font-size: 1.5rem;
+		}
+
+		.normal-mobile-answer-icon {
+			height: 1.75rem;
+		}
+
+		.normal-mobile-answer-text {
+			display: -webkit-box;
+			line-clamp: 3;
+			-webkit-box-orient: vertical;
+			-webkit-line-clamp: 3;
+			overflow: hidden;
+			overflow-wrap: anywhere;
+			font-size: clamp(0.7rem, 3vw, 0.875rem);
+			line-height: 1.2;
+		}
+
+		.normal-mobile-text-answer {
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-start;
+			padding: 0 0.75rem 0.75rem;
+		}
+
+		.normal-mobile-text-label {
+			margin-top: 0.25rem;
+		}
+
+		.normal-mobile-text-inputs {
+			flex: 0 1 auto;
+			min-height: 0;
+			max-height: calc(66.667svh - 6rem);
+			overflow-y: auto;
+			margin: 0.375rem 0 0;
+		}
+
+		.normal-mobile-text-submit {
+			flex: 0 0 auto;
+			margin-top: 0.375rem;
+		}
+
+		.normal-mobile-text-submit-width {
+			width: 100%;
+			max-width: 20rem;
+		}
+
+		.normal-mobile-check-submit {
+			flex: 0 0 auto;
+			height: auto;
+			padding: 0 0.75rem 0.75rem;
+		}
+
+		.normal-mobile-check-submit-width {
+			width: 100%;
+			max-width: 20rem;
+		}
+	}
+</style>
