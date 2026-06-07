@@ -159,47 +159,49 @@ SPDX-License-Identifier: MPL-2.0
 			</GrayButton>
 		</div>
 	</div>
-	<div class="cq-card flex flex-col w-full mt-4 gap-1 p-2">
-		{#each grouped_visible_lobby_players as group (group.key)}
-			<div class="cq-surface-muted flex items-start gap-3 px-3 py-1.5">
-				<h2 class="w-20 shrink-0 text-sm font-semibold text-cq-text">{group.zone}</h2>
-				<div class="flex min-h-6 flex-1 flex-wrap gap-x-2 gap-y-1">
-					{#each group.players as player (participantKey(player.username, player.zone))}
-						{@const player_key = participantKey(player.username, player.zone)}
-						<div class="relative">
-							<button
-								type="button"
-								class="link-hover text-left text-sm"
-								aria-haspopup="menu"
-								aria-expanded={selected_lobby_player_key === player_key}
-								onclick={() => {
-									togglePlayerMenu(player);
-								}}>{player.username}</button
-							>
-							{#if selected_lobby_player_key === player_key}
-								<div class="cq-card absolute left-0 top-full z-10 mt-1 w-max p-1" role="menu">
-									<button
-										type="button"
-										role="menuitem"
-										class="action-button w-full text-sm"
-										aria-label="{$t('words.kick')} {formatPlayerName(player)}"
-										onclick={() => {
-											kickPlayer(player);
-										}}
-									>
-										{$t('words.kick')}
-									</button>
-								</div>
-							{/if}
-						</div>
-					{/each}
+	<div class="cq-card w-full mt-4 p-2">
+		<div class="grid grid-cols-[repeat(auto-fit,minmax(7rem,1fr))] gap-x-3 gap-y-2">
+			{#each grouped_visible_lobby_players as group (group.key)}
+				<div class="cq-surface-muted flex flex-col gap-1 px-3 py-2">
+					<h2 class="text-sm font-semibold text-cq-text">{group.zone}</h2>
+					<div class="flex min-h-6 flex-col gap-1">
+						{#each group.players as player (participantKey(player.username, player.zone))}
+							{@const player_key = participantKey(player.username, player.zone)}
+							<div class="relative">
+								<button
+									type="button"
+									class="link-hover text-left text-sm"
+									aria-haspopup="menu"
+									aria-expanded={selected_lobby_player_key === player_key}
+									onclick={() => {
+										togglePlayerMenu(player);
+									}}>{player.username}</button
+								>
+								{#if selected_lobby_player_key === player_key}
+									<div class="cq-card absolute left-0 top-full z-10 mt-1 w-max p-1" role="menu">
+										<button
+											type="button"
+											role="menuitem"
+											class="action-button w-full text-sm"
+											aria-label="{$t('words.kick')} {formatPlayerName(player)}"
+											onclick={() => {
+												kickPlayer(player);
+											}}
+										>
+											{$t('words.kick')}
+										</button>
+									</div>
+								{/if}
+							</div>
+						{/each}
+					</div>
 				</div>
-			</div>
-		{/each}
+			{/each}
+		</div>
 		{#if hidden_lobby_player_count > 0}
 			<button
 				type="button"
-				class="cq-surface-muted w-fit p-2 text-lg font-semibold text-cq-muted hover:text-cq-text transition"
+				class="cq-surface-muted mt-2 w-fit p-2 text-lg font-semibold text-cq-muted hover:text-cq-text transition"
 				onclick={() => (visible_lobby_player_count += LOBBY_VISIBLE_PLAYER_LIMIT)}
 			>
 				+{Math.min(LOBBY_VISIBLE_PLAYER_LIMIT, hidden_lobby_player_count)}

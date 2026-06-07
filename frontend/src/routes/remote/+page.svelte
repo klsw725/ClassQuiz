@@ -296,9 +296,14 @@ SPDX-License-Identifier: MPL-2.0
 		{/await}
 	{:else}
 		<div class="cq-card m-4 flex flex-col justify-center p-4 text-cq-text">
-			<h1 class="text-6xl text-center font-semibold notranslate" translate="no">
+			<div
+				class="question-title text-6xl text-center font-semibold notranslate"
+				role="heading"
+				aria-level="1"
+				translate="no"
+			>
 				{@html game_data.questions[selected_question].question}
-			</h1>
+			</div>
 			<!--			<span class='text-center py-2 text-lg'>{$t('admin_page.time_left')}: {timer_res}</span>-->
 			<div class="mx-auto my-2">
 				<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
@@ -366,12 +371,14 @@ SPDX-License-Identifier: MPL-2.0
 			{#await get_already_joined_players()}
 				<Spinner my_20={false} />
 			{:then _}
-				<div class="cq-card mt-3 flex flex-col gap-1 p-2 text-cq-muted">
-					<div class="flex flex-col gap-1 text-left">
+				<div class="cq-card mt-3 p-2 text-cq-muted">
+					<div
+						class="grid grid-cols-[repeat(auto-fit,minmax(5rem,1fr))] gap-x-3 gap-y-2 text-left"
+					>
 						{#each grouped_visible_lobby_players as group (group.key)}
-							<div class="cq-surface-muted flex items-start gap-2 px-2 py-1">
-								<h3 class="w-16 shrink-0 text-sm font-semibold text-cq-text">{group.zone}</h3>
-								<ul class="flex min-h-5 flex-1 flex-wrap gap-x-2 gap-y-1 text-sm text-cq-muted">
+							<div class="cq-surface-muted flex flex-col gap-1 px-2 py-1">
+								<h3 class="text-sm font-semibold text-cq-text">{group.zone}</h3>
+								<ul class="flex min-h-5 flex-col gap-1 text-sm text-cq-muted">
 									{#each group.players as player (participantKey(player.username, player.zone))}
 										<li>
 											{player.username}
@@ -422,3 +429,12 @@ SPDX-License-Identifier: MPL-2.0
 	bind:this={dataexport_download_a}
 	class="absolute -top-3/4 -left-3/4 opacity-0 hidden">{$t('words.download')}</a
 >
+
+<style>
+	.question-title :global(hr) {
+		width: 100%;
+		margin: 0.75rem auto;
+		border: 0;
+		border-top: 2px solid var(--cq-border-strong);
+	}
+</style>
