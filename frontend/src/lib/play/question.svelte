@@ -630,7 +630,7 @@ SPDX-License-Identifier: MPL-2.0
 							{#each revealed_answers as answer, i (i)}
 								<li
 									class="cq-card cq-surface-muted border-2 border-cq-border px-4 py-3 text-3xl font-semibold text-cq-text notranslate"
-									class:text-left={is_text_solution_reveal}
+									class:text-left={is_text_solution_reveal && answer.length >= 10}
 									translate="no"
 								>
 									{answer}

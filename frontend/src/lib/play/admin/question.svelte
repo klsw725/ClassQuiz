@@ -186,10 +186,11 @@ SPDX-License-Identifier: MPL-2.0
 			<p class="text-2xl md:text-3xl font-semibold tracking-widest text-cq-muted uppercase mb-6">
 				{$t('words.correct')}
 			</p>
-			<ul class="flex flex-col gap-4" class:text-left={is_text_reveal}>
+			<ul class="flex flex-col gap-4">
 				{#each centered_reveal_lines as line, i (i)}
 					<li
 						class="text-5xl md:text-6xl font-bold text-cq-text notranslate break-words"
+						class:text-left={is_text_reveal && line.length >= 10}
 						translate="no"
 					>
 						{line}
