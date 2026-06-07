@@ -50,11 +50,26 @@ SPDX-License-Identifier: MPL-2.0
 	let selected_answer: string = $state();
 	let answer_submitted = $state(false);
 	let question_title_element = $state<HTMLHeadingElement>();
+	let normal_mobile_answer_grid_element = $state<HTMLDivElement>();
 	let normal_mobile_question_title_size = $state(2.75);
+
+	interface NormalMobileAnswerTextFitOptions {
+		enabled: boolean;
+		text: string;
+	}
 
 	const normal_mobile_question_title_max_size = 2.75;
 	const normal_mobile_question_title_min_size = 0.8;
 	const normal_mobile_question_title_step = 0.05;
+	const normal_mobile_answer_text_max_size = 1.125;
+	const normal_mobile_answer_text_min_size = 0.625;
+	const normal_mobile_answer_text_step = 0.05;
+	const normal_mobile_answer_text_dynamic_max_size = 1.5;
+
+	const parse_css_px = (value: string): number => {
+		const parsed_value = parseFloat(value);
+		return Number.isFinite(parsed_value) ? parsed_value : 0;
+	};
 
 	const normal_mobile_question_title_overflows = (
 		element: HTMLHeadingElement,
@@ -98,6 +113,136 @@ SPDX-License-Identifier: MPL-2.0
 		}
 
 		normal_mobile_question_title_size = next_size;
+	};
+
+	const normal_mobile_answer_text_overflows = (element: HTMLParagraphElement): boolean => {
+		const answer_content = element.parentElement;
+
+		return (
+			element.scrollHeight > element.clientHeight + 1 ||
+			element.scrollWidth > element.clientWidth + 1 ||
+			(answer_content !== null &&
+				(answer_content.scrollHeight > answer_content.clientHeight + 1 ||
+					answer_content.scrollWidth > answer_content.clientWidth + 1))
+		);
+	};
+
+	const get_normal_mobile_answer_text_max_size = (element: HTMLParagraphElement): number => {
+		const answer_content = element.parentElement;
+		const root_font_size = parse_css_px(getComputedStyle(document.documentElement).fontSize);
+
+		if (!answer_content || root_font_size === 0) {
+			return normal_mobile_answer_text_max_size;
+		}
+
+		const content_height_rem = answer_content.clientHeight / root_font_size;
+		const dynamic_max_size = content_height_rem / 5;
+
+		return Math.min(
+			normal_mobile_answer_text_dynamic_max_size,
+			Math.max(normal_mobile_answer_text_max_size, dynamic_max_size)
+		);
+	};
+
+	const update_normal_mobile_answer_text_size = (element: HTMLParagraphElement) => {
+		let next_size = get_normal_mobile_answer_text_max_size(element);
+		element.style.setProperty('--normal-mobile-answer-text-size', `${next_size}rem`);
+
+		while (
+			next_size > normal_mobile_answer_text_min_size &&
+			normal_mobile_answer_text_overflows(element)
+		) {
+			next_size = Math.max(
+				normal_mobile_answer_text_min_size,
+				Number((next_size - normal_mobile_answer_text_step).toFixed(2))
+			);
+			element.style.setProperty('--normal-mobile-answer-text-size', `${next_size}rem`);
+		}
+	};
+
+	const fit_normal_mobile_answer_text = (
+		element: HTMLParagraphElement,
+		options: NormalMobileAnswerTextFitOptions
+	) => {
+		let disposed = false;
+		let animation_frame: number | undefined;
+		let current_options = options;
+		const mobile_query = window.matchMedia('(max-width: 639px)');
+		const answer_content = element.parentElement;
+		const answer_button = answer_content?.parentElement;
+
+		const reset_size = () => {
+			element.style.setProperty(
+				'--normal-mobile-answer-text-size',
+				`${get_normal_mobile_answer_text_max_size(element)}rem`
+			);
+		};
+
+		const schedule_update = async () => {
+			await tick();
+			if (disposed) {
+				return;
+			}
+			if (animation_frame !== undefined) {
+				cancelAnimationFrame(animation_frame);
+			}
+			animation_frame = requestAnimationFrame(() => {
+				if (disposed) {
+					return;
+				}
+				if (!current_options.enabled || !mobile_query.matches) {
+					reset_size();
+					return;
+				}
+				update_normal_mobile_answer_text_size(element);
+			});
+		};
+
+		const resize_observer = new ResizeObserver(schedule_update);
+		resize_observer.observe(element);
+		if (answer_content) {
+			resize_observer.observe(answer_content);
+		}
+		if (answer_button) {
+			resize_observer.observe(answer_button);
+		}
+		mobile_query.addEventListener('change', schedule_update);
+		schedule_update();
+
+		return {
+			update(next_options: NormalMobileAnswerTextFitOptions) {
+				current_options = next_options;
+				schedule_update();
+			},
+			destroy() {
+				disposed = true;
+				resize_observer.disconnect();
+				mobile_query.removeEventListener('change', schedule_update);
+				if (animation_frame !== undefined) {
+					cancelAnimationFrame(animation_frame);
+				}
+			}
+		};
+	};
+
+	const update_normal_mobile_answer_grid_size = (element: HTMLDivElement) => {
+		const grid_styles = getComputedStyle(element);
+		const horizontal_padding =
+			parse_css_px(grid_styles.paddingLeft) + parse_css_px(grid_styles.paddingRight);
+		const vertical_padding =
+			parse_css_px(grid_styles.paddingTop) + parse_css_px(grid_styles.paddingBottom);
+		const available_width =
+			element.clientWidth - horizontal_padding - parse_css_px(grid_styles.columnGap);
+		const available_height =
+			element.clientHeight - vertical_padding - parse_css_px(grid_styles.rowGap);
+		const answer_size = Math.floor(Math.min(available_width / 2, available_height / 2));
+
+		if (answer_size <= 0) {
+			element.style.removeProperty('--normal-mobile-answer-size');
+			return;
+		}
+
+		element.style.setProperty('--normal-mobile-answer-size', `${answer_size}px`);
 	};
 
 	// Stop the timer if the question is answered
@@ -169,6 +314,66 @@ SPDX-License-Identifier: MPL-2.0
 
 		const resize_observer = new ResizeObserver(schedule_update);
 		resize_observer.observe(question_area);
+		mobile_query.addEventListener('change', schedule_update);
+		schedule_update();
+
+		return () => {
+			disposed = true;
+			resize_observer.disconnect();
+			mobile_query.removeEventListener('change', schedule_update);
+			if (animation_frame !== undefined) {
+				cancelAnimationFrame(animation_frame);
+			}
+		};
+	});
+
+	$effect(() => {
+		question.type;
+		question.image;
+		game_mode;
+		solution;
+
+		const element = normal_mobile_answer_grid_element;
+		const is_normal_mobile_answer_grid =
+			solution === undefined &&
+			game_mode === 'normal' &&
+			!question.image &&
+			(question.type === QuizQuestionType.ABCD || question.type === QuizQuestionType.VOTING);
+
+		if (!element || !is_normal_mobile_answer_grid) {
+			return;
+		}
+
+		let disposed = false;
+		let animation_frame: number | undefined;
+		const mobile_query = window.matchMedia('(max-width: 639px)');
+		const answer_area = element.parentElement;
+
+		const schedule_update = async () => {
+			await tick();
+			if (disposed) {
+				return;
+			}
+			if (animation_frame !== undefined) {
+				cancelAnimationFrame(animation_frame);
+			}
+			animation_frame = requestAnimationFrame(() => {
+				if (disposed) {
+					return;
+				}
+				if (!mobile_query.matches) {
+					element.style.removeProperty('--normal-mobile-answer-size');
+					return;
+				}
+				update_normal_mobile_answer_grid_size(element);
+			});
+		};
+
+		const resize_observer = new ResizeObserver(schedule_update);
+		resize_observer.observe(element);
+		if (answer_area) {
+			resize_observer.observe(answer_area);
+		}
 		mobile_query.addEventListener('change', schedule_update);
 		schedule_update();
 
@@ -474,6 +679,7 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 
 				<div
+					bind:this={normal_mobile_answer_grid_element}
 					class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-2 w-full p-4 h-full"
 					class:normal-mobile-answer-grid={game_mode === 'normal'}
 					class:normal-mobile-answer-grid-compact={game_mode === 'normal' &&
@@ -523,6 +729,10 @@ SPDX-License-Identifier: MPL-2.0
 									{/if}
 									<p
 										class="normal-mobile-answer-text min-w-0 notranslate"
+										use:fit_normal_mobile_answer_text={{
+											enabled: game_mode === 'normal' && !question.image,
+											text: answer.answer
+										}}
 										translate="no"
 									>
 										{answer.answer}
@@ -880,6 +1090,14 @@ SPDX-License-Identifier: MPL-2.0
 		}
 
 		.normal-mobile-answer-grid-compact {
+			--normal-mobile-answer-size: min(
+				calc((100vw - 1.5rem) / 2),
+				calc((66.667svh - 4.5rem) / 2)
+			);
+			align-content: center;
+			grid-template-columns: repeat(2, var(--normal-mobile-answer-size));
+			grid-template-rows: repeat(2, var(--normal-mobile-answer-size));
+			justify-content: center;
 			padding-top: 3.5rem;
 		}
 
@@ -887,10 +1105,17 @@ SPDX-License-Identifier: MPL-2.0
 			padding: 0.5rem;
 		}
 
+		.normal-mobile-answer-grid-compact .normal-mobile-answer-button {
+			height: var(--normal-mobile-answer-size);
+			width: var(--normal-mobile-answer-size);
+		}
+
 		.normal-mobile-answer-content {
 			flex-direction: column;
 			gap: 0.25rem;
+			height: 100%;
 			text-align: center;
+			width: 100%;
 		}
 
 		.normal-mobile-answer-emoji {
@@ -903,13 +1128,16 @@ SPDX-License-Identifier: MPL-2.0
 
 		.normal-mobile-answer-text {
 			display: -webkit-box;
+			flex: 1 1 auto;
 			line-clamp: 3;
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 3;
+			max-height: 100%;
 			overflow: hidden;
 			overflow-wrap: anywhere;
-			font-size: clamp(0.7rem, 3vw, 0.875rem);
+			font-size: var(--normal-mobile-answer-text-size, clamp(0.875rem, 3.8vw, 1.125rem));
 			line-height: 1.2;
+			width: 100%;
 		}
 
 		.normal-mobile-text-answer {

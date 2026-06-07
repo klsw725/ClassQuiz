@@ -187,7 +187,7 @@ SPDX-License-Identifier: MPL-2.0
 			-webkit-line-clamp: 3;
 			overflow: hidden;
 			overflow-wrap: anywhere;
-			font-size: clamp(0.7rem, 3vw, 0.875rem);
+			font-size: clamp(0.875rem, 3.8vw, 1.125rem);
 			line-height: 1.2;
 		}
 	}
