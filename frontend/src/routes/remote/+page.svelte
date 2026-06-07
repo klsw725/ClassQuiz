@@ -203,10 +203,6 @@ SPDX-License-Identifier: MPL-2.0
 		final_results = data;
 	});
 
-	socket.on('everyone_answered', (_) => {
-		timer_res = '0';
-	});
-
 	socket.on('export_token', (int_data) => {
 		warnToLeave = false;
 		dataexport_download_a.href = `/api/v1/quiz/export_data/${int_data}?ts=${new Date().getTime()}&game_pin=${

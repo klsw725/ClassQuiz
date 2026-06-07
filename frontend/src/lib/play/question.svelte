@@ -259,10 +259,6 @@ SPDX-License-Identifier: MPL-2.0
 			timer_res = seconds.toString();
 		}, 1000);
 	};
-	socket.on('everyone_answered', (_) => {
-		timer_res = '0';
-	});
-
 	timer(question.time);
 
 	$effect(() => {
