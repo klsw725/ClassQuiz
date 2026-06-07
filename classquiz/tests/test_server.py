@@ -524,6 +524,16 @@ class TestPlayQuiz:
         assert resp.status_code == 422
         resp = test_client.post(
             "/api/v1/solo/attempts",
+            json={
+                "game_pin": ValueStorage.solo_game_pin,
+                "solo_token": ValueStorage.solo_token,
+                "username": "A",
+                "zone": "3구역",
+            },
+        )
+        assert resp.status_code == 422
+        resp = test_client.post(
+            "/api/v1/solo/attempts",
             json={"game_pin": ValueStorage.solo_game_pin, "username": "Solo Player", "zone": "3구역"},
         )
         assert resp.status_code == 404
@@ -542,7 +552,7 @@ class TestPlayQuiz:
             json={
                 "game_pin": ValueStorage.solo_game_pin,
                 "solo_token": ValueStorage.solo_token,
-                "username": "Solo Player",
+                "username": "AB",
                 "zone": "3구역",
             },
         )
@@ -550,7 +560,7 @@ class TestPlayQuiz:
         data = resp.json()
         ValueStorage.solo_attempt_id = data["attempt_id"]
         assert data["game_pin"] == ValueStorage.solo_game_pin
-        assert data["username"] == "Solo Player"
+        assert data["username"] == "AB"
         assert data["zone"] == "3구역"
         assert data["current_question"] == 0
         assert data["completed"] is False

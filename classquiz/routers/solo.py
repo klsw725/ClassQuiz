@@ -22,7 +22,7 @@ SOLO_ATTEMPT_TTL_SECONDS = 18000
 class CreateSoloAttemptRequest(BaseModel):
     game_pin: str = Field(pattern=r"^\d{6}$")
     solo_token: str | None = Field(default=None, min_length=1, max_length=256)
-    username: str | None = Field(default=None, min_length=1, max_length=100)
+    username: str | None = Field(default=None, min_length=2, max_length=100)
     zone: str
 
     @field_validator("zone")

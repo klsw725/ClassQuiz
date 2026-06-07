@@ -183,7 +183,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	const create_attempt = async (event: Event) => {
 		event.preventDefault();
-		if (!game_pin || !token || username.length < 1) {
+		if (!game_pin || !token || username.length < 2) {
 			return;
 		}
 		loading = true;
@@ -410,7 +410,7 @@ SPDX-License-Identifier: MPL-2.0
 
 				<BrownButton
 					type="submit"
-					disabled={loading || !game_pin || !token || username.length < 1}
+					disabled={loading || !game_pin || !token || username.length < 2}
 				>
 					{#if loading}<Spinner my_20={false} />{:else}{$t(
 							'solo_page.start_attempt'
