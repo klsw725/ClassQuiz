@@ -288,6 +288,7 @@
         "stop_time_and_solutions": "시간을 멈추고 해답 표시",
         "enter_answer_into_field": "입력 필드에 답을 입력하세요!",
         "answers_submitted": "{{answer_count}}개의 답변 제출됨",
+        "answers_not_submitted": "{{count}}명 미제출",
         "request_export_results": "결과 다운로드 요청",
         "download_export_results": "결과 다운로드",
         "export_results": "결과 내보내기",

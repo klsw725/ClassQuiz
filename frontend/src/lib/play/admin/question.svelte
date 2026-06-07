@@ -23,6 +23,7 @@ SPDX-License-Identifier: MPL-2.0
 		selected_question: number;
 		timer_res: string;
 		answer_count: number;
+		player_count: number;
 		default_colors: string[];
 	}
 
@@ -31,8 +32,11 @@ SPDX-License-Identifier: MPL-2.0
 		selected_question,
 		timer_res = $bindable(),
 		answer_count,
+		player_count,
 		default_colors
 	}: Props = $props();
+
+	let not_submitted_count = $derived(Math.max(player_count - answer_count, 0));
 
 	const { t } = getLocalization();
 
@@ -93,8 +97,11 @@ SPDX-License-Identifier: MPL-2.0
 		<div class="m-auto">
 			<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
 		</div>
-		<p class="m-auto text-3xl">
+		<p class="m-auto text-center text-3xl">
 			{$t('admin_page.answers_submitted', { answer_count: answer_count })}
+			<span class="text-cq-muted mt-1 block text-xl">
+				{$t('admin_page.answers_not_submitted', { count: not_submitted_count })}
+			</span>
 		</p>
 	</div>
 </div>

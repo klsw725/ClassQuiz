@@ -126,6 +126,7 @@ SPDX-License-Identifier: MPL-2.0
 				selected_question={game_state.selected_question}
 				timer_res={game_state.timer_res}
 				answer_count={game_state.answer_count}
+				player_count={game_state.players.length}
 				{default_colors}
 			/>
 		{/if}
