@@ -57,7 +57,7 @@ def __main__():
         i.emit(
             "join_game",
             {
-                "username": str(index),
+                "username": f"p{index}",
                 "game_pin": GAME_PIN,
                 "zone": f"{index % 11 + 1}구역",
                 "captcha": None,
