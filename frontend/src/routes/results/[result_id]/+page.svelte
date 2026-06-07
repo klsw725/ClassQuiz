@@ -82,6 +82,9 @@ SPDX-License-Identifier: MPL-2.0
 				scores={data.results.player_scores}
 				title={data.results.title}
 				timestamp={data.results.timestamp}
+				answers={data.results.answers}
+				questions={data.results.questions}
+				player_zone_data={data.results.player_zone_data ?? {}}
 			/>
 		</div>
 	{:else if selected_tab === SelectedTab.Questions}
