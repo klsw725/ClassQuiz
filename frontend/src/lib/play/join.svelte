@@ -214,6 +214,7 @@ SPDX-License-Identifier: MPL-2.0
 				bind:value={game_pin}
 				maxlength="6"
 				inputmode="numeric"
+				autocomplete="off"
 			/>
 			<!--				use:tippy={{content: "Please enter the game pin", sticky: true, placement: 'top'}}-->
 

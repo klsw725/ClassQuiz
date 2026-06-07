@@ -16,6 +16,7 @@ SPDX-License-Identifier: MPL-2.0
 	import KahootResults from '$lib/play/results_kahoot.svelte';
 	import { getLocalization } from '$lib/i18n';
 	import { participantKey } from '$lib/admin';
+	import { browser } from '$app/environment';
 	import Cookies from 'js-cookie';
 	const { t } = getLocalization();
 
@@ -26,6 +27,8 @@ SPDX-License-Identifier: MPL-2.0
 
 	let { data }: Props = $props();
 	let { game_pin } = $state(data);
+	const initial_game_pin = data.game_pin;
+	const joined_game_cookie_expires = 2 / 24;
 
 	// Types
 	interface GameMeta {
@@ -130,6 +133,23 @@ SPDX-License-Identifier: MPL-2.0
 		}
 	};
 
+	const is_reload_navigation = () => {
+		if (!browser) {
+			return false;
+		}
+		const [navigation_entry] = performance.getEntriesByType(
+			'navigation'
+		) as PerformanceNavigationTiming[];
+		return navigation_entry?.type === 'reload';
+	};
+
+	const should_restore_joined_game = (joined_game: JoinedGameCookie) => {
+		if (initial_game_pin !== '') {
+			return joined_game.game_pin === initial_game_pin;
+		}
+		return is_reload_navigation();
+	};
+
 	const confirmUnload = (event: BeforeUnloadEvent) => {
 		if (preventReload) {
 			event.preventDefault();
@@ -148,7 +168,10 @@ SPDX-License-Identifier: MPL-2.0
 			return;
 		}
 		const data = JSON.parse(cookie_data) as JoinedGameCookie;
-		restoreJoinedGameState(data);
+		if (!should_restore_joined_game(data)) {
+			Cookies.remove('joined_game');
+			return;
+		}
 		socket.emit('rejoin_game', {
 			old_sid: data.sid,
 			username: data.username,
@@ -170,7 +193,7 @@ SPDX-License-Identifier: MPL-2.0
 			[participantKey(username, zone)]: `${zone}-${username}`
 		};
 		Cookies.set('joined_game', JSON.stringify({ sid: socket.id, username, game_pin, zone }), {
-			expires: 3600
+			expires: joined_game_cookie_expires
 		});
 	});
 	socket.on('rejoined_game', (data: GameData) => {
@@ -179,7 +202,7 @@ SPDX-License-Identifier: MPL-2.0
 			const joinedGame = JSON.parse(cookie_data) as JoinedGameCookie;
 			restoreJoinedGameState(joinedGame);
 			Cookies.set('joined_game', JSON.stringify({ ...joinedGame, sid: socket.id }), {
-				expires: 3600
+				expires: joined_game_cookie_expires
 			});
 		}
 		gameData = data;
