@@ -556,6 +556,7 @@ async def test_submit_answer_scores_ordered_multi_text_partial_credit(recovery_c
             TextQuizAnswer(answer="gamma", case_sensitive=False),
         ],
         multi_text_order_sensitive=True,
+        multi_text_partial_credit=True,
     )
     game = make_game(uuid.uuid4(), question_show=True, questions=[question], started=True)
     game.time_based_scoring = False

@@ -26,6 +26,7 @@ def make_text_game(
     ignore_whitespace: bool = False,
     question_type: QuizQuestionType = QuizQuestionType.TEXT,
     multi_text_order_sensitive: bool = False,
+    multi_text_partial_credit: bool = False,
 ) -> PlayGame:
     return PlayGame(
         quiz_id=uuid.uuid4(),
@@ -40,6 +41,7 @@ def make_text_game(
                 answers=answers,
                 ignore_whitespace=ignore_whitespace,
                 multi_text_order_sensitive=multi_text_order_sensitive,
+                multi_text_partial_credit=multi_text_partial_credit,
             )
         ],
         game_id=uuid.uuid4(),
@@ -115,6 +117,14 @@ def test_multi_text_question_order_sensitive_defaults_to_false():
     assert not game.questions[0].multi_text_order_sensitive
 
 
+def test_multi_text_question_partial_credit_defaults_to_false():
+    answers = [TextQuizAnswer(answer="alpha", case_sensitive=False)]
+
+    game = make_text_game(answers, question_type=QuizQuestionType.MULTI_TEXT)
+
+    assert not game.questions[0].multi_text_partial_credit
+
+
 def test_multi_text_answer_can_require_matching_slot_order():
     answers = [
         TextQuizAnswer(answer="alpha", case_sensitive=False),
@@ -143,6 +153,7 @@ def test_multi_text_answer_order_sensitive_awards_matching_slots_only():
         ["alpha", "wrong", "Gamma"],
         answers,
         order_sensitive=True,
+        partial_credit=True,
     )
 
     assert not right
@@ -247,7 +258,7 @@ def test_multi_text_answer_feedback_can_require_matching_slot_order():
     ]
 
 
-def test_multi_text_answer_awards_partial_credit_for_matched_required_answers():
+def test_multi_text_answer_partial_credit_defaults_to_off():
     answers = [
         TextQuizAnswer(answer="alpha", case_sensitive=False),
         TextQuizAnswer(answer="beta", case_sensitive=False),
@@ -255,6 +266,23 @@ def test_multi_text_answer_awards_partial_credit_for_matched_required_answers():
     ]
 
     right, credit = check_multi_text_question(["gamma", "wrong", "alpha"], answers)
+
+    assert not right
+    assert credit == 0
+
+
+def test_multi_text_answer_awards_partial_credit_when_enabled():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+        TextQuizAnswer(answer="gamma", case_sensitive=False),
+    ]
+
+    right, credit = check_multi_text_question(
+        ["gamma", "wrong", "alpha"],
+        answers,
+        partial_credit=True,
+    )
 
     assert not right
     assert credit == 2 / 3
@@ -266,10 +294,22 @@ def test_multi_text_answer_uses_one_to_one_matching_for_duplicate_slots():
         TextQuizAnswer(answer="alpha", case_sensitive=False),
     ]
 
-    right, credit = check_multi_text_question(["alpha"], answers)
+    right, credit = check_multi_text_question(["alpha"], answers, partial_credit=True)
 
     assert not right
     assert credit == 0.5
+
+
+def test_multi_text_answer_full_match_credits_one_without_partial_credit():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+    ]
+
+    right, credit = check_multi_text_question(["alpha", "beta"], answers)
+
+    assert right
+    assert credit == 1
 
 
 def test_multi_text_answer_ignores_extra_submitted_guesses():
@@ -289,7 +329,11 @@ def test_check_answer_multi_text_uses_complex_answer_and_returns_joined_submissi
         TextQuizAnswer(answer="alpha", case_sensitive=False),
         TextQuizAnswer(answer="beta", case_sensitive=False),
     ]
-    game = make_text_game(answers, question_type=QuizQuestionType.MULTI_TEXT)
+    game = make_text_game(
+        answers,
+        question_type=QuizQuestionType.MULTI_TEXT,
+        multi_text_partial_credit=True,
+    )
     data = SubmitAnswerData(
         question_index=0,
         answer="",
@@ -336,6 +380,7 @@ def test_check_answer_multi_text_awards_order_sensitive_partial_credit():
         answers,
         question_type=QuizQuestionType.MULTI_TEXT,
         multi_text_order_sensitive=True,
+        multi_text_partial_credit=True,
     )
     data = SubmitAnswerData(
         question_index=0,
@@ -354,6 +399,33 @@ def test_check_answer_multi_text_awards_order_sensitive_partial_credit():
     assert credit == 2 / 3
 
 
+def test_check_answer_multi_text_partial_credit_off_returns_zero_for_partial_match():
+    answers = [
+        TextQuizAnswer(answer="alpha", case_sensitive=False),
+        TextQuizAnswer(answer="beta", case_sensitive=False),
+        TextQuizAnswer(answer="gamma", case_sensitive=False),
+    ]
+    game = make_text_game(
+        answers,
+        question_type=QuizQuestionType.MULTI_TEXT,
+    )
+    data = SubmitAnswerData(
+        question_index=0,
+        answer="",
+        complex_answer=[
+            SubmitAnswerDataOrderType(answer="alpha"),
+            SubmitAnswerDataOrderType(answer="wrong"),
+            SubmitAnswerDataOrderType(answer="Gamma"),
+        ],
+    )
+
+    right, answer, credit = check_answer(game, data)
+
+    assert not right
+    assert answer == "alpha, wrong, Gamma"
+    assert credit == 0
+
+
 def test_live_multi_text_ordered_partial_credit_answer_data_serializes_details():
     answers = [
         TextQuizAnswer(answer="alpha", case_sensitive=False),
@@ -364,6 +436,7 @@ def test_live_multi_text_ordered_partial_credit_answer_data_serializes_details()
         answers,
         question_type=QuizQuestionType.MULTI_TEXT,
         multi_text_order_sensitive=True,
+        multi_text_partial_credit=True,
     )
     game.time_based_scoring = False
     data = SubmitAnswerData(

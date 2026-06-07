@@ -93,6 +93,7 @@ def check_answer(game_data: PlayGame, data: SubmitAnswerData) -> AnswerCheckResu
             text_answers,
             game_data.questions[q_i].ignore_whitespace,
             game_data.questions[q_i].multi_text_order_sensitive,
+            game_data.questions[q_i].multi_text_partial_credit,
         )
         return AnswerCheckResult(answer_right, ", ".join(submitted_answers), score_credit)
 
@@ -225,12 +226,15 @@ def check_multi_text_question(
     answers: list[TextQuizAnswer],
     ignore_whitespace: bool = False,
     order_sensitive: bool = False,
+    partial_credit: bool = False,
 ) -> tuple[bool, float]:
     if not answers:
         return False, 0
     match_count = count_text_matches(submitted_answers, answers, ignore_whitespace, order_sensitive)
-    score_credit = match_count / len(answers)
-    return match_count == len(answers), score_credit
+    answer_right = match_count == len(answers)
+    if not partial_credit:
+        return answer_right, float(answer_right)
+    return answer_right, match_count / len(answers)
 
 
 def get_submitted_text_answers(data: SubmitAnswerData) -> list[str]:
