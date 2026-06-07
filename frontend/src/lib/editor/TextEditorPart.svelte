@@ -54,6 +54,7 @@ SPDX-License-Identifier: MPL-2.0
 	data.questions[selected_question].ignore_whitespace ??= false;
 	if (get_text_question_type() === QuizQuestionType.MULTI_TEXT) {
 		data.questions[selected_question].multi_text_order_sensitive ??= false;
+		data.questions[selected_question].multi_text_partial_credit ??= false;
 	}
 
 	const tippy = createTippy({
@@ -164,6 +165,53 @@ SPDX-License-Identifier: MPL-2.0
 					{data.questions[selected_question].multi_text_order_sensitive
 						? $t('editor.multi_text_order_sensitive_on')
 						: $t('editor.multi_text_order_sensitive_off')}
+				</span>
+			</button>
+			<button
+				class="cq-surface cq-card-interactive flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition"
+				type="button"
+				aria-label={$t('editor.multi_text_partial_credit_toggle')}
+				onclick={() => {
+					data.questions[selected_question].multi_text_partial_credit =
+						!data.questions[selected_question].multi_text_partial_credit;
+				}}
+				use:tippy={{ content: $t('editor.multi_text_partial_credit_tooltip'), placement: 'top' }}
+			>
+				{#if data.questions[selected_question].multi_text_partial_credit}
+					<svg
+						class="w-5 h-5 inline-block"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M5 19L19 5M8 8a2 2 0 11-4 0 2 2 0 014 0zM20 16a2 2 0 11-4 0 2 2 0 014 0z"
+						/>
+					</svg>
+				{:else}
+					<svg
+						class="w-5 h-5 inline-block"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M5 9h14M5 15h14"
+						/>
+					</svg>
+				{/if}
+				<span>
+					{data.questions[selected_question].multi_text_partial_credit
+						? $t('editor.multi_text_partial_credit_on')
+						: $t('editor.multi_text_partial_credit_off')}
 				</span>
 			</button>
 		{/if}

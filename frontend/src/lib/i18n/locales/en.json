@@ -243,7 +243,11 @@
         "multi_text_order_sensitive_toggle": "Toggle ordered multi text matching",
         "multi_text_order_sensitive_tooltip": "Require answers in the configured order?",
         "multi_text_order_sensitive_on": "Answer order: Required",
-        "multi_text_order_sensitive_off": "Answer order: Any"
+        "multi_text_order_sensitive_off": "Answer order: Any",
+        "multi_text_partial_credit_toggle": "Toggle multi text partial credit",
+        "multi_text_partial_credit_tooltip": "Award partial credit per matched answer?",
+        "multi_text_partial_credit_on": "Partial credit: On",
+        "multi_text_partial_credit_off": "Partial credit: Off"
     },
     "import_page": {
         "need_help": "Need help?",

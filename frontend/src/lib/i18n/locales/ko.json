@@ -241,7 +241,11 @@
         "multi_text_order_sensitive_toggle": "멀티 텍스트 순서 채점 전환",
         "multi_text_order_sensitive_tooltip": "설정한 순서대로 답해야 정답 처리할까요?",
         "multi_text_order_sensitive_on": "정답 순서: 필요",
-        "multi_text_order_sensitive_off": "정답 순서: 자유"
+        "multi_text_order_sensitive_off": "정답 순서: 자유",
+        "multi_text_partial_credit_toggle": "멀티 텍스트 부분 점수 전환",
+        "multi_text_partial_credit_tooltip": "맞춘 만큼 부분 점수를 줄까요?",
+        "multi_text_partial_credit_on": "부분 점수: 켜짐",
+        "multi_text_partial_credit_off": "부분 점수: 꺼짐"
     },
     "import_page": {
         "need_help": "도움이 필요하신가요?",
