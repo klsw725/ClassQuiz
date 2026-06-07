@@ -128,12 +128,16 @@ SPDX-License-Identifier: MPL-2.0
 <style>
 	@media (max-width: 639px) {
 		.normal-mobile-check-answer {
+			display: flex;
+			flex-direction: column;
 			height: 65svh;
 			min-height: 0;
 			position: relative;
 		}
 
 		.normal-mobile-check-answer-available {
+			display: flex;
+			flex-direction: column;
 			flex: 1 1 0;
 			height: auto;
 			max-height: 66.667svh;
@@ -142,24 +146,36 @@ SPDX-License-Identifier: MPL-2.0
 		}
 
 		.normal-mobile-answer-timer {
-			top: 0.5rem;
+			position: relative;
+			z-index: auto;
+			flex: 0 0 4.125rem;
+			align-self: center;
+			width: 4.125rem;
+			height: 4.125rem;
+			top: auto;
 			right: auto;
 			bottom: auto;
-			left: 50%;
-			margin: 0;
-			transform: translateX(-50%) scale(0.55);
-			transform-origin: top center;
+			left: auto;
+			margin: 0.5rem auto 0;
+			transform: none;
+		}
+
+		.normal-mobile-answer-timer :global(#progress-circle) {
+			transform: scale(0.55);
+			transform-origin: top left;
 		}
 
 		.normal-mobile-answer-grid {
 			grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+			flex: 1 1 0;
 			gap: 0.5rem;
-			height: 100%;
-			padding: 5rem 0.5rem 0.5rem;
+			height: auto;
+			min-height: 0;
+			padding: 0.5rem;
 		}
 
 		.normal-mobile-answer-grid-compact {
-			padding-top: 3.5rem;
+			padding-top: 0.5rem;
 		}
 
 		.normal-mobile-answer-button {

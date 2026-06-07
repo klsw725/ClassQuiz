@@ -668,7 +668,7 @@ SPDX-License-Identifier: MPL-2.0
 		{#if question.type === QuizQuestionType.ABCD || question.type === QuizQuestionType.VOTING}
 			<div
 				class="answer-area w-full relative h-full"
-				class:normal-mobile-answer-area={game_mode === 'normal' && !question.image}
+				class:normal-mobile-answer-area={game_mode === 'normal'}
 				style="--answer-area-height: {get_div_height()}%"
 			>
 				<div
@@ -1016,6 +1016,11 @@ SPDX-License-Identifier: MPL-2.0
 			overflow: hidden;
 		}
 
+		.normal-mobile-answer-area {
+			display: flex;
+			flex-direction: column;
+		}
+
 		.normal-mobile-range-answer,
 		.normal-mobile-check-answer-area {
 			display: flex;
@@ -1073,20 +1078,32 @@ SPDX-License-Identifier: MPL-2.0
 		}
 
 		.normal-mobile-answer-timer {
-			top: 0.5rem;
+			position: relative;
+			z-index: auto;
+			flex: 0 0 4.125rem;
+			align-self: center;
+			width: 4.125rem;
+			height: 4.125rem;
+			top: auto;
 			right: auto;
 			bottom: auto;
-			left: 50%;
-			margin: 0;
-			transform: translateX(-50%) scale(0.55);
-			transform-origin: top center;
+			left: auto;
+			margin: 0.5rem auto 0;
+			transform: none;
+		}
+
+		.normal-mobile-answer-timer :global(#progress-circle) {
+			transform: scale(0.55);
+			transform-origin: top left;
 		}
 
 		.normal-mobile-answer-grid {
 			grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+			flex: 1 1 0;
 			gap: 0.5rem;
-			height: 100%;
-			padding: 5rem 0.5rem 0.5rem;
+			height: auto;
+			min-height: 0;
+			padding: 0.5rem;
 		}
 
 		.normal-mobile-answer-grid-compact {
@@ -1098,7 +1115,7 @@ SPDX-License-Identifier: MPL-2.0
 			grid-template-columns: repeat(2, var(--normal-mobile-answer-size));
 			grid-template-rows: repeat(2, var(--normal-mobile-answer-size));
 			justify-content: center;
-			padding-top: 3.5rem;
+			padding-top: 0.5rem;
 		}
 
 		.normal-mobile-answer-button {

@@ -166,7 +166,10 @@ SPDX-License-Identifier: MPL-2.0
 									'questions[].question'
 								).isValidSync(data.questions[selected_question].question)}
 							>
-								<c.default bind:text={data.questions[selected_question].question} />
+								<c.default
+									bind:text={data.questions[selected_question].question}
+									horizontalLine
+								/>
 							</div>
 						{/await}
 					{/key}

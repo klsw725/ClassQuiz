@@ -5,33 +5,35 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 <script lang="ts">
-	import { run } from 'svelte/legacy';
-
 	import {
-		BalloonEditor,
-		Essentials,
 		Autoformat,
+		BalloonEditor,
 		Bold,
+		Essentials,
+		HorizontalLine,
 		Italic,
 		Paragraph,
-		TextTransformation,
-		Superscript,
+		Strikethrough,
 		Subscript,
-		Strikethrough
+		Superscript,
+		TextTransformation,
+		Underline
 	} from 'ckeditor5';
 	import 'ckeditor5/ckeditor5.css';
+	import { onMount } from 'svelte';
+	import { run } from 'svelte/legacy';
 
 	const triggerChange = () => {
 		text = editor.getData();
 	};
 
-	import { onMount } from 'svelte';
 	interface Props {
 		// import Autoformat from "@ckeditor/ckeditor5-autoformat/src/autoformat"
 		text?: string;
+		horizontalLine?: boolean;
 	}
 
-	let { text = $bindable('') }: Props = $props();
+	let { text = $bindable(''), horizontalLine = false }: Props = $props();
 
 	let html_el = $state<HTMLElement>();
 
@@ -40,18 +42,34 @@ SPDX-License-Identifier: MPL-2.0
 	});
 	let editor: Awaited<ReturnType<typeof BalloonEditor.create>>;
 	onMount(() => {
+		const builtinPlugins = [
+			Essentials,
+			Autoformat,
+			Bold,
+			Italic,
+			Paragraph,
+			TextTransformation,
+			Strikethrough,
+			Subscript,
+			Superscript,
+			Underline,
+			...(horizontalLine ? [HorizontalLine] : [])
+		];
+		const toolbar = [
+			'bold',
+			'italic',
+			'underline',
+			'strikethrough',
+			'superscript',
+			'subscript',
+			...(horizontalLine ? ['horizontalLine'] : []),
+			'|',
+			'undo',
+			'redo'
+		];
+
 		class Editor extends BalloonEditor {
-			static builtinPlugins = [
-				Essentials,
-				Autoformat,
-				Bold,
-				Italic,
-				Paragraph,
-				TextTransformation,
-				Strikethrough,
-				Subscript,
-				Superscript
-			];
+			static builtinPlugins = builtinPlugins;
 
 			static defaultConfig = {
 				language: 'en'
@@ -64,16 +82,7 @@ SPDX-License-Identifier: MPL-2.0
 		Editor.create(html_el, {
 			licenseKey: 'GPL',
 			// plugins: [Strikethrough],
-			toolbar: [
-				'bold',
-				'italic',
-				'strikethrough',
-				'superscript',
-				'subscript',
-				'|',
-				'undo',
-				'redo'
-			]
+			toolbar
 		})
 			.then((newEditor) => {
 				editor = newEditor;
