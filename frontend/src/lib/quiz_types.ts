@@ -80,6 +80,7 @@ export interface BaseQuestion {
 	hide_results?: boolean;
 	ignore_whitespace?: boolean;
 	multi_text_order_sensitive?: boolean;
+	multi_text_partial_credit?: boolean;
 }
 
 export type Question =
