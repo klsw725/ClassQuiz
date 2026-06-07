@@ -103,6 +103,7 @@ SPDX-License-Identifier: MPL-2.0
 	let show_current_player_result = $derived(
 		username !== undefined && username in data && current_player_index !== -1
 	);
+	let is_participant_view = $derived(username !== undefined);
 
 	let canvas: HTMLCanvasElement = $state();
 	let confetti_delay = $derived(
@@ -123,7 +124,7 @@ SPDX-License-Identifier: MPL-2.0
 	<canvas bind:this={canvas}></canvas>
 	<div
 		class="results-layout px-4 py-8 md:py-12"
-		class:has-zones={has_zone_rankings}
+		class:has-zones={has_zone_rankings && !is_participant_view}
 	>
 		{#if has_zone_rankings}
 			<section class="zone-column">
@@ -152,41 +153,43 @@ SPDX-License-Identifier: MPL-2.0
 				</ol>
 			</section>
 		{/if}
-		<section class="player-column">
-			<h2
-				in:fly|global={{ y: -120, delay: 0 }}
-				class="mb-6 text-center text-5xl font-extrabold text-cq-text md:mb-8 xl:text-6xl"
-			>
-				개인 순위
-			</h2>
-			<div class="player-list">
-				{#each visible_player_names as player, i (player)}
-					{@const player_zone = getPlayerZone(player)}
-					<p
-						in:fly|global={{
-							y: -300,
-							delay: visible_player_count * 800 - (i + 1) * 600
-						}}
-						style="font-size: clamp(2.25rem, {Math.max(
-							2.25,
-							visible_player_count + 1.5 - i / 1.5
-						)}rem, {has_zone_rankings ? 5 : 7}rem)"
-						class="player-row text-center leading-tight"
-					>
-						{$t('play_page.final_result_rank', {
-							place: i + 1,
-							username: formatPlayerName(player),
-							points: data[player]
-						})}
-						{#if player_zone}
-							<span class="zone-badge {zone_badge_backgrounds[player_zone]}"
-								>{player_zone}</span
-							>
-						{/if}
-					</p>
-				{/each}
-			</div>
-		</section>
+		{#if !is_participant_view}
+			<section class="player-column">
+				<h2
+					in:fly|global={{ y: -120, delay: 0 }}
+					class="mb-6 text-center text-5xl font-extrabold text-cq-text md:mb-8 xl:text-6xl"
+				>
+					개인 순위
+				</h2>
+				<div class="player-list">
+					{#each visible_player_names as player, i (player)}
+						{@const player_zone = getPlayerZone(player)}
+						<p
+							in:fly|global={{
+								y: -300,
+								delay: visible_player_count * 800 - (i + 1) * 600
+							}}
+							style="font-size: clamp(2.25rem, {Math.max(
+								2.25,
+								visible_player_count + 1.5 - i / 1.5
+							)}rem, {has_zone_rankings ? 5 : 7}rem)"
+							class="player-row text-center leading-tight"
+						>
+							{$t('play_page.final_result_rank', {
+								place: i + 1,
+								username: formatPlayerName(player),
+								points: data[player]
+							})}
+							{#if player_zone}
+								<span class="zone-badge {zone_badge_backgrounds[player_zone]}"
+									>{player_zone}</span
+								>
+							{/if}
+						</p>
+					{/each}
+				</div>
+			</section>
+		{/if}
 	</div>
 	{#if show_current_player_result}
 		<div class="fixed bottom-0 left-0 flex justify-center w-full px-4 mb-6">
