@@ -59,7 +59,7 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	const normal_mobile_question_title_max_size = 2.75;
-	const normal_mobile_question_title_min_size = 1.75;
+	const normal_mobile_question_title_min_size = 1;
 	const normal_mobile_question_title_step = 0.05;
 	const normal_mobile_answer_text_max_size = 1.5;
 	const normal_mobile_answer_text_min_size = 1.125;
