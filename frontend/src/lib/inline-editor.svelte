@@ -68,21 +68,14 @@ SPDX-License-Identifier: MPL-2.0
 			'redo'
 		];
 
-		class Editor extends BalloonEditor {
-			static builtinPlugins = builtinPlugins;
-
-			static defaultConfig = {
-				language: 'en'
-			};
-		}
-		// BalloonEditor.builtinPlugins = [Strikethrough]
 		if (!html_el) {
 			return;
 		}
-		Editor.create(html_el, {
+		BalloonEditor.create(html_el, {
 			licenseKey: 'GPL',
-			// plugins: [Strikethrough],
-			toolbar
+			plugins: builtinPlugins,
+			toolbar,
+			language: 'en'
 		})
 			.then((newEditor) => {
 				editor = newEditor;
