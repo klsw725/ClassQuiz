@@ -12,7 +12,7 @@ SPDX-License-Identifier: MPL-2.0
 	import Spinner from '$lib/Spinner.svelte';
 	import CircularTimer from '$lib/play/circular_progress.svelte';
 	import { getLocalization } from '$lib/i18n';
-	import { participantKey } from '$lib/admin';
+	import { participantKey, type Player } from '$lib/admin';
 	import { navbarVisible } from '$lib/stores.svelte.ts';
 	import MediaComponent from '$lib/editor/MediaComponent.svelte';
 
@@ -39,10 +39,29 @@ SPDX-License-Identifier: MPL-2.0
 
 	let players: Array<{ sid: string; username: string; zone?: string }> = $state([]);
 	const LOBBY_VISIBLE_PLAYER_LIMIT = 80;
-	const formatPlayerName = (player: { username: string; zone?: string }) =>
-		player.zone ? `${player.zone}-${player.username}` : player.username;
+	const groupLobbyPlayersByZone = (players: Array<Player>) => {
+		const groups: Array<{ key: string; zone: string; players: Array<Player> }> = [];
+
+		for (const player of players) {
+			const zone_key = player.zone ?? '';
+			const group = groups.find((group) => group.key === zone_key);
+
+			if (group === undefined) {
+				groups.push({
+					key: zone_key,
+					zone: player.zone ?? $t('words.zone'),
+					players: [player]
+				});
+			} else {
+				group.players.push(player);
+			}
+		}
+
+		return groups;
+	};
 	let visible_lobby_player_count = $state(LOBBY_VISIBLE_PLAYER_LIMIT);
 	let visible_lobby_players = $derived(players.slice(0, visible_lobby_player_count));
+	let grouped_visible_lobby_players = $derived(groupLobbyPlayersByZone(visible_lobby_players));
 	let hidden_lobby_player_count = $derived(
 		Math.max(players.length - visible_lobby_players.length, 0)
 	);
@@ -324,18 +343,29 @@ SPDX-License-Identifier: MPL-2.0
 {:else}
 	<div class="flex min-h-screen items-center justify-center px-4 text-cq-text">
 		<div class="cq-card w-full max-w-md p-6 text-center">
-			<button onclick={start_game} class="accent-button w-fit">{$t('admin_page.start_game')}</button>
+			<button onclick={start_game} class="accent-button w-fit"
+				>{$t('admin_page.start_game')}</button
+			>
 
 			<h2 class="mt-6 text-xl font-semibold text-cq-text">{$t('words.player_plural')}:</h2>
 			{#await get_already_joined_players()}
 				<Spinner my_20={false} />
 			{:then _}
 				<div class="cq-surface-muted mt-3 p-3 text-cq-muted">
-					<ul>
-						{#each visible_lobby_players as player (participantKey(player.username, player.zone))}
-							<li>{formatPlayerName(player)}</li>
+					<div class="flex flex-col gap-3 text-left">
+						{#each grouped_visible_lobby_players as group (group.key)}
+							<div class="cq-card p-3">
+								<h3 class="font-semibold text-cq-text">{group.zone}</h3>
+								<ul class="mt-2 flex flex-wrap gap-2 text-cq-muted">
+									{#each group.players as player (participantKey(player.username, player.zone))}
+										<li class="cq-surface-muted px-2 py-1">
+											{player.username}
+										</li>
+									{/each}
+								</ul>
+							</div>
 						{/each}
-					</ul>
+					</div>
 					{#if hidden_lobby_player_count > 0}
 						<button
 							type="button"

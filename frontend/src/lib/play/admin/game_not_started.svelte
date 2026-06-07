@@ -11,7 +11,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { fade } from 'svelte/transition';
 	import { SocketGameControls } from '$lib/play/admin/socket_game_controls.ts';
 	import type { GameState } from '$lib/play/admin/game_state';
-	import { participantKey } from '$lib/admin';
+	import { participantKey, type Player } from '$lib/admin';
 
 	interface Props {
 		game_pin: string;
@@ -33,8 +33,29 @@ SPDX-License-Identifier: MPL-2.0
 	const { t } = getLocalization();
 	const formatPlayerName = (player: { username: string; zone?: string }) =>
 		player.zone ? `${player.zone}-${player.username}` : player.username;
+	const groupLobbyPlayersByZone = (players: Array<Player>) => {
+		const groups: Array<{ key: string; zone: string; players: Array<Player> }> = [];
+
+		for (const player of players) {
+			const zone_key = player.zone ?? '';
+			const group = groups.find((group) => group.key === zone_key);
+
+			if (group === undefined) {
+				groups.push({
+					key: zone_key,
+					zone: player.zone ?? $t('words.zone'),
+					players: [player]
+				});
+			} else {
+				group.players.push(player);
+			}
+		}
+
+		return groups;
+	};
 	let visible_lobby_player_count = $state(LOBBY_VISIBLE_PLAYER_LIMIT);
 	let visible_lobby_players = $derived(game_state.players.slice(0, visible_lobby_player_count));
+	let grouped_visible_lobby_players = $derived(groupLobbyPlayersByZone(visible_lobby_players));
 	let selected_lobby_player_key = $state<string | null>(null);
 	let hidden_lobby_player_count = $derived(
 		Math.max(game_state.players.length - visible_lobby_players.length, 0)
@@ -123,44 +144,53 @@ SPDX-License-Identifier: MPL-2.0
 			</GrayButton>
 		</div>
 	</div>
-	<div class="flex flex-row w-full mt-4 px-10 flex-wrap">
+	<div class="flex flex-col w-full mt-4 px-10 gap-3">
 		{#if game_state.players.length > 0}
-			{#each visible_lobby_players as player (participantKey(player.username, player.zone))}
-				{@const player_key = participantKey(player.username, player.zone)}
-				<div class="cq-surface-muted relative p-2 m-2">
-					<button
-						type="button"
-						class="link-hover text-lg"
-						aria-haspopup="menu"
-						aria-expanded={selected_lobby_player_key === player_key}
-						onclick={() => {
-							togglePlayerMenu(player);
-						}}>{formatPlayerName(player)}</button
-					>
-					{#if selected_lobby_player_key === player_key}
-						<div
-							class="cq-card absolute left-0 top-full z-10 mt-1 w-max p-1"
-							role="menu"
-						>
-							<button
-								type="button"
-								role="menuitem"
-								class="action-button w-full text-sm"
-								aria-label="{$t('words.kick')} {formatPlayerName(player)}"
-								onclick={() => {
-									kickPlayer(player);
-								}}
-							>
-								{$t('words.kick')}
-							</button>
-						</div>
-					{/if}
+			{#each grouped_visible_lobby_players as group (group.key)}
+				<div class="cq-card p-3">
+					<h2 class="text-lg font-semibold text-cq-text">{group.zone}</h2>
+					<div class="mt-2 flex flex-row flex-wrap">
+						{#each group.players as player (participantKey(player.username, player.zone))}
+							{@const player_key = participantKey(player.username, player.zone)}
+							<div class="cq-surface-muted relative p-2 m-2">
+								<button
+									type="button"
+									class="link-hover text-lg"
+									aria-haspopup="menu"
+									aria-expanded={selected_lobby_player_key === player_key}
+									onclick={() => {
+										togglePlayerMenu(player);
+									}}>{player.username}</button
+								>
+								{#if selected_lobby_player_key === player_key}
+									<div
+										class="cq-card absolute left-0 top-full z-10 mt-1 w-max p-1"
+										role="menu"
+									>
+										<button
+											type="button"
+											role="menuitem"
+											class="action-button w-full text-sm"
+											aria-label="{$t('words.kick')} {formatPlayerName(
+												player
+											)}"
+											onclick={() => {
+												kickPlayer(player);
+											}}
+										>
+											{$t('words.kick')}
+										</button>
+									</div>
+								{/if}
+							</div>
+						{/each}
+					</div>
 				</div>
 			{/each}
 			{#if hidden_lobby_player_count > 0}
 				<button
 					type="button"
-					class="cq-surface-muted p-2 m-2 text-lg font-semibold text-cq-muted hover:text-cq-text transition"
+					class="cq-surface-muted w-fit p-2 m-2 text-lg font-semibold text-cq-muted hover:text-cq-text transition"
 					onclick={() => (visible_lobby_player_count += LOBBY_VISIBLE_PLAYER_LIMIT)}
 				>
 					+{Math.min(LOBBY_VISIBLE_PLAYER_LIMIT, hidden_lobby_player_count)}
