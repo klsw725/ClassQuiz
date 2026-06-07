@@ -122,7 +122,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	const setUsername = async (e: Event) => {
 		e.preventDefault();
-		if (username.length < 3) {
+		if (username.length < 2) {
 			return;
 		}
 		let captcha_resp: string;
@@ -252,7 +252,7 @@ SPDX-License-Identifier: MPL-2.0
 			{/if}
 
 			<div class="mt-2">
-				<BrownButton disabled={username.length < 3} onclick={setUsername}
+				<BrownButton disabled={username.length < 2} onclick={setUsername}
 					>{$t('words.submit')}</BrownButton
 				>
 			</div>

@@ -209,6 +209,41 @@ async def test_same_username_different_zones_can_join_before_start(recovery_cont
 
 
 @pytest.mark.asyncio
+async def test_join_game_rejects_one_character_username(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    game = make_game(uuid.uuid4(), started=False)
+    fake_redis.values["game:123456"] = game.model_dump_json()
+
+    await socket_server.join_game(
+        "short-name-sid",
+        {
+            "game_pin": "123456",
+            "username": "A",
+            "zone": "1구역",
+            "captcha": None,
+            "custom_field": "",
+        },
+    )
+
+    assert ("error", None, "short-name-sid") in fake_sio.emitted
+    assert "short-name-sid" not in sessions
+
+    await socket_server.join_game(
+        "valid-name-sid",
+        {
+            "game_pin": "123456",
+            "username": "AB",
+            "zone": "1구역",
+            "captcha": None,
+            "custom_field": "",
+        },
+    )
+
+    assert ("joined_game", game.to_player_data(), "valid-name-sid") in fake_sio.emitted
+    assert sessions["valid-name-sid"]["username"] == "AB"
+
+
+@pytest.mark.asyncio
 async def test_same_username_same_zone_is_rejected_before_start(recovery_context):
     fake_redis, fake_sio, sessions = recovery_context
     game = make_game(uuid.uuid4(), started=False)
@@ -246,6 +281,19 @@ async def test_cookie_rejoin_rejects_active_old_sid(recovery_context):
     assert ("participant_already_connected", None, "new-sid") in fake_sio.emitted
     assert fake_redis.values[f"game_session:123456:players:{participant_key('alice', '1구역')}"] == "old-sid"
     assert "new-sid" not in sessions
+
+
+@pytest.mark.asyncio
+async def test_rejoin_game_rejects_one_character_username(recovery_context):
+    _fake_redis, fake_sio, sessions = recovery_context
+
+    await socket_server.rejoin_game(
+        "short-name-sid",
+        {"game_pin": "123456", "username": "A", "zone": "1구역", "old_sid": "old-sid"},
+    )
+
+    assert ("error", None, "short-name-sid") in fake_sio.emitted
+    assert "short-name-sid" not in sessions
 
 
 @pytest.mark.asyncio

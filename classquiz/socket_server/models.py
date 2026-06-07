@@ -10,7 +10,7 @@ ALLOWED_ZONES = tuple(f"{zone}구역" for zone in range(1, 12))
 
 
 class JoinGameData(BaseModel):
-    username: str
+    username: str = Field(min_length=2)
     game_pin: str
     zone: str
     captcha: str | None = None
@@ -26,7 +26,7 @@ class JoinGameData(BaseModel):
 class RejoinGameData(BaseModel):
     old_sid: str
     game_pin: str
-    username: str
+    username: str = Field(min_length=2)
     zone: str | None = None
 
     @field_validator("zone")
