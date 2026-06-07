@@ -552,13 +552,7 @@ async def submit_answer(sid: str, data: dict):
         data=answer_data,
         q_index=int(float(data.question_index)),
     )
-    player_count = await redis.scard(f"game_session:{session['game_pin']}:players")
     await sio.emit("player_answer", {})
-    if len(answers) == player_count:
-        game_data = await PlayGame.get_from_redis(session["game_pin"])
-        game_data.question_show = False
-        await game_data.save(session["game_pin"])
-        await sio.emit("everyone_answered", {})
 
 
 @sio.event
@@ -589,15 +583,9 @@ async def show_solutions(sid: str, _data: dict):
     game_data = await PlayGame.get_from_redis(session["game_pin"])
     if not session["admin"]:
         return
-    question = game_data.questions[game_data.current_question]
-    question_data = question.model_dump()
-    if question.type == QuizQuestionType.MULTI_TEXT and isinstance(question_data.get("answers"), list):
-        question_data["answers"] = [
-            {"answer": "", "case_sensitive": False} for _answer in question_data["answers"]
-        ]
     await sio.emit(
         "solutions",
-        question_data,
+        game_data.questions[game_data.current_question].model_dump(),
         room=session["game_pin"],
     )
 

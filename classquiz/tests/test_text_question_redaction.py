@@ -67,19 +67,16 @@ def test_solo_multi_text_question_payload_redacts_answer_text_but_keeps_field_co
     assert "secret two" not in str(question)
 
 
-def test_solo_multi_text_solution_payload_redacts_answer_text_but_keeps_field_count():
+def test_solo_multi_text_solution_payload_exposes_answer_text():
     question = solution_question(make_text_game().questions[0])
 
-    assert question["answers"] == [
-        {"answer": "", "case_sensitive": False},
-        {"answer": "", "case_sensitive": False},
-    ]
-    assert "secret one" not in str(question)
-    assert "secret two" not in str(question)
+    answers = question["answers"]
+    assert isinstance(answers, list)
+    assert [a["answer"] for a in answers] == ["secret one", "secret two"]
 
 
 @pytest.mark.asyncio
-async def test_live_multi_text_solution_payload_redacts_answer_text(monkeypatch):
+async def test_live_multi_text_solution_payload_exposes_answer_text(monkeypatch):
     emitted: list[tuple[str, object, str | None]] = []
     game = make_text_game()
     game.current_question = 0
@@ -99,27 +96,12 @@ async def test_live_multi_text_solution_payload_redacts_answer_text(monkeypatch)
 
     await socket_server.show_solutions("admin-sid", {})
 
-    assert emitted == [
-        (
-            "solutions",
-            {
-                "question": "Text question",
-                "time": "20",
-                "points": 1000,
-                "type": QuizQuestionType.MULTI_TEXT,
-                "answers": [
-                    {"answer": "", "case_sensitive": False},
-                    {"answer": "", "case_sensitive": False},
-                ],
-                "image": None,
-                "hide_results": False,
-                "ignore_whitespace": False,
-            },
-            game.game_pin,
-        )
-    ]
-    assert "secret one" not in str(emitted)
-    assert "secret two" not in str(emitted)
+    assert len(emitted) == 1
+    event, payload, room = emitted[0]
+    assert event == "solutions"
+    assert room == game.game_pin
+    assert payload["type"] == QuizQuestionType.MULTI_TEXT
+    assert [a["answer"] for a in payload["answers"]] == ["secret one", "secret two"]
 
 
 def test_solo_text_solution_payload_keeps_answer_text():

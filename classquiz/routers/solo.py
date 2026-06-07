@@ -135,11 +135,7 @@ def _safe_question(game: PlayGame, question_index: int) -> dict[str, object]:
 
 
 def _solution_question(question: QuizQuestion) -> dict[str, object]:
-    question_data = cast(dict[str, object], question.model_dump())
-    answers = question_data.get("answers")
-    if question.type == QuizQuestionType.MULTI_TEXT and isinstance(answers, list):
-        question_data["answers"] = [{"answer": "", "case_sensitive": False} for _answer in answers]
-    return question_data
+    return cast(dict[str, object], question.model_dump())
 
 
 async def _get_solo_game(game_pin: str) -> PlayGame:
