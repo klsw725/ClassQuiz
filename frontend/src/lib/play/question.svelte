@@ -590,6 +590,12 @@ SPDX-License-Identifier: MPL-2.0
 					QuizQuestionType.TEXT,
 					QuizQuestionType.MULTI_TEXT
 				].includes(question.type)}
+			class:normal-mobile-question-answer-clearance={solution === undefined &&
+				game_mode === 'normal' &&
+				!question.image &&
+				[QuizQuestionType.ABCD, QuizQuestionType.VOTING, QuizQuestionType.CHECK].includes(
+					question.type
+				)}
 			style="--question-area-height: {get_question_area_height()}%"
 		>
 			<h1
@@ -970,6 +976,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	@media (max-width: 639px) {
 		.normal-mobile-play-screen {
+			--normal-mobile-answer-timer-clearance: 4.125rem;
 			display: flex;
 			flex-direction: column;
 			height: 100svh;
@@ -988,6 +995,11 @@ SPDX-License-Identifier: MPL-2.0
 
 		.normal-mobile-question-offset {
 			margin-top: 0;
+		}
+
+		.normal-mobile-question-answer-clearance {
+			box-sizing: border-box;
+			padding-bottom: var(--normal-mobile-answer-timer-clearance);
 		}
 
 		.normal-mobile-question .question-title {
