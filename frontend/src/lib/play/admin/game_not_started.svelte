@@ -28,27 +28,42 @@ SPDX-License-Identifier: MPL-2.0
 	}: Props = $props();
 
 	const LOBBY_VISIBLE_PLAYER_LIMIT = 80;
+	const lobby_zones = Array.from({ length: 11 }, (_, index) => `${index + 1}구역`);
 
 	let fullscreen_open = $state(false);
 	const { t } = getLocalization();
 	const formatPlayerName = (player: { username: string; zone?: string }) =>
 		player.zone ? `${player.zone}-${player.username}` : player.username;
 	const groupLobbyPlayersByZone = (players: Array<Player>) => {
-		const groups: Array<{ key: string; zone: string; players: Array<Player> }> = [];
+		const groups: Array<{ key: string; zone: string; players: Array<Player> }> = lobby_zones.map(
+			(zone) => ({
+				key: zone,
+				zone,
+				players: []
+			})
+		);
+		const players_without_zone: Array<Player> = [];
 
 		for (const player of players) {
-			const zone_key = player.zone ?? '';
+			if (!player.zone) {
+				players_without_zone.push(player);
+				continue;
+			}
+
+			const zone_key = player.zone;
 			const group = groups.find((group) => group.key === zone_key);
 
-			if (group === undefined) {
-				groups.push({
-					key: zone_key,
-					zone: player.zone ?? $t('words.zone'),
-					players: [player]
-				});
-			} else {
+			if (group !== undefined) {
 				group.players.push(player);
 			}
+		}
+
+		if (players_without_zone.length > 0) {
+			groups.push({
+				key: '',
+				zone: $t('words.zone'),
+				players: players_without_zone
+			});
 		}
 
 		return groups;
@@ -144,58 +159,51 @@ SPDX-License-Identifier: MPL-2.0
 			</GrayButton>
 		</div>
 	</div>
-	<div class="flex flex-col w-full mt-4 px-10 gap-3">
-		{#if game_state.players.length > 0}
-			{#each grouped_visible_lobby_players as group (group.key)}
-				<div class="cq-card p-3">
-					<h2 class="text-lg font-semibold text-cq-text">{group.zone}</h2>
-					<div class="mt-2 flex flex-row flex-wrap">
-						{#each group.players as player (participantKey(player.username, player.zone))}
-							{@const player_key = participantKey(player.username, player.zone)}
-							<div class="cq-surface-muted relative p-2 m-2">
-								<button
-									type="button"
-									class="link-hover text-lg"
-									aria-haspopup="menu"
-									aria-expanded={selected_lobby_player_key === player_key}
-									onclick={() => {
-										togglePlayerMenu(player);
-									}}>{player.username}</button
-								>
-								{#if selected_lobby_player_key === player_key}
-									<div
-										class="cq-card absolute left-0 top-full z-10 mt-1 w-max p-1"
-										role="menu"
+	<div class="cq-card flex flex-col w-full mt-4 gap-1 p-2">
+		{#each grouped_visible_lobby_players as group (group.key)}
+			<div class="cq-surface-muted flex items-start gap-3 px-3 py-1.5">
+				<h2 class="w-20 shrink-0 text-sm font-semibold text-cq-text">{group.zone}</h2>
+				<div class="flex min-h-6 flex-1 flex-wrap gap-x-2 gap-y-1">
+					{#each group.players as player (participantKey(player.username, player.zone))}
+						{@const player_key = participantKey(player.username, player.zone)}
+						<div class="relative">
+							<button
+								type="button"
+								class="link-hover text-left text-sm"
+								aria-haspopup="menu"
+								aria-expanded={selected_lobby_player_key === player_key}
+								onclick={() => {
+									togglePlayerMenu(player);
+								}}>{player.username}</button
+							>
+							{#if selected_lobby_player_key === player_key}
+								<div class="cq-card absolute left-0 top-full z-10 mt-1 w-max p-1" role="menu">
+									<button
+										type="button"
+										role="menuitem"
+										class="action-button w-full text-sm"
+										aria-label="{$t('words.kick')} {formatPlayerName(player)}"
+										onclick={() => {
+											kickPlayer(player);
+										}}
 									>
-										<button
-											type="button"
-											role="menuitem"
-											class="action-button w-full text-sm"
-											aria-label="{$t('words.kick')} {formatPlayerName(
-												player
-											)}"
-											onclick={() => {
-												kickPlayer(player);
-											}}
-										>
-											{$t('words.kick')}
-										</button>
-									</div>
-								{/if}
-							</div>
-						{/each}
-					</div>
+										{$t('words.kick')}
+									</button>
+								</div>
+							{/if}
+						</div>
+					{/each}
 				</div>
-			{/each}
-			{#if hidden_lobby_player_count > 0}
-				<button
-					type="button"
-					class="cq-surface-muted w-fit p-2 m-2 text-lg font-semibold text-cq-muted hover:text-cq-text transition"
-					onclick={() => (visible_lobby_player_count += LOBBY_VISIBLE_PLAYER_LIMIT)}
-				>
-					+{Math.min(LOBBY_VISIBLE_PLAYER_LIMIT, hidden_lobby_player_count)}
-				</button>
-			{/if}
+			</div>
+		{/each}
+		{#if hidden_lobby_player_count > 0}
+			<button
+				type="button"
+				class="cq-surface-muted w-fit p-2 text-lg font-semibold text-cq-muted hover:text-cq-text transition"
+				onclick={() => (visible_lobby_player_count += LOBBY_VISIBLE_PLAYER_LIMIT)}
+			>
+				+{Math.min(LOBBY_VISIBLE_PLAYER_LIMIT, hidden_lobby_player_count)}
+			</button>
 		{/if}
 	</div>
 </div>

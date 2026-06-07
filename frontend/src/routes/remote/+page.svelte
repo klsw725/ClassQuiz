@@ -39,22 +39,37 @@ SPDX-License-Identifier: MPL-2.0
 
 	let players: Array<{ sid: string; username: string; zone?: string }> = $state([]);
 	const LOBBY_VISIBLE_PLAYER_LIMIT = 80;
+	const lobby_zones = Array.from({ length: 11 }, (_, index) => `${index + 1}구역`);
 	const groupLobbyPlayersByZone = (players: Array<Player>) => {
-		const groups: Array<{ key: string; zone: string; players: Array<Player> }> = [];
+		const groups: Array<{ key: string; zone: string; players: Array<Player> }> = lobby_zones.map(
+			(zone) => ({
+				key: zone,
+				zone,
+				players: []
+			})
+		);
+		const players_without_zone: Array<Player> = [];
 
 		for (const player of players) {
-			const zone_key = player.zone ?? '';
+			if (!player.zone) {
+				players_without_zone.push(player);
+				continue;
+			}
+
+			const zone_key = player.zone;
 			const group = groups.find((group) => group.key === zone_key);
 
-			if (group === undefined) {
-				groups.push({
-					key: zone_key,
-					zone: player.zone ?? $t('words.zone'),
-					players: [player]
-				});
-			} else {
+			if (group !== undefined) {
 				group.players.push(player);
 			}
+		}
+
+		if (players_without_zone.length > 0) {
+			groups.push({
+				key: '',
+				zone: $t('words.zone'),
+				players: players_without_zone
+			});
 		}
 
 		return groups;
@@ -341,24 +356,24 @@ SPDX-License-Identifier: MPL-2.0
 		{/if}
 	{/if}
 {:else}
-	<div class="flex min-h-screen items-center justify-center px-4 text-cq-text">
-		<div class="cq-card w-full max-w-md p-6 text-center">
+	<div class="flex min-h-screen items-start justify-center px-4 py-6 text-cq-text">
+		<div class="cq-card w-full max-w-md p-4 text-center">
 			<button onclick={start_game} class="accent-button w-fit"
 				>{$t('admin_page.start_game')}</button
 			>
 
-			<h2 class="mt-6 text-xl font-semibold text-cq-text">{$t('words.player_plural')}:</h2>
+			<h2 class="mt-4 text-xl font-semibold text-cq-text">{$t('words.player_plural')}:</h2>
 			{#await get_already_joined_players()}
 				<Spinner my_20={false} />
 			{:then _}
-				<div class="cq-surface-muted mt-3 p-3 text-cq-muted">
-					<div class="flex flex-col gap-3 text-left">
+				<div class="cq-card mt-3 flex flex-col gap-1 p-2 text-cq-muted">
+					<div class="flex flex-col gap-1 text-left">
 						{#each grouped_visible_lobby_players as group (group.key)}
-							<div class="cq-card p-3">
-								<h3 class="font-semibold text-cq-text">{group.zone}</h3>
-								<ul class="mt-2 flex flex-wrap gap-2 text-cq-muted">
+							<div class="cq-surface-muted flex items-start gap-2 px-2 py-1">
+								<h3 class="w-16 shrink-0 text-sm font-semibold text-cq-text">{group.zone}</h3>
+								<ul class="flex min-h-5 flex-1 flex-wrap gap-x-2 gap-y-1 text-sm text-cq-muted">
 									{#each group.players as player (participantKey(player.username, player.zone))}
-										<li class="cq-surface-muted px-2 py-1">
+										<li>
 											{player.username}
 										</li>
 									{/each}
