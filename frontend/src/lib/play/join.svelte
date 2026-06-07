@@ -206,11 +206,11 @@ SPDX-License-Identifier: MPL-2.0
 </svelte:head>
 
 {#if game_pin === '' || game_pin.length < 6}
-	<div class="flex min-h-screen w-screen items-center justify-center px-4 text-cq-text">
+	<div class="flex min-h-svh w-screen items-center justify-center px-4 text-cq-text">
 		<form class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center">
-			<h1 class="text-lg font-semibold text-cq-text">{$t('words.game_pin')}</h1>
+			<h1 class="text-2xl font-semibold text-cq-text">{$t('words.game_pin')}</h1>
 			<input
-				class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-2xl tracking-widest text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
+				class="cq-surface-muted w-full self-center rounded-lg p-4 text-center text-4xl tracking-widest text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
 				bind:value={game_pin}
 				maxlength="6"
 				inputmode="numeric"
@@ -224,20 +224,20 @@ SPDX-License-Identifier: MPL-2.0
 		</form>
 	</div>
 {:else}
-	<div class="flex min-h-screen w-screen items-center justify-center px-4 text-cq-text">
+	<div class="flex min-h-svh w-screen items-center justify-center px-4 text-cq-text">
 		<form
 			onsubmit={setUsername}
 			class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center"
 		>
-			<h1 class="text-lg font-semibold text-cq-text">{$t('words.username')}</h1>
+			<h1 class="text-2xl font-semibold text-cq-text">{$t('words.username')}</h1>
 			<input
-				class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
+				class="cq-surface-muted w-full self-center rounded-lg p-4 text-center text-2xl text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
 				bind:value={username}
 				maxlength="17"
 			/>
-			<h1 class="text-lg font-semibold text-cq-text">{$t('words.zone')}</h1>
+			<h1 class="text-2xl font-semibold text-cq-text">{$t('words.zone')}</h1>
 			<select
-				class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
+				class="cq-surface-muted w-full self-center rounded-lg p-4 text-center text-2xl text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
 				bind:value={zone}
 			>
 				{#each zones as zone_option (zone_option)}
@@ -245,9 +245,9 @@ SPDX-License-Identifier: MPL-2.0
 				{/each}
 			</select>
 			{#if custom_field}
-				<h1 class="text-lg font-semibold text-cq-text">{custom_field}</h1>
+				<h1 class="text-2xl font-semibold text-cq-text">{custom_field}</h1>
 				<input
-					class="cq-surface-muted w-full self-center rounded-lg p-3 text-center text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
+					class="cq-surface-muted w-full self-center rounded-lg p-4 text-center text-2xl text-cq-text outline-hidden ring-2 ring-cq-border transition-all focus:ring-cq-brand"
 					bind:value={custom_field_value}
 				/>
 			{/if}

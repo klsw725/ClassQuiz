@@ -553,11 +553,17 @@ SPDX-License-Identifier: MPL-2.0
 			(solution.type ?? QuizQuestionType.ABCD) === QuizQuestionType.VOTING
 	);
 
+	const is_text_solution_reveal = $derived(
+		solution !== undefined &&
+			((solution.type ?? QuizQuestionType.ABCD) === QuizQuestionType.TEXT ||
+				(solution.type ?? QuizQuestionType.ABCD) === QuizQuestionType.MULTI_TEXT)
+	);
+
 	const default_colors = ['#D6EDC9', '#B07156', '#7F7057', '#4E6E58'];
 </script>
 
 <div
-	class="h-screen w-screen"
+	class="h-svh w-screen overflow-hidden"
 	class:normal-mobile-play-screen={solution === undefined && game_mode === 'normal'}
 >
 	{#if solution !== undefined || game_mode === 'normal' || (game_mode === 'kahoot' && question.image)}
@@ -593,7 +599,7 @@ SPDX-License-Identifier: MPL-2.0
 		>
 			<div
 				bind:this={question_title_element}
-				class="question-title lg:text-2xl text-lg text-left text-cq-text mt-2 break-normal mb-2 notranslate"
+				class="question-title lg:text-2xl text-lg text-left text-cq-text mt-8 break-normal mb-2 notranslate"
 				role="heading"
 				aria-level="1"
 				style:--normal-mobile-question-title-size={`${normal_mobile_question_title_size}rem`}
@@ -624,6 +630,7 @@ SPDX-License-Identifier: MPL-2.0
 							{#each revealed_answers as answer, i (i)}
 								<li
 									class="cq-card cq-surface-muted border-2 border-cq-border px-4 py-3 text-3xl font-semibold text-cq-text notranslate"
+									class:text-left={is_text_solution_reveal}
 									translate="no"
 								>
 									{answer}
@@ -937,7 +944,11 @@ SPDX-License-Identifier: MPL-2.0
 			</div>
 			<!--{/if}-->
 		{:else if question.type === QuizQuestionType.CHECK}
-			<div class:normal-mobile-check-answer-area={game_mode === 'normal' && !question.image}>
+			<div
+				class="answer-area w-full relative"
+				class:normal-mobile-check-answer-area={game_mode === 'normal' && !question.image}
+				style="--answer-area-height: {get_div_height()}%"
+			>
 				{#await import('./questions/check.svelte')}
 					<Spinner />
 				{:then c}
@@ -993,6 +1004,7 @@ SPDX-License-Identifier: MPL-2.0
 <style>
 	.question-area {
 		height: var(--question-area-height);
+		overflow-y: auto;
 	}
 
 	.answer-area {
@@ -1041,7 +1053,7 @@ SPDX-License-Identifier: MPL-2.0
 		.normal-mobile-question .question-title {
 			white-space: pre-wrap;
 			overflow-wrap: anywhere;
-			margin-top: 0.5rem;
+			margin-top: 1.5rem;
 			margin-bottom: 0.5rem;
 			font-size: var(--normal-mobile-question-title-size, 2.75rem);
 			line-height: 1.15;

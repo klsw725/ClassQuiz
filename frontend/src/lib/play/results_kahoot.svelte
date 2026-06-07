@@ -75,23 +75,32 @@ SPDX-License-Identifier: MPL-2.0
 	}
 	scores = { ...scores };
 	let sorted_scores = $derived(sortObjectbyValue(scores));
+	let current_player_rank = $derived(Object.keys(sorted_scores).indexOf(username) + 1);
 </script>
 
-<div class="flex min-h-screen items-center justify-center px-4 text-cq-text">
+<div class="flex min-h-svh items-center justify-center px-4 text-cq-text">
 	<div
 		class="cq-card flex w-full max-w-md flex-col gap-7 p-8 text-center shadow-2xl md:max-w-xl md:p-10"
 	>
+		<h2 class="text-3xl font-semibold text-cq-text">{$t('words.result', { count: 2 })}</h2>
 		<p
 			class="cq-surface-muted rounded-lg border-2 border-cq-border p-6 text-5xl font-bold text-cq-brand md:p-8 md:text-7xl"
 		>
 			+{score_by_username[username] ?? '0'}
 		</p>
-		<p class="cq-surface rounded-lg px-5 py-4 text-xl font-semibold text-cq-muted md:text-2xl">
+		<p class="cq-surface rounded-lg px-5 py-4 text-2xl font-semibold text-cq-muted md:text-3xl">
 			{$t('play_page.your_score', { score: sorted_scores[username] ?? '0' })}
 		</p>
+		{#if current_player_rank > 0}
+			<p
+				class="cq-surface-muted rounded-lg border-2 border-cq-border px-5 py-4 text-2xl font-semibold text-cq-brand md:text-3xl"
+			>
+				{$t('play_page.your_place', { place: current_player_rank })}
+			</p>
+		{/if}
 		{#if currentPlayerResult}
 			<p
-				class="cq-surface-muted rounded-lg border-2 border-cq-border px-5 py-4 text-lg font-semibold md:text-xl"
+				class="cq-surface-muted rounded-lg border-2 border-cq-border px-5 py-4 text-2xl font-semibold md:text-3xl"
 				class:text-cq-brand={currentPlayerResult.right}
 				class:text-cq-accent={!currentPlayerResult.right}
 			>
@@ -101,9 +110,9 @@ SPDX-License-Identifier: MPL-2.0
 			</p>
 			{#if currentPlayerResult.answer_details?.length}
 				<div class="cq-surface-muted flex flex-col gap-2 p-3 text-left">
-					<p class="text-sm font-semibold text-cq-muted">{$t('words.answer')}</p>
+					<p class="text-lg font-semibold text-cq-muted">{$t('words.answer')}</p>
 					{#each currentPlayerResult.answer_details as detail, index (index)}
-						<div class="cq-surface flex items-center justify-between gap-3 p-2 text-sm">
+						<div class="cq-surface flex items-center justify-between gap-3 p-3 text-lg">
 							<span class="notranslate break-words text-cq-text" translate="no">
 								{detail.answer || '-'}
 							</span>

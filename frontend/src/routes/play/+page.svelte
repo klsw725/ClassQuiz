@@ -278,7 +278,7 @@ SPDX-License-Identifier: MPL-2.0
 	<title>ClassQuiz - {$t('words.play')}</title>
 </svelte:head>
 <div
-	class="min-h-screen min-w-full"
+	class="min-h-svh min-w-full"
 	style="background: {bg_color ? bg_color : 'transparent'}"
 	class:text-cq-text={bg_color}
 >
@@ -310,9 +310,6 @@ SPDX-License-Identifier: MPL-2.0
 					<h1 class="text-3xl">{$t('admin_page.no_answers')}</h1>
 				</div>
 			{:else}
-				<div>
-					<h2 class="text-center text-3xl mb-8">{$t('words.result', { count: 2 })}</h2>
-				</div>
 				{#key unique}
 					<KahootResults
 						username={current_participant_key}
