@@ -7,7 +7,7 @@ import os
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from classquiz.auth import get_current_user
 from classquiz.db.models import User, Controller
@@ -18,7 +18,7 @@ router = APIRouter()
 
 
 class SetControllerUpInput(BaseModel):
-    player_name: str | None = None
+    player_name: str | None = Field(default=None, min_length=2)
     name: str
 
 
@@ -62,7 +62,7 @@ async def get_controller(id: uuid.UUID, user: User = Depends(get_current_user)) 
 
 class ModifyControllerInput(BaseModel):
     id: uuid.UUID
-    player_name: str
+    player_name: str = Field(min_length=2)
     name: str
 
 

@@ -18,7 +18,7 @@ SPDX-License-Identifier: MPL-2.0
 		name: ''
 	});
 
-	let isValid = $derived(input_data.name.length !== 0 && input_data.player_name.length !== 0);
+	let isValid = $derived(input_data.name.length !== 0 && input_data.player_name.length >= 2);
 	let isSubmitting = false;
 
 	const submit = async (e: Event) => {
@@ -57,8 +57,8 @@ SPDX-License-Identifier: MPL-2.0
 									name="player_name"
 									type="text"
 									class="peer h-10 w-full rounded-lg bg-transparent px-2 text-cq-text placeholder-transparent ring-2 ring-cq-border focus:ring-cq-brand focus:outline-hidden"
-									class:ring-red-700={input_data.player_name.length === 0}
-									class:ring-green-600={input_data.player_name.length !== 0}
+									class:ring-red-700={input_data.player_name.length < 2}
+									class:ring-green-600={input_data.player_name.length >= 2}
 									bind:value={input_data.player_name}
 								/>
 								<label

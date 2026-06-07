@@ -26,7 +26,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	let saved_status = $state(SaveStatus.Unchanged);
 
-	let save_player_timer;
+	let save_player_timer: ReturnType<typeof setTimeout> | undefined;
 	const save_player_name_debounce = () => {
 		clearTimeout(save_player_timer);
 		save_player_timer = setTimeout(save_names, 750);
@@ -34,6 +34,10 @@ SPDX-License-Identifier: MPL-2.0
 
 	const save_names = async () => {
 		if (!browser) {
+			return;
+		}
+		if (controller.player_name.length < 2) {
+			saved_status = SaveStatus.Error;
 			return;
 		}
 		saved_status = SaveStatus.Saving;
@@ -75,7 +79,7 @@ SPDX-License-Identifier: MPL-2.0
 		if (newest_version === controller.os_version) {
 			return;
 		}
-		let wanted_version;
+		let wanted_version: string | undefined;
 		if (newest_version === controller.wanted_os_version) {
 			wanted_version = controller.os_version;
 		} else {
@@ -114,6 +118,8 @@ SPDX-License-Identifier: MPL-2.0
 			<div class="mx-auto flex items-center gap-2">
 				<input
 					class="cq-surface p-2 text-center transition-all outline-hidden focus:ring-2 focus:ring-cq-brand"
+					class:ring-2={controller.player_name.length < 2}
+					class:ring-red-700={controller.player_name.length < 2}
 					bind:value={controller.player_name}
 					onkeyup={save_player_name_debounce}
 				/>

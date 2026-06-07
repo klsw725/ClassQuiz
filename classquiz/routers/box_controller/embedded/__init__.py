@@ -32,6 +32,8 @@ class JoinGameResponse(BaseModel):
 @router.post("/join")
 async def join_game(data: JoinGameInput) -> JoinGameResponse:
     controller = await Controller.objects.get_or_none(id=data.id, secret_key=data.secret_key)
+    if controller is None:
+        raise HTTPException(status_code=404, detail="Key and/or id invalid")
     game_pin = await redis.get(f"game:cqc:code:{data.code}")
     if game_pin is None:
         raise HTTPException(status_code=404, detail="Game not found")
@@ -42,6 +44,8 @@ async def join_game(data: JoinGameInput) -> JoinGameResponse:
     # Check if game is already running
     if game.started:
         raise HTTPException(status_code=400, detail="Game started already")
+    if len(controller.player_name) < 2:
+        raise HTTPException(status_code=400, detail="Player name must be at least 2 characters")
     # check if username already exists
     if await redis.get(f"game_session:{game_pin}:players:{participant_key(controller.player_name, None)}") is not None:
         raise HTTPException(status_code=409, detail="Username already exists")
