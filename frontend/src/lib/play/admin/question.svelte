@@ -141,7 +141,14 @@ SPDX-License-Identifier: MPL-2.0
 	}
 </style>
 {#if current_question.type === QuizQuestionType.ABCD || current_question.type === QuizQuestionType.VOTING || current_question.type === QuizQuestionType.CHECK}
-	<div class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-2 w-full p-4">
+	{@const admin_answer_count = Array.isArray(current_question.answers)
+		? current_question.answers.length
+		: 0}
+	<div
+		class="grid grid-cols-2 gap-2 w-full p-4"
+		class:grid-rows-1={admin_answer_count <= 2}
+		class:grid-rows-2={admin_answer_count > 2}
+	>
 		{#each current_question.answers as answer, i}
 			{@const mcq_reveal = reveal && is_mcq}
 			{@const is_correct = answer.right === true}

@@ -67,10 +67,16 @@ SPDX-License-Identifier: MPL-2.0
 		<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
 	</div>
 
+	{@const check_answer_count = Array.isArray(answers) ? answers.length : 0}
 	<div
-		class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-2 w-full p-4 h-full"
+		class="grid grid-cols-2 gap-2 w-full p-4 h-full"
+		class:grid-rows-1={check_answer_count <= 2}
+		class:grid-rows-2={check_answer_count > 2}
 		class:normal-mobile-answer-grid={game_mode === 'normal'}
 		class:normal-mobile-answer-grid-compact={game_mode === 'normal' && !question.image}
+		class:normal-mobile-answer-grid-single-row={game_mode === 'normal' &&
+			!question.image &&
+			check_answer_count <= 2}
 	>
 		{#each answers as answer, i}
 			<button
@@ -176,6 +182,10 @@ SPDX-License-Identifier: MPL-2.0
 
 		.normal-mobile-answer-grid-compact {
 			padding-top: 0.5rem;
+		}
+
+		.normal-mobile-answer-grid-single-row {
+			grid-template-rows: minmax(0, 1fr);
 		}
 
 		.normal-mobile-answer-button {

@@ -564,7 +564,7 @@ SPDX-License-Identifier: MPL-2.0
 >
 	{#if solution !== undefined || game_mode === 'normal' || (game_mode === 'kahoot' && question.image)}
 		<div
-			class="question-area flex flex-col justify-start"
+			class="question-area flex flex-col justify-start px-4 sm:px-6 md:px-8"
 			class:normal-mobile-question={solution === undefined &&
 				game_mode === 'normal' &&
 				!question.image &&
@@ -682,12 +682,20 @@ SPDX-License-Identifier: MPL-2.0
 					<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
 				</div>
 
+				{@const abcd_answer_count = Array.isArray(question.answers)
+					? question.answers.length
+					: 0}
 				<div
 					bind:this={normal_mobile_answer_grid_element}
-					class="grid grid-rows-2 grid-flow-col auto-cols-auto gap-2 w-full p-4 h-full"
+					class="grid grid-cols-2 gap-2 w-full p-4 h-full"
+					class:grid-rows-1={abcd_answer_count <= 2}
+					class:grid-rows-2={abcd_answer_count > 2}
 					class:normal-mobile-answer-grid={game_mode === 'normal'}
 					class:normal-mobile-answer-grid-compact={game_mode === 'normal' &&
 						!question.image}
+					class:normal-mobile-answer-grid-single-row={game_mode === 'normal' &&
+						!question.image &&
+						abcd_answer_count <= 2}
 				>
 					{#each question.answers as answer, i}
 						<button
@@ -1034,7 +1042,7 @@ SPDX-License-Identifier: MPL-2.0
 			max-height: 33.333svh;
 			min-height: 0;
 			overflow-y: auto;
-			padding-inline: 0.75rem;
+			padding-inline: 1.25rem;
 		}
 
 		.normal-mobile-question-offset {
@@ -1162,6 +1170,14 @@ SPDX-License-Identifier: MPL-2.0
 			grid-template-rows: repeat(2, var(--normal-mobile-answer-size));
 			justify-content: center;
 			padding-top: 0.5rem;
+		}
+
+		.normal-mobile-answer-grid-single-row {
+			grid-template-rows: minmax(0, 1fr);
+		}
+
+		.normal-mobile-answer-grid-compact.normal-mobile-answer-grid-single-row {
+			grid-template-rows: var(--normal-mobile-answer-size);
 		}
 
 		.normal-mobile-answer-button {
