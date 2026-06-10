@@ -30,6 +30,7 @@ SPDX-License-Identifier: MPL-2.0
 		circular_progress
 	}: Props = $props();
 	let answers = question.answers as Answer[];
+	let check_answer_count = $derived(Array.isArray(answers) ? answers.length : 0);
 	let _selected_answers = $state([false, false, false, false]);
 
 	const selectAnswer = (i: number) => {
@@ -67,7 +68,6 @@ SPDX-License-Identifier: MPL-2.0
 		<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
 	</div>
 
-	{@const check_answer_count = Array.isArray(answers) ? answers.length : 0}
 	<div
 		class="grid grid-cols-2 gap-2 w-full p-4 h-full"
 		class:grid-rows-1={check_answer_count <= 2}

@@ -670,6 +670,9 @@ SPDX-License-Identifier: MPL-2.0
 		</section>
 	{:else if timer_res !== '0'}
 		{#if question.type === QuizQuestionType.ABCD || question.type === QuizQuestionType.VOTING}
+			{@const abcd_answer_count = Array.isArray(question.answers)
+				? question.answers.length
+				: 0}
 			<div
 				class="answer-area w-full relative h-full"
 				class:normal-mobile-answer-area={game_mode === 'normal'}
@@ -682,9 +685,6 @@ SPDX-License-Identifier: MPL-2.0
 					<CircularTimer text={timer_res} progress={circular_progress} color="#ef4444" />
 				</div>
 
-				{@const abcd_answer_count = Array.isArray(question.answers)
-					? question.answers.length
-					: 0}
 				<div
 					bind:this={normal_mobile_answer_grid_element}
 					class="grid grid-cols-2 gap-2 w-full p-4 h-full"
