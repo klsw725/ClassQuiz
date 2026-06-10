@@ -82,7 +82,7 @@ SPDX-License-Identifier: MPL-2.0
 	});
 </script>
 
-<div class="flex flex-col justify-center w-screen h-1/6">
+<div class="flex flex-col justify-center w-screen h-1/6 px-8 xl:px-16">
 	<div
 		class="question-title text-6xl text-left notranslate"
 		role="heading"
@@ -106,7 +106,7 @@ SPDX-License-Identifier: MPL-2.0
 	</div>
 </div>
 {#if quiz_data.questions[selected_question].image !== null}
-	<div class="flex w-full">
+	<div class="flex w-full px-8 xl:px-16">
 		<MediaComponent
 			src={quiz_data.questions[selected_question].image}
 			muted={false}
@@ -145,7 +145,7 @@ SPDX-License-Identifier: MPL-2.0
 		? current_question.answers.length
 		: 0}
 	<div
-		class="grid grid-cols-2 gap-2 w-full p-4"
+		class="grid grid-cols-2 gap-2 w-full px-8 py-4 xl:px-16"
 		class:grid-rows-1={admin_answer_count <= 2}
 		class:grid-rows-2={admin_answer_count > 2}
 	>
@@ -193,7 +193,7 @@ SPDX-License-Identifier: MPL-2.0
 		{/each}
 	</div>
 {:else if reveal && (current_question.type === QuizQuestionType.TEXT || current_question.type === QuizQuestionType.MULTI_TEXT || current_question.type === QuizQuestionType.RANGE || current_question.type === QuizQuestionType.ORDER)}
-	<div class="flex justify-center items-center px-6 py-10" style="min-height: 60vh;">
+	<div class="flex justify-center items-center px-8 xl:px-16 py-10" style="min-height: 60vh;">
 		<div
 			class="cq-card max-w-4xl w-full text-center px-10 py-12 shadow-2xl correct-reveal-card"
 		>
