@@ -8,6 +8,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { flip } from 'svelte/animate';
 	import { fade, scale } from 'svelte/transition';
 	import { parseParticipantKey } from '$lib/admin';
+	import { formatApiDateTime } from '$lib/datetime';
 	import type { Question } from '$lib/quiz_types';
 
 	const zones = Array.from({ length: 11 }, (_, index) => `${index + 1}구역`);
@@ -95,7 +96,7 @@ SPDX-License-Identifier: MPL-2.0
 		return map;
 	})();
 
-	const date_str = new Date(timestamp).toLocaleString();
+	const date_str = formatApiDateTime(timestamp);
 	const formatNumber = (n: number, digits = 0) =>
 		n.toLocaleString(undefined, { maximumFractionDigits: digits });
 

@@ -7,6 +7,7 @@ SPDX-License-Identifier: MPL-2.0
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { getLocalization } from '$lib/i18n';
+	import { formatApiDateTime } from '$lib/datetime';
 
 	const { t } = getLocalization();
 
@@ -47,7 +48,7 @@ SPDX-License-Identifier: MPL-2.0
 									></td
 								>
 								<td class="border-r p-1 border-cq-border"
-									>{new Date(result.timestamp).toLocaleString()}</td
+									>{formatApiDateTime(result.timestamp)}</td
 								>
 								<td class="border-r p-1 border-cq-border"
 									>{Object.keys(result.player_scores).length}</td
