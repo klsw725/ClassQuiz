@@ -85,6 +85,16 @@ SPDX-License-Identifier: MPL-2.0
 		zone?: string;
 	}
 
+	type ScreenWakeLockSentinel = EventTarget & {
+		release: () => Promise<void>;
+	};
+
+	type NavigatorWithWakeLock = Navigator & {
+		wakeLock?: {
+			request: (_type: 'screen') => Promise<ScreenWakeLockSentinel>;
+		};
+	};
+
 	// Variables init
 	let question_index: string = $state('');
 	let unique: object = $state({});
@@ -100,6 +110,12 @@ SPDX-License-Identifier: MPL-2.0
 	let gameMeta: GameMeta = $state({
 		started: false
 	});
+	let playWakeLockActive = $derived(
+		gameData !== undefined && JSON.stringify(final_results) === JSON.stringify([null])
+	);
+	let wakeLockRouteActive = true;
+	let wakeLockSentinel: ScreenWakeLockSentinel | undefined;
+	let wakeLockRequestPending = false;
 
 	let question: QuestionType | undefined = $state();
 
@@ -156,6 +172,84 @@ SPDX-License-Identifier: MPL-2.0
 			event.returnValue = '';
 		}
 	};
+
+	const handleWakeLockRelease = (event: Event) => {
+		if (event.currentTarget === wakeLockSentinel) {
+			wakeLockSentinel.removeEventListener('release', handleWakeLockRelease);
+			wakeLockSentinel = undefined;
+		}
+	};
+
+	const releaseScreenWakeLock = async () => {
+		const sentinel = wakeLockSentinel;
+		if (!sentinel) {
+			return;
+		}
+		wakeLockSentinel = undefined;
+		sentinel.removeEventListener('release', handleWakeLockRelease);
+		try {
+			await sentinel.release();
+		} catch {
+			return;
+		}
+	};
+
+	const requestScreenWakeLock = async () => {
+		if (
+			!browser ||
+			!wakeLockRouteActive ||
+			wakeLockSentinel ||
+			wakeLockRequestPending ||
+			!('wakeLock' in navigator) ||
+			document.visibilityState !== 'visible'
+		) {
+			return;
+		}
+		const wakeLock = (navigator as NavigatorWithWakeLock).wakeLock;
+		if (!wakeLock) {
+			return;
+		}
+		wakeLockRequestPending = true;
+		try {
+			const sentinel = await wakeLock.request('screen');
+			if (!wakeLockRouteActive || !playWakeLockActive || document.visibilityState !== 'visible') {
+				await sentinel.release();
+				return;
+			}
+			sentinel.addEventListener('release', handleWakeLockRelease);
+			wakeLockSentinel = sentinel;
+		} catch {
+			return;
+		} finally {
+			wakeLockRequestPending = false;
+		}
+	};
+
+	const handleVisibilityChange = () => {
+		if (document.visibilityState === 'visible' && playWakeLockActive) {
+			void requestScreenWakeLock();
+		}
+	};
+
+	$effect(() => {
+		if (playWakeLockActive) {
+			void requestScreenWakeLock();
+		} else {
+			void releaseScreenWakeLock();
+		}
+	});
+
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+		document.addEventListener('visibilitychange', handleVisibilityChange);
+		return () => {
+			wakeLockRouteActive = false;
+			document.removeEventListener('visibilitychange', handleVisibilityChange);
+			void releaseScreenWakeLock();
+		};
+	});
 
 	socket.on('time_sync', (data) => {
 		socket.emit('echo_time_sync', data);
