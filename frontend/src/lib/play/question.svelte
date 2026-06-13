@@ -50,7 +50,6 @@ SPDX-License-Identifier: MPL-2.0
 	let selected_answer: string = $state();
 	let answer_submitted = $state(false);
 	let question_title_element = $state<HTMLHeadingElement>();
-	let normal_mobile_answer_grid_element = $state<HTMLDivElement>();
 	let normal_mobile_question_title_size = $state(2.75);
 
 	interface NormalMobileAnswerTextFitOptions {
@@ -225,26 +224,6 @@ SPDX-License-Identifier: MPL-2.0
 		};
 	};
 
-	const update_normal_mobile_answer_grid_size = (element: HTMLDivElement) => {
-		const grid_styles = getComputedStyle(element);
-		const horizontal_padding =
-			parse_css_px(grid_styles.paddingLeft) + parse_css_px(grid_styles.paddingRight);
-		const vertical_padding =
-			parse_css_px(grid_styles.paddingTop) + parse_css_px(grid_styles.paddingBottom);
-		const available_width =
-			element.clientWidth - horizontal_padding - parse_css_px(grid_styles.columnGap);
-		const available_height =
-			element.clientHeight - vertical_padding - parse_css_px(grid_styles.rowGap);
-		const answer_size = Math.floor(Math.min(available_width / 2, available_height / 2));
-
-		if (answer_size <= 0) {
-			element.style.removeProperty('--normal-mobile-answer-size');
-			return;
-		}
-
-		element.style.setProperty('--normal-mobile-answer-size', `${answer_size}px`);
-	};
-
 	// Stop the timer if the question is answered
 	const timer = (time: string) => {
 		let seconds = Number(time);
@@ -310,66 +289,6 @@ SPDX-License-Identifier: MPL-2.0
 
 		const resize_observer = new ResizeObserver(schedule_update);
 		resize_observer.observe(question_area);
-		mobile_query.addEventListener('change', schedule_update);
-		schedule_update();
-
-		return () => {
-			disposed = true;
-			resize_observer.disconnect();
-			mobile_query.removeEventListener('change', schedule_update);
-			if (animation_frame !== undefined) {
-				cancelAnimationFrame(animation_frame);
-			}
-		};
-	});
-
-	$effect(() => {
-		question.type;
-		question.image;
-		game_mode;
-		solution;
-
-		const element = normal_mobile_answer_grid_element;
-		const is_normal_mobile_answer_grid =
-			solution === undefined &&
-			game_mode === 'normal' &&
-			!question.image &&
-			(question.type === QuizQuestionType.ABCD || question.type === QuizQuestionType.VOTING);
-
-		if (!element || !is_normal_mobile_answer_grid) {
-			return;
-		}
-
-		let disposed = false;
-		let animation_frame: number | undefined;
-		const mobile_query = window.matchMedia('(max-width: 639px)');
-		const answer_area = element.parentElement;
-
-		const schedule_update = async () => {
-			await tick();
-			if (disposed) {
-				return;
-			}
-			if (animation_frame !== undefined) {
-				cancelAnimationFrame(animation_frame);
-			}
-			animation_frame = requestAnimationFrame(() => {
-				if (disposed) {
-					return;
-				}
-				if (!mobile_query.matches) {
-					element.style.removeProperty('--normal-mobile-answer-size');
-					return;
-				}
-				update_normal_mobile_answer_grid_size(element);
-			});
-		};
-
-		const resize_observer = new ResizeObserver(schedule_update);
-		resize_observer.observe(element);
-		if (answer_area) {
-			resize_observer.observe(answer_area);
-		}
 		mobile_query.addEventListener('change', schedule_update);
 		schedule_update();
 
@@ -555,7 +474,7 @@ SPDX-License-Identifier: MPL-2.0
 				(solution.type ?? QuizQuestionType.ABCD) === QuizQuestionType.MULTI_TEXT)
 	);
 
-	const default_colors = ['#e0413a', '#1a73c2', '#e8a020', '#2a9d54'];
+	const default_colors = ['#ff5252', '#40c4ff', '#ffd740', '#69f0ae'];
 </script>
 
 <div
@@ -686,7 +605,6 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 
 				<div
-					bind:this={normal_mobile_answer_grid_element}
 					class="grid grid-cols-2 gap-2 w-full p-4 h-full"
 					class:grid-rows-1={abcd_answer_count <= 2}
 					class:grid-rows-2={abcd_answer_count > 2}
@@ -873,7 +791,7 @@ SPDX-License-Identifier: MPL-2.0
 					<div
 						class="cq-card w-full h-fit flex-row p-2 align-middle"
 						animate:flip={{ duration: 100 }}
-						style="background-color: {answer.color ?? '#1a73c2'}"
+						style="background-color: {answer.color ?? '#40c4ff'}"
 					>
 						<button
 							onclick={() => {
@@ -1161,14 +1079,9 @@ SPDX-License-Identifier: MPL-2.0
 		}
 
 		.normal-mobile-answer-grid-compact {
-			--normal-mobile-answer-size: min(
-				calc((100vw - 1.5rem) / 2),
-				calc((66.667svh - 4.5rem) / 2)
-			);
-			align-content: center;
-			grid-template-columns: repeat(2, var(--normal-mobile-answer-size));
-			grid-template-rows: repeat(2, var(--normal-mobile-answer-size));
-			justify-content: center;
+			grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+			align-content: stretch;
+			justify-content: stretch;
 			padding-top: 0.5rem;
 		}
 
@@ -1176,17 +1089,13 @@ SPDX-License-Identifier: MPL-2.0
 			grid-template-rows: minmax(0, 1fr);
 		}
 
-		.normal-mobile-answer-grid-compact.normal-mobile-answer-grid-single-row {
-			grid-template-rows: var(--normal-mobile-answer-size);
-		}
-
 		.normal-mobile-answer-button {
 			padding: 0.5rem;
 		}
 
 		.normal-mobile-answer-grid-compact .normal-mobile-answer-button {
-			height: var(--normal-mobile-answer-size);
-			width: var(--normal-mobile-answer-size);
+			height: 100%;
+			width: 100%;
 		}
 
 		.normal-mobile-answer-content {

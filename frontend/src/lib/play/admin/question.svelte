@@ -80,6 +80,49 @@ SPDX-License-Identifier: MPL-2.0
 			return 0;
 		}
 	});
+
+	// Keep all answer tiles the same size. If one answer needs more room
+	// (long text), every tile grows to match the tallest one — text is never
+	// clipped or shrunk, and the boxes stay uniform.
+	let answer_grid_el = $state<HTMLDivElement | undefined>();
+	const equalize_answer_tiles = () => {
+		const grid = answer_grid_el;
+		if (!grid) {
+			return;
+		}
+		const tiles = Array.from(grid.children) as HTMLElement[];
+		if (tiles.length === 0) {
+			return;
+		}
+		// reset, then measure natural (content) heights
+		for (const tile of tiles) {
+			tile.style.minHeight = '';
+		}
+		let max_height = 0;
+		for (const tile of tiles) {
+			max_height = Math.max(max_height, tile.offsetHeight);
+		}
+		if (max_height > 0) {
+			for (const tile of tiles) {
+				tile.style.minHeight = `${Math.ceil(max_height)}px`;
+			}
+		}
+	};
+	$effect(() => {
+		// re-run when the question changes, on reveal, or on resize
+		current_question;
+		reveal;
+		if (!answer_grid_el) {
+			return;
+		}
+		const frame = requestAnimationFrame(equalize_answer_tiles);
+		const on_resize = () => requestAnimationFrame(equalize_answer_tiles);
+		window.addEventListener('resize', on_resize);
+		return () => {
+			cancelAnimationFrame(frame);
+			window.removeEventListener('resize', on_resize);
+		};
+	});
 </script>
 
 <div class="flex flex-col justify-center w-screen h-1/6 px-8 xl:px-16">
@@ -145,6 +188,7 @@ SPDX-License-Identifier: MPL-2.0
 		? current_question.answers.length
 		: 0}
 	<div
+		bind:this={answer_grid_el}
 		class="grid grid-cols-2 gap-2 w-full px-8 py-4 xl:px-16"
 		class:grid-rows-1={admin_answer_count <= 2}
 		class:grid-rows-2={admin_answer_count > 2}
@@ -153,7 +197,7 @@ SPDX-License-Identifier: MPL-2.0
 			{@const mcq_reveal = reveal && is_mcq}
 			{@const is_correct = answer.right === true}
 			<div
-				class="rounded-lg h-fit flex relative transition-all duration-200"
+				class="rounded-lg min-h-[14vh] flex items-center relative transition-all duration-200"
 				class:border-2={!(mcq_reveal && is_correct)}
 				class:border-cq-border={!(mcq_reveal && is_correct)}
 				class:border-4={mcq_reveal && is_correct}
@@ -174,7 +218,7 @@ SPDX-License-Identifier: MPL-2.0
 					/>
 				{/if}
 				<span
-					class="text-center text-2xl px-2 py-4 w-full notranslate"
+					class="text-center text-2xl px-2 py-4 w-full min-w-0 [overflow-wrap:anywhere] whitespace-normal notranslate"
 					translate="no"
 					style="color: {get_foreground_color(answer.color ?? default_colors[i])}"
 					>{answer.answer}</span
