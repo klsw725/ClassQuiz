@@ -167,15 +167,15 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	.correct-reveal {
-		border-color: #10b981;
-		box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 12px 28px rgba(16, 185, 129, 0.35);
+		border-color: #00c853;
+		box-shadow: 8px 8px 0 #009e3f;
 		transform: scale(1.03);
 		z-index: 1;
 	}
 
 	.correct-check {
 		color: #047857;
-		text-shadow: 0 2px 6px rgba(255, 255, 255, 0.8);
+		text-shadow: 2px 2px 0 rgba(255, 255, 255, 0.9);
 	}
 
 	.correct-reveal-card {

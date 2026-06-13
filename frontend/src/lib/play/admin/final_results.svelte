@@ -255,7 +255,7 @@ SPDX-License-Identifier: MPL-2.0
 		border-radius: 1rem;
 		padding: 0.85rem 1.25rem;
 		font-weight: 700;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		box-shadow: 4px 4px 0 var(--cq-ink);
 	}
 	@media (min-width: 1280px) {
 		.zone-row {
@@ -265,7 +265,7 @@ SPDX-License-Identifier: MPL-2.0
 	}
 	.zone-row.is-top {
 		transform: scale(1.04);
-		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+		box-shadow: 6px 6px 0 var(--cq-ink);
 	}
 	.zone-rank {
 		font-size: 2.25rem;
