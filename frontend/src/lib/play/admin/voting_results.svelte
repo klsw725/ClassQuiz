@@ -102,9 +102,10 @@ SPDX-License-Identifier: MPL-2.0
 		<div class="flex gap-8 sm:gap-12 lg:gap-16">
 			{#each answer_bars as answer_bar, i (i)}
 				<div
-					class="cq-surface w-24 self-end flex justify-center rounded-t-lg border-2 border-cq-border shadow-2xl sm:w-28 lg:w-32"
-					class:shadow-blue-500={show_correctness && answer_bar.right}
-					class:shadow-yellow-500={show_correctness && !answer_bar.right}
+					class="cq-surface w-24 self-end flex justify-center rounded-t-lg shadow-[4px_4px_0_var(--cq-ink)] sm:w-28 lg:w-32"
+					class:border-4={show_correctness && answer_bar.right}
+					class:border-[#2f80ed]={show_correctness && answer_bar.right}
+					class:border-[#e8a020]={show_correctness && !answer_bar.right}
 					class:opacity-70={show_correctness && !answer_bar.right}
 					style="height: {get_bar_height(
 						answer_bar.count
