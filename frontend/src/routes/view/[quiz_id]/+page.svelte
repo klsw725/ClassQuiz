@@ -21,7 +21,7 @@ SPDX-License-Identifier: MPL-2.0
 	import ModComponent from './ModComponent.svelte';
 	import { get_foreground_color } from '$lib/helpers.ts';
 
-	const default_colors = ['#e0413a', '#1a73c2', '#e8a020', '#2a9d54'];
+	const default_colors = ['#ff5252', '#40c4ff', '#ffd740', '#69f0ae'];
 
 	const tippy = createTippy({
 		arrow: true,

@@ -319,7 +319,8 @@ SPDX-License-Identifier: MPL-2.0
 					{#each answer_options as answer, _i}
 						<div
 							class="cq-card h-fit flex"
-							style="background-color: {answer.color ?? '#B45309'}"
+							style="background-color: {answer.color ??
+								['#ff5252', '#40c4ff', '#ffd740', '#69f0ae'][_i % 4]}"
 							class:opacity-50={'right' in answer &&
 								!answer.right &&
 								game_data.questions[selected_question].type ===

@@ -60,7 +60,7 @@ SPDX-License-Identifier: MPL-2.0
 			id: i
 		};
 	}
-	const default_colors = ['#e0413a', '#1a73c2', '#e8a020', '#2a9d54'];
+	const default_colors = ['#ff5252', '#40c4ff', '#ffd740', '#69f0ae'];
 	const set_colors_if_unset = () => {
 		for (let i = 0; i < answers.length; i++) {
 			if (!answers[i].color) {
@@ -167,15 +167,39 @@ SPDX-License-Identifier: MPL-2.0
 					)}"
 					placeholder={$t('editor.empty')}
 				/>
-				<input
-					class="rounded-lg p-1 border-cq-border border"
-					type="color"
-					bind:value={answer.color}
-					oncontextmenu={(e) => {
-						e.preventDefault();
-						answer.color = null;
-					}}
-				/>
+				<div class="flex items-center gap-1">
+					<input
+						class="rounded-lg p-1 border-cq-border border"
+						type="color"
+						bind:value={answer.color}
+						oncontextmenu={(e) => {
+							e.preventDefault();
+							answer.color = null;
+						}}
+					/>
+					<button
+						type="button"
+						class="action-button flex items-center justify-center p-1"
+						aria-label={$t('editor_page.reset_colors')}
+						title={$t('editor_page.reset_colors')}
+						onclick={() => {
+							answer.color = default_colors[i];
+						}}
+					>
+						<svg
+							class="h-4 w-4"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d="M3 2v6h6" />
+							<path d="M3 13a9 9 0 1 0 3-7.7L3 8" />
+						</svg>
+					</button>
+				</div>
 			</div>
 		{/each}
 	</div>

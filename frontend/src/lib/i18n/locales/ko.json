@@ -386,7 +386,8 @@
     },
     "editor_page": {
         "add_an_answer": "답변 추가",
-        "right_click_to_delete": "답변을 삭제하려면 답변을 마우스 오른쪽 버튼으로 클릭하세요!"
+        "right_click_to_delete": "답변을 삭제하려면 답변을 마우스 오른쪽 버튼으로 클릭하세요!",
+        "reset_colors": "색상 초기화"
     },
     "dashboard": {
         "search_for_own_quizzes": "내 퀴즈 검색",

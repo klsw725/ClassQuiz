@@ -12,7 +12,7 @@ SPDX-License-Identifier: MPL-2.0
 	import CircularTimer from '$lib/play/circular_progress.svelte';
 	// import CircularTimer from '$lib/play/circular_progress.svelte';
 	const { t } = getLocalization();
-	const default_colors = ['#e0413a', '#1a73c2', '#e8a020', '#2a9d54'];
+	const default_colors = ['#ff5252', '#40c4ff', '#ffd740', '#69f0ae'];
 
 	interface Props {
 		question: Question;

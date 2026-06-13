@@ -388,7 +388,8 @@
     },
     "editor_page": {
         "add_an_answer": "Add an answer",
-        "right_click_to_delete": "Right-click on an answer to delete it!"
+        "right_click_to_delete": "Right-click on an answer to delete it!",
+        "reset_colors": "Reset colors"
     },
     "dashboard": {
         "search_for_own_quizzes": "Search for your own quizzes",
