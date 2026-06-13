@@ -194,7 +194,7 @@ SPDX-License-Identifier: MPL-2.0
 	{#if show_current_player_result}
 		<div class="fixed bottom-0 left-0 flex justify-center w-full px-4 mb-6">
 			<div
-				class="cq-card mx-auto w-full max-w-md p-6 text-cq-text shadow-2xl md:max-w-xl md:p-8"
+				class="cq-card mx-auto w-full max-w-md p-6 text-cq-text md:max-w-xl md:p-8"
 			>
 				<p
 					class="cq-surface-muted rounded-lg border-2 border-cq-border p-4 text-center text-2xl font-semibold text-cq-brand md:text-4xl"

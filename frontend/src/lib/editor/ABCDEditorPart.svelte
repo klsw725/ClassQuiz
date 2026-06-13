@@ -202,7 +202,7 @@ SPDX-License-Identifier: MPL-2.0
 				<div class="relative mx-2">
 					<button
 						type="button"
-						class="cq-surface cq-card-interactive flex h-10 w-11 items-center justify-center rounded-2xl border border-cq-border text-lg shadow-lg transition hover:scale-105 focus:outline-hidden focus:ring-2 focus:ring-cq-brand"
+						class="cq-surface cq-card-interactive flex h-10 w-11 items-center justify-center rounded-md text-lg transition focus:outline-hidden focus:ring-2 focus:ring-cq-brand"
 						aria-label="Choose answer emoji"
 						aria-expanded={emoji_picker_open_for === index}
 						onclick={() => {
@@ -214,7 +214,7 @@ SPDX-License-Identifier: MPL-2.0
 
 					{#if emoji_picker_open_for === index}
 						<div
-							class="cq-card absolute left-1/2 top-12 z-40 w-56 -translate-x-1/2 rounded-3xl border border-cq-border p-3 shadow-2xl"
+							class="cq-card absolute left-1/2 top-12 z-40 w-56 -translate-x-1/2 rounded-md p-3"
 							role="dialog"
 							aria-label="Answer emoji picker"
 						>
@@ -235,7 +235,7 @@ SPDX-License-Identifier: MPL-2.0
 								{#each answer_emojis as emoji (emoji)}
 									<button
 										type="button"
-										class="flex h-8 w-8 items-center justify-center rounded-xl text-lg transition hover:bg-cq-brand/20 focus:outline-hidden focus:ring-2 focus:ring-cq-brand"
+										class="flex h-8 w-8 items-center justify-center rounded-md text-lg transition hover:bg-cq-brand/20 focus:outline-hidden focus:ring-2 focus:ring-cq-brand"
 										class:cq-surface-muted={answer.emoji === emoji}
 										aria-label="Use {emoji} emoji"
 										onclick={() => {
@@ -250,7 +250,7 @@ SPDX-License-Identifier: MPL-2.0
 							<input
 								bind:value={answer.emoji}
 								type="text"
-								class="cq-surface-muted mt-3 w-full rounded-2xl border border-cq-border px-3 py-2 text-center text-cq-text outline-hidden transition-all placeholder:text-cq-muted focus:shadow-2xl focus:ring-2 focus:ring-cq-brand"
+								class="cq-surface-muted mt-3 w-full rounded-sm px-3 py-2 text-center text-cq-text outline-hidden transition-all placeholder:text-cq-muted focus:ring-2 focus:ring-cq-brand"
 								placeholder="Paste custom emoji"
 								aria-label="Custom answer emoji"
 								onchange={() => {

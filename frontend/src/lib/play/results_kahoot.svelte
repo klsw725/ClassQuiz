@@ -80,7 +80,7 @@ SPDX-License-Identifier: MPL-2.0
 
 <div class="flex min-h-svh items-center justify-center px-4 text-cq-text">
 	<div
-		class="cq-card flex w-full max-w-md flex-col gap-7 p-8 text-center shadow-2xl md:max-w-xl md:p-10"
+		class="cq-card flex w-full max-w-md flex-col gap-7 p-8 text-center md:max-w-xl md:p-10"
 	>
 		<h2 class="text-3xl font-semibold text-cq-text">{$t('words.result', { count: 2 })}</h2>
 		<p

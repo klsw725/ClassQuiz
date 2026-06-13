@@ -652,7 +652,7 @@ SPDX-License-Identifier: MPL-2.0
 			aria-live="polite"
 		>
 			<div
-				class="cq-card flex w-full max-w-md flex-col gap-3 p-6 text-center shadow-2xl md:p-8"
+				class="cq-card flex w-full max-w-md flex-col gap-3 p-6 text-center md:p-8"
 			>
 				<p class="text-3xl font-semibold text-cq-text md:text-4xl">
 					{#if answer_submitted}
@@ -989,7 +989,7 @@ SPDX-License-Identifier: MPL-2.0
 			aria-live="polite"
 		>
 			<div
-				class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center shadow-2xl md:p-8"
+				class="cq-card flex w-full max-w-md flex-col gap-4 p-6 text-center md:p-8"
 			>
 				<p
 					class="cq-surface-muted rounded-lg border-2 border-cq-border px-5 py-4 text-3xl font-semibold text-cq-brand md:text-4xl"

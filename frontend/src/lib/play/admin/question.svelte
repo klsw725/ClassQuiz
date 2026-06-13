@@ -136,8 +136,8 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	.correct-reveal-card {
-		border: 4px solid #10b981;
-		box-shadow: 0 0 0 6px rgba(16, 185, 129, 0.2), 0 24px 48px rgba(16, 185, 129, 0.25);
+		border: 4px solid #00c853;
+		box-shadow: 8px 8px 0 #009e3f;
 	}
 </style>
 {#if current_question.type === QuizQuestionType.ABCD || current_question.type === QuizQuestionType.VOTING || current_question.type === QuizQuestionType.CHECK}
@@ -195,7 +195,7 @@ SPDX-License-Identifier: MPL-2.0
 {:else if reveal && (current_question.type === QuizQuestionType.TEXT || current_question.type === QuizQuestionType.MULTI_TEXT || current_question.type === QuizQuestionType.RANGE || current_question.type === QuizQuestionType.ORDER)}
 	<div class="flex justify-center items-center px-8 xl:px-16 py-10" style="min-height: 60vh;">
 		<div
-			class="cq-card max-w-4xl w-full text-center px-10 py-12 shadow-2xl correct-reveal-card"
+			class="cq-card max-w-4xl w-full text-center px-10 py-12 correct-reveal-card"
 		>
 			<p class="text-2xl md:text-3xl font-semibold tracking-widest text-cq-muted uppercase mb-6">
 				{$t('words.correct')}
