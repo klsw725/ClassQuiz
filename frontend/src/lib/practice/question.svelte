@@ -270,7 +270,7 @@ SPDX-License-Identifier: MPL-2.0
 				<div
 					class="w-full h-fit flex-row rounded-lg p-2 align-middle"
 					animate:flip={{ duration: 100 }}
-					style="background-color: {answer.color ?? '#b07156'}"
+					style="background-color: {answer.color ?? '#1a73c2'}"
 				>
 					<button
 						onclick={() => {

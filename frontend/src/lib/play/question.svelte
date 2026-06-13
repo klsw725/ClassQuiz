@@ -555,7 +555,7 @@ SPDX-License-Identifier: MPL-2.0
 				(solution.type ?? QuizQuestionType.ABCD) === QuizQuestionType.MULTI_TEXT)
 	);
 
-	const default_colors = ['#D6EDC9', '#B07156', '#7F7057', '#4E6E58'];
+	const default_colors = ['#e0413a', '#1a73c2', '#e8a020', '#2a9d54'];
 </script>
 
 <div
@@ -873,7 +873,7 @@ SPDX-License-Identifier: MPL-2.0
 					<div
 						class="cq-card w-full h-fit flex-row p-2 align-middle"
 						animate:flip={{ duration: 100 }}
-						style="background-color: {answer.color ?? '#b07156'}"
+						style="background-color: {answer.color ?? '#1a73c2'}"
 					>
 						<button
 							onclick={() => {
