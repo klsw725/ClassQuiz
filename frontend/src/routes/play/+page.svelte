@@ -166,10 +166,18 @@ SPDX-License-Identifier: MPL-2.0
 		return is_reload_navigation();
 	};
 
-	const confirmUnload = (event: BeforeUnloadEvent) => {
-		if (preventReload) {
+	// Block refresh while the game is in progress (but leave tab/window closing alone).
+	// beforeunload can't tell refresh from close and can't actually prevent a reload,
+	// so we intercept the refresh shortcuts directly instead.
+	const blockRefreshKeys = (event: KeyboardEvent) => {
+		if (!preventReload) {
+			return;
+		}
+		const key = event.key;
+		const isReloadCombo =
+			key === 'F5' || ((event.ctrlKey || event.metaKey) && (key === 'r' || key === 'R'));
+		if (isReloadCombo) {
 			event.preventDefault();
-			event.returnValue = '';
 		}
 	};
 
@@ -248,6 +256,31 @@ SPDX-License-Identifier: MPL-2.0
 			wakeLockRouteActive = false;
 			document.removeEventListener('visibilitychange', handleVisibilityChange);
 			void releaseScreenWakeLock();
+		};
+	});
+
+	// Trap the mobile/browser back button while the game is in progress.
+	// beforeunload doesn't reliably catch back navigation on mobile,
+	// so we push a dummy history entry and re-push it whenever the user pops it.
+	$effect(() => {
+		if (!browser) {
+			return;
+		}
+		history.pushState(null, '', location.href);
+		const onPopState = () => {
+			if (preventReload) {
+				history.pushState(null, '', location.href);
+			}
+		};
+		window.addEventListener('popstate', onPopState);
+		window.addEventListener('keydown', blockRefreshKeys);
+		// Stop mobile "pull-to-refresh" gesture.
+		const previousOverscroll = document.body.style.overscrollBehaviorY;
+		document.body.style.overscrollBehaviorY = 'contain';
+		return () => {
+			window.removeEventListener('popstate', onPopState);
+			window.removeEventListener('keydown', blockRefreshKeys);
+			document.body.style.overscrollBehaviorY = previousOverscroll;
 		};
 	});
 
@@ -367,7 +400,6 @@ SPDX-License-Identifier: MPL-2.0
 	// The rest
 </script>
 
-<svelte:window onbeforeunload={confirmUnload} />
 <svelte:head>
 	<title>ClassQuiz - {$t('words.play')}</title>
 </svelte:head>
