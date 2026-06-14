@@ -74,6 +74,11 @@ async def generate_final_results(game_data: PlayGame, game_pin: str) -> dict:
     return results
 
 
+async def get_player_scores(game_pin: str) -> dict[str, int]:
+    score_data = await redis.hgetall(f"game_session:{game_pin}:player_scores")
+    return {player: int(score) for player, score in score_data.items()}
+
+
 async def set_answer(answers, game_pin: str, q_index: int, data: AnswerData) -> AnswerDataList:
     if answers is None:
         answers = AnswerDataList([data])
@@ -436,6 +441,8 @@ async def get_question_results(sid: str, data: dict):
     game_data = await PlayGame.get_from_redis(game_pin)
     game_data.question_show = False
     await game_data.save(game_pin)
+    player_scores = await get_player_scores(game_pin)
+    await sio.emit("question_player_scores", player_scores, room=game_pin)
     await sio.emit("question_results", answer_data_list.model_dump(), room=game_pin)
 
 
@@ -553,7 +560,6 @@ async def submit_answer(sid: str, data: dict):
         q_index=int(float(data.question_index)),
     )
     await sio.emit("player_answer", {})
-    await sio.emit("answer_accepted", {"question_index": question_index}, room=sid)
 
 
 @sio.event
@@ -562,7 +568,9 @@ async def get_final_results(sid: str, _data: dict):
     if not session["admin"]:
         return
     game_data = await PlayGame.get_from_redis(session["game_pin"])
+    player_scores = await get_player_scores(session["game_pin"])
     results = await generate_final_results(game_data, session["game_pin"])
+    await sio.emit("final_player_scores", player_scores, room=session["game_pin"])
     await sio.emit("final_results", results, room=session["game_pin"])
 
 

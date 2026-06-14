@@ -11,6 +11,7 @@ from fastapi import HTTPException
 
 from classquiz.db.models import (
     ABCDQuizAnswer,
+    AnswerData,
     AnswerDataList,
     GamePlayer,
     GameSession,
@@ -644,6 +645,71 @@ async def test_register_as_admin_fresh_session_saves_and_enters_rooms(recovery_c
     assert sessions["admin-sid"] == {"game_pin": "123456", "admin": True, "remote": False}
     assert ("admin-sid", "123456") in fake_sio.entered_rooms
     assert ("admin-sid", "admin:123456") in fake_sio.entered_rooms
+
+
+@pytest.mark.asyncio
+async def test_get_question_results_emits_backend_player_scores_before_results(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    question = QuizQuestion(
+        question="Question",
+        time="30",
+        answers=[ABCDQuizAnswer(answer="A", right=True), ABCDQuizAnswer(answer="B", right=False)],
+    )
+    game = make_game(uuid.uuid4(), question_show=True, questions=[question])
+    player_key = participant_key("alice", "1구역")
+    answer_data = AnswerData(
+        username="alice",
+        answer="A",
+        right=True,
+        time_taken=1000,
+        score=900,
+        zone="1구역",
+    )
+    sessions["admin-sid"] = {"game_pin": "123456", "admin": True, "remote": False}
+    fake_redis.values["game:123456"] = game.model_dump_json()
+    fake_redis.values["game_session:123456:0"] = AnswerDataList([answer_data]).model_dump_json()
+    fake_redis.hashes["game_session:123456:player_scores"] = {player_key: "1300"}
+
+    await socket_server.get_question_results("admin-sid", {"question_number": 0})
+
+    assert fake_sio.emitted == [
+        ("question_player_scores", {player_key: 1300}, "123456"),
+        ("question_results", [answer_data.model_dump()], "123456"),
+    ]
+    saved_game = PlayGame.model_validate_json(fake_redis.values["game:123456"])
+    assert saved_game.question_show is False
+
+
+@pytest.mark.asyncio
+async def test_get_final_results_emits_backend_player_scores_first(recovery_context):
+    fake_redis, fake_sio, sessions = recovery_context
+    game_id = uuid.uuid4()
+    question = QuizQuestion(
+        question="Question",
+        time="30",
+        answers=[ABCDQuizAnswer(answer="A", right=True), ABCDQuizAnswer(answer="B")],
+    )
+    game = make_game(uuid.uuid4(), game_id=game_id, questions=[question])
+    player_key = participant_key("alice", "1구역")
+    answer_data = AnswerData(
+        username="alice",
+        answer="A",
+        right=True,
+        time_taken=1000,
+        score=900,
+        zone="1구역",
+    )
+    sessions["admin-sid"] = {"game_pin": "123456", "admin": True, "remote": False}
+    fake_redis.values["game:123456"] = game.model_dump_json()
+    fake_redis.values["game_session:123456:0"] = AnswerDataList([answer_data]).model_dump_json()
+    fake_redis.hashes["game_session:123456:player_scores"] = {player_key: "900"}
+
+    await socket_server.get_final_results("admin-sid", {})
+
+    assert fake_sio.emitted == [
+        ("final_player_scores", {player_key: 900}, "123456"),
+        ("final_results", {"0": [answer_data.model_dump()]}, "123456"),
+    ]
 
 
 @pytest.mark.asyncio
