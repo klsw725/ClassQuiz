@@ -23,7 +23,7 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	interface Props {
-		data: any;
+		data: Record<string, number>;
 		question: Question;
 		new_data: Array<{
 			username: string;
@@ -41,9 +41,9 @@ SPDX-License-Identifier: MPL-2.0
 
 	// let data_by_username = {};
 
-	const group_username_by_score = (_new_d: any[]): object => {
-		let ret_data = {};
-		for (const i of new_data) {
+	const group_username_by_score = (_new_d: typeof new_data): Record<string, number> => {
+		let ret_data: Record<string, number> = {};
+		for (const i of _new_d) {
 			ret_data[participantKey(i.username, i.zone)] = i.score;
 		}
 		return ret_data;
@@ -66,39 +66,17 @@ SPDX-License-Identifier: MPL-2.0
 
 	let player_names = $derived(
 		Object.keys(data).sort((a, b) => {
-			const scoreA = parseFloat(data[a]) || 0;
-			const scoreB = parseFloat(data[b]) || 0;
+			const scoreA = data[a] || 0;
+			const scoreB = data[b] || 0;
 			return scoreB - scoreA;
 		})
 	);
 	let visible_player_names = $derived(player_names.slice(0, LIVE_SCORE_VISIBLE_PLAYER_LIMIT));
 
-	if (JSON.stringify(data) === '{}') {
-		for (const i of new_data) {
-			data[participantKey(i.username, i.zone)] = 0;
-		}
-	}
-
 	let show_new_score_clicked = $state(false);
 
 	const show_new_score = () => {
-		for (const i of player_names) {
-			if (isNaN(data[i])) {
-				data[i] = 0;
-			}
-			console.log(score_by_username[i], '1');
-			data[i] = (score_by_username[i] ?? 0) + data[i];
-		}
-		for (const i of new_data) {
-			const key = participantKey(i.username, i.zone);
-			if (!data[key]) {
-				data[key] = score_by_username[key];
-			}
-		}
 		show_new_score_clicked = true;
-		setTimeout(() => {
-			data = { ...data };
-		}, 800);
 	};
 
 	onMount(() => {
@@ -136,7 +114,7 @@ SPDX-License-Identifier: MPL-2.0
 							<td class="p-3 md:p-5 border-r border-cq-border font-semibold"
 								>{formatPlayerName(player)}</td
 							>
-							<td class="p-3 md:p-5 font-bold text-cq-brand">{data[player]}</td>
+							<td class="p-3 md:p-5 font-bold text-cq-brand">{data[player] ?? 0}</td>
 							{#if show_new_score_clicked}
 								<td
 									in:fly|global={{ x: 300 }}
@@ -159,4 +137,3 @@ SPDX-License-Identifier: MPL-2.0
 		</div>
 	{/if}
 </div>
-

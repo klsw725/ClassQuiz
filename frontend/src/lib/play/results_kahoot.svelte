@@ -10,8 +10,8 @@ SPDX-License-Identifier: MPL-2.0
 
 	const { t } = getLocalization();
 
-	function sortObjectbyValue(obj) {
-		const ret = {};
+	function sortObjectbyValue(obj: Record<string, number>) {
+		const ret: Record<string, number> = {};
 		Object.keys(obj)
 			.sort((a, b) => obj[b] - obj[a])
 			.forEach((s) => {
@@ -26,7 +26,7 @@ SPDX-License-Identifier: MPL-2.0
 	}
 
 	interface Props {
-		scores: any;
+		scores: Record<string, number>;
 		question_results: Array<{
 			username: string;
 			answer: string;
@@ -36,7 +36,7 @@ SPDX-License-Identifier: MPL-2.0
 			score: number;
 			zone?: string;
 		}>;
-		username: any;
+		username: string;
 		display_names?: Record<string, string>;
 	}
 
@@ -46,7 +46,14 @@ SPDX-License-Identifier: MPL-2.0
 		username,
 		display_names = $bindable({})
 	}: Props = $props();
-	let score_by_username = $state({});
+	let score_by_username = $derived(
+		Object.fromEntries(
+			question_results.map((result) => [
+				participantKey(result.username, result.zone),
+				result.score
+			])
+		) as Record<string, number>
+	);
 	const addDisplayNames = () => {
 		const nextDisplayNames = { ...display_names };
 		for (const result of question_results) {
@@ -62,26 +69,12 @@ SPDX-License-Identifier: MPL-2.0
 		question_results.find((result) => participantKey(result.username, result.zone) === username)
 	);
 
-	if (JSON.stringify(scores) === '{}') {
-		for (const i of question_results) {
-			scores[participantKey(i.username, i.zone)] = 0;
-		}
-	}
-	for (const i of question_results) {
-		score_by_username[participantKey(i.username, i.zone)] = i.score;
-	}
-	for (const username of Object.keys(score_by_username)) {
-		scores[username] = (score_by_username[username] ?? 0) + (scores[username] ?? 0);
-	}
-	scores = { ...scores };
 	let sorted_scores = $derived(sortObjectbyValue(scores));
 	let current_player_rank = $derived(Object.keys(sorted_scores).indexOf(username) + 1);
 </script>
 
 <div class="flex min-h-svh items-center justify-center px-4 text-cq-text">
-	<div
-		class="cq-card flex w-full max-w-md flex-col gap-7 p-8 text-center md:max-w-xl md:p-10"
-	>
+	<div class="cq-card flex w-full max-w-md flex-col gap-7 p-8 text-center md:max-w-xl md:p-10">
 		<h2 class="text-3xl font-semibold text-cq-text">{$t('words.result', { count: 2 })}</h2>
 		<p
 			class="cq-surface-muted rounded-lg border-2 border-cq-border p-6 text-5xl font-bold text-cq-brand md:p-8 md:text-7xl"
