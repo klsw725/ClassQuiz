@@ -553,6 +553,7 @@ async def submit_answer(sid: str, data: dict):
         q_index=int(float(data.question_index)),
     )
     await sio.emit("player_answer", {})
+    await sio.emit("answer_accepted", {"question_index": question_index}, room=sid)
 
 
 @sio.event

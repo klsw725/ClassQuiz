@@ -19,7 +19,7 @@ SPDX-License-Identifier: MPL-2.0
 	import { kahoot_icons } from './kahoot_mode_assets/kahoot_icons';
 	import CircularTimer from '$lib/play/circular_progress.svelte';
 	import { flip } from 'svelte/animate';
-	import { tick } from 'svelte';
+	import { tick, onMount } from 'svelte';
 	import BrownButton from '$lib/components/buttons/brown.svelte';
 	import { get_foreground_color } from '../helpers';
 	import MediaComponent from '$lib/editor/MediaComponent.svelte';
@@ -49,6 +49,136 @@ SPDX-License-Identifier: MPL-2.0
 	let timer_res = $state(question.time);
 	let selected_answer: string = $state();
 	let answer_submitted = $state(false);
+	// 낙관적 제출 + 거부/무응답 보정 상태
+	let answer_confirmed = $state(false);
+	let submit_failed = $state(false);
+	let pending_payload: Record<string, unknown> | null = null;
+	let submit_retried = false;
+	let submit_timer: ReturnType<typeof setTimeout> | undefined;
+	let fail_timer: ReturnType<typeof setTimeout> | undefined;
+	// 무음 유실 의심 시 재전송까지 기다리는 시간. 문제 제한시간에 비례시키되
+	// (20%), 짧은 문제에서 너무 잦은 재전송 / 긴 문제에서 너무 느린 복구를 막기
+	// 위해 1~3초로 제한한다. 컴포넌트는 문제마다 재마운트되므로 여기서 1회 산출.
+	const question_time_ms = Math.max(Number(question.time) || 0, 0) * 1000;
+	const RESEND_TIMEOUT = Math.min(Math.max(question_time_ms * 0.2, 1000), 3000);
+	const MIN_ROUNDTRIP = RESEND_TIMEOUT + 500;
+
+	// timer_res 는 '초' 단위 카운트다운 문자열(해상도 1초). 남은 시간(ms) 근사.
+	const remaining_ms = (): number => {
+		const secs = Number(timer_res);
+		return Number.isFinite(secs) ? secs * 1000 : 0;
+	};
+
+	const scheduleResend = () => {
+		clearTimeout(submit_timer);
+		// 남은 제한시간이 왕복을 보장 못 하면 재전송/실패를 스케줄하지 않는다.
+		// 즉시 emit 은 이미 끝났고, ACK/거부 리스너는 계속 동작하며, 문제 종료
+		// 시점에는 settlePending() 이 조용히 정리한다(낙관적 표시 유지).
+		if (remaining_ms() <= MIN_ROUNDTRIP) {
+			return;
+		}
+		submit_timer = setTimeout(() => {
+			if (answer_confirmed || pending_payload === null) {
+				return;
+			}
+			if (!submit_retried && remaining_ms() > MIN_ROUNDTRIP) {
+				// ACK도 거부도 없음(무음 유실 의심) → 1회 재전송. 서버의
+				// already_replied 가드 덕에 멱등하므로 중복 저장 위험 없음.
+				submit_retried = true;
+				socket.emit('submit_answer', pending_payload);
+				scheduleResend();
+			} else {
+				// 재전송 후에도 무응답이고 아직 시간이 남음 → 실패로 표기.
+				failSubmission();
+			}
+		}, RESEND_TIMEOUT);
+	};
+
+	// 진행 중 제출을 실패로 처리: 표시를 거두고 다시 선택하도록 유도.
+	const failSubmission = () => {
+		clearTimeout(submit_timer);
+		pending_payload = null;
+		answer_confirmed = false;
+		answer_submitted = false;
+		selected_answer = undefined;
+		submit_failed = true;
+		clearTimeout(fail_timer);
+		fail_timer = setTimeout(() => {
+			submit_failed = false;
+		}, 4000);
+	};
+
+	// 서버가 답을 받음 → 제출됨으로 확정.
+	const confirmSubmission = () => {
+		clearTimeout(submit_timer);
+		clearTimeout(fail_timer);
+		pending_payload = null;
+		answer_confirmed = true;
+		submit_failed = false;
+		answer_submitted = true;
+	};
+
+	// 문제 종료 등으로 더 손쓸 수 없을 때: 대기 상태만 조용히 정리.
+	// 사용자가 재선택할 수 없으므로 실패로 알리지 않고 낙관적 표시를 유지한다.
+	const settlePending = () => {
+		clearTimeout(submit_timer);
+		clearTimeout(fail_timer);
+		pending_payload = null;
+		submit_failed = false;
+	};
+
+	const sendAnswer = (payload: Record<string, unknown>) => {
+		clearTimeout(fail_timer);
+		submit_failed = false;
+		answer_submitted = true; // 낙관적: 클릭 즉시 제출됨으로 표시
+		answer_confirmed = false;
+		pending_payload = payload;
+		submit_retried = false;
+		socket.emit('submit_answer', payload);
+		scheduleResend();
+	};
+
+	// 문제가 끝나면(시간 종료/해설 표시) 대기 중 제출을 조용히 정리.
+	$effect(() => {
+		if (timer_res === '0' && pending_payload !== null) {
+			settlePending();
+		}
+	});
+
+	onMount(() => {
+		// answer_accepted: 제출자 전용 ACK. already_replied: 서버에 이미 내 답이
+		// 있음 → 둘 다 제출됨으로 확정(보정).
+		const onConfirmed = () => {
+			if (pending_payload === null) {
+				return;
+			}
+			confirmSubmission();
+		};
+		// question_not_active / error: 서버가 저장하지 않음.
+		const onRejected = () => {
+			if (pending_payload === null) {
+				return;
+			}
+			// 아직 시간이 남았으면 재선택 유도, 이미 끝났으면 조용히 정리.
+			if (timer_res === '0') {
+				settlePending();
+			} else {
+				failSubmission();
+			}
+		};
+		socket.on('answer_accepted', onConfirmed);
+		socket.on('already_replied', onConfirmed);
+		socket.on('question_not_active', onRejected);
+		socket.on('error', onRejected);
+		return () => {
+			clearTimeout(submit_timer);
+			clearTimeout(fail_timer);
+			socket.off('answer_accepted', onConfirmed);
+			socket.off('already_replied', onConfirmed);
+			socket.off('question_not_active', onRejected);
+			socket.off('error', onRejected);
+		};
+	});
 	let question_title_element = $state<HTMLHeadingElement>();
 	let normal_mobile_question_title_size = $state(2.75);
 
@@ -304,8 +434,7 @@ SPDX-License-Identifier: MPL-2.0
 
 	const selectAnswer = (answer: string) => {
 		selected_answer = answer;
-		answer_submitted = true;
-		socket.emit('submit_answer', {
+		sendAnswer({
 			question_index: question_index,
 			answer: answer
 		});
@@ -313,12 +442,11 @@ SPDX-License-Identifier: MPL-2.0
 
 	const select_complex_answer = (data) => {
 		selected_answer = 'a';
-		answer_submitted = true;
 		const new_array = [];
 		for (let i = 0; i < data.length; i++) {
 			new_array.push({ answer: data[i].answer });
 		}
-		socket.emit('submit_answer', {
+		sendAnswer({
 			question_index: question_index,
 			answer: 'a',
 			complex_answer: new_array
@@ -369,8 +497,7 @@ SPDX-License-Identifier: MPL-2.0
 			payload.complex_answer = text_inputs.map((answer) => ({ answer }));
 		}
 		selected_answer = answer;
-		answer_submitted = true;
-		socket.emit('submit_answer', payload);
+		sendAnswer(payload);
 	};
 
 	let slider_value = $state([0]);
@@ -562,6 +689,19 @@ SPDX-License-Identifier: MPL-2.0
 					/>
 				</div>
 			{/if}
+		</div>
+	{/if}
+	{#if submit_failed && solution === undefined && timer_res !== '0'}
+		<div
+			class="pointer-events-none fixed left-1/2 top-4 z-50 -translate-x-1/2 px-4"
+			role="alert"
+			aria-live="assertive"
+		>
+			<p
+				class="cq-card rounded-lg border-2 border-cq-border px-5 py-3 text-center text-lg font-semibold text-cq-text shadow"
+			>
+				{$t('play_page.submit_failed')}
+			</p>
 		</div>
 	{/if}
 	{#if solution === undefined && (answer_submitted || timer_res === '0')}
