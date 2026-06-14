@@ -27,7 +27,6 @@ SPDX-License-Identifier: MPL-2.0
 		cqc_code = $bindable()
 	}: Props = $props();
 
-	const LOBBY_VISIBLE_PLAYER_LIMIT = 80;
 	const lobby_zones = Array.from({ length: 11 }, (_, index) => `${index + 1}구역`);
 
 	let fullscreen_open = $state(false);
@@ -68,13 +67,8 @@ SPDX-License-Identifier: MPL-2.0
 
 		return groups;
 	};
-	let visible_lobby_player_count = $state(LOBBY_VISIBLE_PLAYER_LIMIT);
-	let visible_lobby_players = $derived(game_state.players.slice(0, visible_lobby_player_count));
-	let grouped_visible_lobby_players = $derived(groupLobbyPlayersByZone(visible_lobby_players));
+	let grouped_visible_lobby_players = $derived(groupLobbyPlayersByZone(game_state.players));
 	let selected_lobby_player_key = $state<string | null>(null);
-	let hidden_lobby_player_count = $derived(
-		Math.max(game_state.players.length - visible_lobby_players.length, 0)
-	);
 	const togglePlayerMenu = (player: { username: string; zone?: string }) => {
 		const key = participantKey(player.username, player.zone);
 		selected_lobby_player_key = selected_lobby_player_key === key ? null : key;
@@ -198,15 +192,6 @@ SPDX-License-Identifier: MPL-2.0
 				</div>
 			{/each}
 		</div>
-		{#if hidden_lobby_player_count > 0}
-			<button
-				type="button"
-				class="cq-surface-muted mt-2 w-fit p-2 text-lg font-semibold text-cq-muted hover:text-cq-text transition"
-				onclick={() => (visible_lobby_player_count += LOBBY_VISIBLE_PLAYER_LIMIT)}
-			>
-				+{Math.min(LOBBY_VISIBLE_PLAYER_LIMIT, hidden_lobby_player_count)}
-			</button>
-		{/if}
 	</div>
 </div>
 
