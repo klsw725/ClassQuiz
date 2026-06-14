@@ -220,7 +220,11 @@ SPDX-License-Identifier: MPL-2.0
 		wakeLockRequestPending = true;
 		try {
 			const sentinel = await wakeLock.request('screen');
-			if (!wakeLockRouteActive || !playWakeLockActive || document.visibilityState !== 'visible') {
+			if (
+				!wakeLockRouteActive ||
+				!playWakeLockActive ||
+				document.visibilityState !== 'visible'
+			) {
 				await sentinel.release();
 				return;
 			}
@@ -371,6 +375,10 @@ SPDX-License-Identifier: MPL-2.0
 		answer_results = data;
 	});
 
+	socket.on('question_player_scores', (data: Record<string, number>) => {
+		scores = data;
+	});
+
 	socket.on('username_already_exists', () => {
 		window.alert($t('play_page.username_already_exists'));
 	});
@@ -383,6 +391,10 @@ SPDX-License-Identifier: MPL-2.0
 		Cookies.remove('joined_game');
 		window.location.reload();
 	});
+	socket.on('final_player_scores', (data: Record<string, number>) => {
+		scores = data;
+	});
+
 	socket.on('final_results', (data: Record<string, PlayerAnswer[]>) => {
 		for (const questionResults of Object.values(data)) {
 			rememberDisplayNames(questionResults);
@@ -440,7 +452,7 @@ SPDX-License-Identifier: MPL-2.0
 					<KahootResults
 						username={current_participant_key}
 						question_results={answer_results}
-						bind:scores
+						{scores}
 						bind:display_names
 					/>
 				{/key}

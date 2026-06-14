@@ -49,6 +49,14 @@ SPDX-License-Identifier: MPL-2.0
 		clearInterval(timer_interval);
 	});
 
+	socket.on('final_player_scores', (data: Record<string, number>) => {
+		game_state.player_scores = data;
+	});
+
+	socket.on('question_player_scores', (data: Record<string, number>) => {
+		game_state.player_scores = data;
+	});
+
 	socket.on('final_results', (data) => {
 		final_results_clicked = true;
 		game_state.timer_res = '0';
